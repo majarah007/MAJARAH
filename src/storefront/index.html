@@ -59,7 +59,7 @@
             <span onclick="togglePrelaunchPasswordInput()" style="cursor: pointer; font-size: 9px; letter-spacing: 2.5px; color: #333; text-transform: uppercase; transition: color 0.2s;" onmouseover="this.style.color='#888'" onmouseout="this.style.color='#333'">ENTER STORE USING PASSWORD</span>
             <div id="prelaunchPasswordContainer" style="display: none; margin-top: 15px;">
                 <form onsubmit="handlePrelaunchBypass(event)" style="display: flex; gap: 8px; max-width: 280px; margin: 0 auto;">
-                    <input type="password" id="prelaunchBypassPass" required placeholder="PASSWORD" style="flex: 1; background: #080808; border: 1px solid #1c1c1c; color: #fff; padding: 10px 14px; font-size: 10px; letter-spacing: 2px; outline: none; border-radius: 4px; text-align: center;">
+                    <input type="password" id="prelaunchBypassPass" required placeholder="PASSWORD" autocomplete="new-password" style="flex: 1; background: #080808; border: 1px solid #1c1c1c; color: #fff; padding: 10px 14px; font-size: 10px; letter-spacing: 2px; outline: none; border-radius: 4px; text-align: center;">
                     <button type="submit" style="background: transparent; border: 1px solid #333; color: #fff; padding: 10px 18px; font-size: 9px; letter-spacing: 1.5px; cursor: pointer; text-transform: uppercase; border-radius: 4px;">ENTER</button>
                 </form>
                 <p id="prelaunchBypassError" style="display: none; font-size: 9px; color: #ff4444; margin-top: 10px; letter-spacing: 1px;">INCORRECT PASSWORD</p>
@@ -153,8 +153,8 @@
         <div class="footer-col">
             <h4 data-t="company">Company</h4>
             <ul>
-                <li><a onclick="openBrand()" data-t="about_us">About Us</a></li>
-                <li><a onclick="triggerFooterContact()" data-t="contact_us">Contact Us</a></li>
+                <li><a href="javascript:void(0)" onclick="openBrand()" data-t="about_us">About Us</a></li>
+                <li><a href="javascript:void(0)" onclick="triggerFooterContact()" data-t="contact_us">Contact Us</a></li>
             </ul>
         </div>
 
@@ -162,11 +162,11 @@
         <div class="footer-col">
             <h4 data-t="get_help">Get Help</h4>
             <ul>
-                <li><a onclick="openOrderTrackerModal()" data-t="track_order">Track Order</a></li>
-                <li><a onclick="openRefundModal()" data-t="refund_ex">Refund & Exchange</a></li>
-                <li><a onclick="openHow()" data-t="how_to_order">How to order</a></li>
-                <li><a onclick="showToast(currentLang === 'ar' ? 'سياسة الخصوصية: جميع بيانات العملاء والطلبات مشفرة ومحمية.' : 'Privacy Policy: All customer registration and order details are encrypted.', 'info')" data-t="privacy">Privacy Policy</a></li>
-                <li><a onclick="toggleLanguage()" id="langToggleLink">العربية (Arabic)</a></li>
+                <li><a href="javascript:void(0)" onclick="openOrderTrackerModal()" data-t="track_order">Track Order</a></li>
+                <li><a href="javascript:void(0)" onclick="openRefundModal()" data-t="refund_ex">Refund & Exchange</a></li>
+                <li><a href="javascript:void(0)" onclick="openHow()" data-t="how_to_order">How to order</a></li>
+                <li><a href="javascript:void(0)" onclick="showToast(currentLang === 'ar' ? 'سياسة الخصوصية: جميع بيانات العملاء والطلبات مشفرة ومحمية.' : 'Privacy Policy: All customer registration and order details are encrypted.', 'info')" data-t="privacy">Privacy Policy</a></li>
+                <li><a href="javascript:void(0)" onclick="toggleLanguage()" id="langToggleLink">العربية (Arabic)</a></li>
             </ul>
         </div>
 
@@ -174,8 +174,8 @@
         <div class="footer-col">
             <h4 data-t="sizing">Sizing</h4>
             <ul>
-                <li><a onclick="openSize()" data-t="sizing_chart">Sizing Chart</a></li>
-                <li><a onclick="openSizeRecommender()" id="footerSizeCalcLink" data-t="size_calculator">Size Calculator</a></li>
+                <li><a href="javascript:void(0)" onclick="openSize()" data-t="sizing_chart">Sizing Chart</a></li>
+                <li><a href="javascript:void(0)" onclick="openSizeRecommender()" id="footerSizeCalcLink" data-t="size_calculator">Size Calculator</a></li>
             </ul>
         </div>
 
@@ -183,8 +183,8 @@
         <div class="footer-col">
             <h4 data-t="care_guide">Care Guide</h4>
             <ul>
-                <li><a onclick="openWashingModal()" data-t="washing">Washing Instructions</a></li>
-                <li><a onclick="openGarmentModal()" data-t="garment_care">Garment Care</a></li>
+                <li><a href="javascript:void(0)" onclick="openWashingModal()" data-t="washing">Washing Instructions</a></li>
+                <li><a href="javascript:void(0)" onclick="openGarmentModal()" data-t="garment_care">Garment Care</a></li>
             </ul>
         </div>
     </div>
@@ -317,7 +317,7 @@
             <button class="checkout-trigger-btn" onclick="submitAuthForgot()" style="margin-top: 0; background:#fff; color:#050505;">Reset Password</button>
             <p id="authForgotError" style="font-size: 11px; color: #ff4444; margin-top: 12px; display: none; letter-spacing: 0.5px;"></p>
             <div style="text-align: center; margin-top: 15px;">
-                <span onclick="switchAuthTab('login')" style="cursor: pointer; font-size: 10px; color: #555; letter-spacing: 1.5px; text-transform: uppercase;">← Back to Log In</span>
+                <span onclick="switchAuthTab('login')" class="back-to-login-link" style="cursor: pointer; font-size: 10px; color: #aaa; letter-spacing: 1.5px; text-transform: uppercase; text-decoration: underline;">← Back to Log In</span>
             </div>
         </div>
 
@@ -499,10 +499,10 @@
     <button class="pp-back" onclick="closeProduct()" data-t="back">← Back</button>
     <div class="pp-inner">
         <div class="pp-images">
-            <div class="pp-main"><img id="ppMainImg" src="" alt="Product"></div>
+            <div class="pp-main"><img id="ppMainImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Product"></div>
             <div class="pp-thumbs">
-                <div class="pp-thumb active" onclick="switchImg(0)" id="thumb0"><img id="thumbImg0" src="" alt="Front"></div>
-                <div class="pp-thumb"        onclick="switchImg(1)" id="thumb1"><img id="thumbImg1" src="" alt="Back"></div>
+                <div class="pp-thumb active" onclick="switchImg(0)" id="thumb0"><img id="thumbImg0" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Front"></div>
+                <div class="pp-thumb"        onclick="switchImg(1)" id="thumb1"><img id="thumbImg1" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Back"></div>
             </div>
         </div>
         <div class="pp-info">
@@ -596,6 +596,10 @@
                     </div>
                     <input type="text" id="chkPostal" class="chk-input-field" placeholder="Postal code (Optional)" data-t-placeholder="postal_code">
                 </div>
+                <div class="chk-save-address-row" style="margin-top: 15px; display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="chkSaveAddress" style="accent-color: #fff; cursor: pointer; width: 14px; height: 14px;">
+                    <label for="chkSaveAddress" style="font-size: 10px; color: #888; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; user-select: none;">Save address for future orders</label>
+                </div>
             </div>
             
             <div class="chk-section-block">
@@ -634,7 +638,7 @@
         <div class="chk-sidebar-panel">
             <div class="chk-line-item">
                 <div class="chk-item-thumb-container">
-                    <img id="chkItemThumb" src="" alt="Thumb">
+                    <img id="chkItemThumb" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Thumb">
                     <span class="chk-item-quantity-bubble">1</span>
                 </div>
                 <div class="chk-item-meta-desc">
@@ -662,6 +666,7 @@
                     <span data-t="shipping">Shipping</span>
                     <span id="chkShipping">Select city</span>
                 </div>
+                <div class="chk-delivery-note" id="chkDeliveryNote">2–5 business days after confirmation</div>
                 <div class="chk-ledger-row total-row">
                     <span data-t="total">Total</span>
                     <span id="chkTotal"><span class="chk-currency-code">EGP</span>0.00</span>

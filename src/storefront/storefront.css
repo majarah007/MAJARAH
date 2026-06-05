@@ -1549,3 +1549,226 @@
         .logo {
             transition: letter-spacing 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
+
+        /* ── RTL FULL LAYOUT (Arabic) ── */
+        body.lang-ar {
+            direction: rtl;
+            text-align: right;
+        }
+        body.lang-ar header { direction: ltr !important; }
+        body.lang-ar .store-footer { direction: rtl; text-align: right; }
+        body.lang-ar .footer-grid { direction: rtl; }
+        body.lang-ar .footer-col { text-align: right; }
+        body.lang-ar .chk-container { direction: rtl; }
+        body.lang-ar .chk-section-title { text-align: right; }
+        body.lang-ar .chk-input-field { text-align: right; direction: rtl; }
+        body.lang-ar .chk-ledger-row { direction: rtl; }
+        body.lang-ar .product-meta { flex-direction: row-reverse; }
+        body.lang-ar .pp-info { direction: rtl; text-align: right; }
+        body.lang-ar .pp-size-row { flex-direction: row-reverse; }
+        body.lang-ar .modal-box { direction: rtl; text-align: right; }
+        body.lang-ar .modal-x { right: auto !important; left: 20px !important; }
+        body.lang-ar .chk-header-nav { flex-direction: row-reverse; }
+        body.lang-ar .how-modal-grid { direction: rtl; }
+        body.lang-ar .step { direction: rtl; }
+        body.lang-ar .tracking-stepper { direction: rtl; }
+        body.lang-ar .chk-line-item { flex-direction: row-reverse; }
+        body.lang-ar .chk-item-meta-desc { text-align: right; }
+
+        /* ── MOBILE TOUCH FLIP ── */
+        /* On mobile devices, tapping a card shows the back; second tap opens product */
+        @media (hover: none) {
+            .image-container:hover .front-print { opacity: 1; transform: none; }
+            .image-container:hover .back-print { opacity: 0; transform: none; }
+
+            .product-card.mobile-flipped .front-print { opacity: 0; transform: scale(1.04); }
+            .product-card.mobile-flipped .back-print { opacity: 1; transform: scale(1.04); }
+            .product-card.mobile-flipped .tap-hint { color: #555; }
+
+            /* Disable hover lift on mobile to prevent accidental triggers */
+            .product-card:hover { transform: none !important; }
+        }
+
+        /* ── TOUCH TARGETS (min 44px) ── */
+        .pp-size-btn {
+            min-width: 48px;
+            min-height: 48px;
+        }
+        .chk-input-field {
+            min-height: 48px;
+        }
+        .checkout-trigger-btn {
+            min-height: 52px;
+        }
+        .chk-submit-button {
+            min-height: 56px;
+        }
+
+        /* ── LOADING SPINNER (inside submit button) ── */
+        .chk-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(5,5,5,0.3);
+            border-top-color: #050505;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ── ORDER CONFIRMATION MODAL ANIMATION ── */
+        @keyframes confirmSlideUp {
+            from { transform: translateY(30px) scale(0.97); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        /* ── CHAT WIDGET Z-INDEX FIX (stay above footer, below modals) ── */
+        .support-chat-widget {
+            z-index: 4000 !important;
+        }
+        .support-chat-window {
+            z-index: 4001 !important;
+        }
+
+        /* ── HERO RESPONSIVE ── */
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 42px;
+                letter-spacing: 5px;
+            }
+            .hero p {
+                font-size: 10px;
+                letter-spacing: 3px;
+            }
+        }
+        @media (max-width: 375px) {
+            .hero h1 {
+                font-size: 34px;
+                letter-spacing: 4px;
+            }
+        }
+
+        /* ── CHECKOUT DELIVERY ESTIMATE LINE ── */
+        .chk-delivery-note {
+            font-size: 10px;
+            color: #444;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 6px;
+            text-align: right;
+        }
+
+        /* ── PROMO MARQUEE MOBILE ── */
+        @media (max-width: 480px) {
+            .promo-scroller-wrap {
+                font-size: 10px;
+            }
+        }
+
+        /* ── CUSTOM RE-LAUNCH SPRINT FIXES & OVERRIDES ── */
+
+        /* iOS Safari overlay tap-outside modal dismissals */
+        .overlay {
+            cursor: pointer;
+        }
+        .modal-box {
+            cursor: default;
+        }
+
+        /* Prevent white-on-white invisible Governorates option select dropdowns */
+        select option {
+            background-color: #080808 !important;
+            color: #fff !important;
+        }
+
+        /* Large touch-friendly range slider handles */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #222;
+            outline: none;
+            border: none;
+            border-radius: 3px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            border: 1px solid #000;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+            transition: transform 0.1s, background-color 0.1s;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            border: 1px solid #000;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+            transition: transform 0.1s, background-color 0.1s;
+        }
+        input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(1.25);
+            background: #ccc;
+        }
+        input[type="range"]::-moz-range-thumb:active {
+            transform: scale(1.25);
+            background: #ccc;
+        }
+
+        /* Narrow screens product grid card overflow fallback */
+        @media (max-width: 360px) {
+            .grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        /* Prevent live chat widgets from overlapping checkout actions and footer links on mobile */
+        @media (max-width: 900px) {
+            .product-page.open ~ .support-chat-widget,
+            .checkout-page.open ~ .support-chat-widget {
+                display: none !important;
+            }
+            .product-page.open ~ .support-chat-window,
+            .checkout-page.open ~ .support-chat-window {
+                display: none !important;
+            }
+        }
+
+        /* Mobile sticky bottom "Buy It Now" reachable footer layouts */
+        @media (max-width: 900px) {
+            .product-page .checkout-trigger-btn {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                margin: 0;
+                z-index: 3002;
+                border-top: 1px solid #1c1c1c;
+                border-radius: 0;
+                box-shadow: 0 -4px 16px rgba(0,0,0,0.6);
+                background: #fff;
+                color: #000;
+            }
+            /* Add padding to prevent info cutoff under sticky buy button */
+            .pp-inner {
+                padding-bottom: 140px !important;
+            }
+            body.light-mode .product-page .checkout-trigger-btn {
+                background: #050505;
+                color: #fff;
+                border-top: 1px solid #eee;
+            }
+        }

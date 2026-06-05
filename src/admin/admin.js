@@ -1,3 +1,6 @@
+window.SB_URL = "https://majarah-db.co";
+window.SB_KEY = "majarah-guest-dummy-key";
+
 // ── DASHBOARD HTML — injected only after auth ──
 function renderDashboard() {
   document.getElementById('app').innerHTML = `
@@ -2033,41 +2036,19 @@ async function saveTweaks() {
   
   if (SB_URL && SB_KEY) {
     try {
-      const baseUrl = SB_URL.replace(/\/+$/, "");
-      
       for (const item of settingsList) {
         // Try PATCH first
-        const patchRes = await fetch(`${baseUrl}/rest/v1/settings?key=eq.${item.key}`, {
-          method: 'PATCH',
-          headers: {
-            'apikey': SB_KEY,
-            'Authorization': `Bearer ${SB_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation'
-          },
-          body: JSON.stringify({ value: item.value })
-        });
+        const patchData = await sbFetch('settings', 'PATCH', { value: item.value }, `?key=eq.${item.key}`);
         
         let saved = false;
-        if (patchRes.ok) {
-          const patchData = await patchRes.json();
-          if (patchData && patchData.length > 0) {
-            saved = true;
-          }
+        if (patchData && patchData.length > 0) {
+          saved = true;
         }
         
         if (!saved) {
           // POST if key doesn't exist
-          const postRes = await fetch(`${baseUrl}/rest/v1/settings`, {
-            method: 'POST',
-            headers: {
-              'apikey': SB_KEY,
-              'Authorization': `Bearer ${SB_KEY}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ key: item.key, value: item.value })
-          });
-          if (postRes.ok) saved = true;
+          const postData = await sbFetch('settings', 'POST', { key: item.key, value: item.value });
+          if (postData) saved = true;
         }
         
         if (saved) successCount++;
@@ -2115,17 +2096,8 @@ async function clearPrelaunchEmails() {
   
   if (SB_URL && SB_KEY) {
     try {
-      const baseUrl = SB_URL.replace(/\/+$/, "");
-      const res = await fetch(`${baseUrl}/rest/v1/settings?key=eq.prelaunch_emails`, {
-        method: 'PATCH',
-        headers: {
-          'apikey': SB_KEY,
-          'Authorization': `Bearer ${SB_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ value: '[]' })
-      });
-      if (res.ok) {
+      const res = await sbFetch('settings', 'PATCH', { value: '[]' }, '?key=eq.prelaunch_emails');
+      if (res) {
         showToast("Pre-launch email list cleared in database!", "success");
       } else {
         showToast("Cleared locally, but database failed to update.", "warning");

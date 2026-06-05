@@ -33,7 +33,7 @@ const productsData = {
         title: "Onyx Graphic Tee",
         sub: "Drop 01 · 2026",
         price: 520,
-        desc: "<strong>Material Architecture:</strong> 100% Luxury Heavyweight Open-End Carded Cotton. 280 GSM structural density definition pattern layout. Ribbed mock collar configuration profile. Silk-screen ink configuration across face panel lines.",
+        desc: "<strong>Made from:</strong> 100% Heavyweight Cotton — 280 GSM, oversized cut with dropped shoulders. Screen-printed artwork on the front panel. Ribbed collar for structure.",
         imgFront: "blackinfront.jpg",
         imgBack: "Blackback.jpg"
     },
@@ -41,11 +41,36 @@ const productsData = {
         title: "Alabaster Graphic Tee",
         sub: "Drop 01 · 2026",
         price: 520,
-        desc: "<strong>Material Architecture:</strong> 100% Luxury Heavyweight Open-End Carded Cotton. 280 GSM structural density definition pattern layout. Ribbed mock collar configuration profile. Silk-screen ink configuration across face panel lines.",
+        desc: "<strong>Made from:</strong> 100% Heavyweight Cotton — 280 GSM, oversized cut with dropped shoulders. Screen-printed artwork on the front panel. Ribbed collar for structure.",
         imgFront: "whiteinfront.jpg",
         imgBack: "whiteback.jpg"
     }
 };
+
+// --- PRODUCT TRANSLATIONS MAPPING FOR ARABIC LOCALIZATION ---
+const PRODUCT_TRANSLATIONS = {
+    ar: {
+        "Onyx Graphic Tee": "تيشيرت أونيكس جرافيك",
+        "Alabaster Graphic Tee": "تيشيرت ألاباستر جرافيك",
+        "Arabic Edition": "النسخة العربية",
+        "Black Majarah": "مَجَرَّة أسود",
+        "White Majarah": "مَجَرَّة أبيض",
+        "Onyx Black": "أسود أونيكس",
+        "Alabaster White": "أبيض ألاباستر",
+        "Drop 01 · 2026": "دروب 01 · 2026",
+        "Heavyweight Cotton": "قطن ثقيل الوزن",
+        "Heavyweight Organic Cotton": "قطن عضوي ثقيل الوزن",
+        "Premium Oversized": "أوفرسايز بريميوم",
+        "<strong>Made from:</strong> 100% Heavyweight Cotton — 280 GSM, oversized cut with dropped shoulders. Screen-printed artwork on the front panel. Ribbed collar for structure.": "<strong>مصنوع من:</strong> قطن ثقيل الوزن 100٪ - 280 جرام، قصّة أوفرسايز مع أكتاف منسدلة. طباعة شاشة حريرية على الصدر. ياقة مضلعة لتماسك التصميم."
+    }
+};
+
+// --- IMAGE SRC RESOLVER HELPER ---
+// Ensures product images always resolve to a valid src, never empty string
+function resolveImgSrc(url, fallback) {
+    if (url && url.trim() !== '') return url.trim();
+    return fallback || 'blackinfront.jpg';
+}
 
 // Official 27 Bosta Governorate Default Matrix Setup (Subsidized Shipping Strategy)
 const bostaDefaultTiers = [
@@ -70,6 +95,7 @@ let activeSelectedSize = null;
 let activeSelectedPayment = "COD";
 let currentLoadedShippingRates = [];
 let fetchedProducts = [];
+let fetchedInventory = [];
 
 // Load products from Supabase with static fallback
 async function loadProducts() {
@@ -124,13 +150,21 @@ async function loadProducts() {
     }
 
     fetchedProducts = products;
+    fetchedInventory = allInventory;
 
-    // Render the grid dynamically
+    renderProductsGrid(products, allInventory);
+}
+
+function renderProductsGrid(products, inventory) {
+    const grid = document.querySelector('.grid');
+    if (!grid) return;
+    const isAr = (currentLang === 'ar');
+
     grid.innerHTML = products.filter(p => p.status === 'active').map((p, idx) => {
         // Calculate total stock across S, M, L, XL sizes
         let totalStock = 40; // Default offline fallback
-        if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY" && allInventory.length > 0) {
-            const productInv = allInventory.filter(item => Number(item.product_id) === Number(p.id));
+        if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY" && inventory.length > 0) {
+            const productInv = inventory.filter(item => Number(item.product_id) === Number(p.id));
             totalStock = productInv.reduce((sum, item) => sum + (Number(item.stock) || 0), 0);
         }
 
@@ -141,34 +175,48 @@ async function loadProducts() {
             defaultFront = 'whiteinfront.jpg';
             defaultBack = 'whiteback.jpg';
         }
-        const frontImg = p.front_image_url || defaultFront;
-        const backImg = p.back_image_url || defaultBack;
+        const frontImg = resolveImgSrc(p.front_image_url, defaultFront);
+        const backImg = resolveImgSrc(p.back_image_url, defaultBack);
         
         const isSoldOut = totalStock <= 0;
         let badgeHTML = p.badge ? `<div class="badge">${p.badge}</div>` : '';
         let overlayHTML = '';
         
         if (isSoldOut) {
-            badgeHTML = `<div class="badge" style="background: #ff4444; color: #fff;">SOLD OUT</div>`;
-            overlayHTML = `<div class="sold-out-overlay">SOLD OUT</div>`;
+            badgeHTML = `<div class="badge" style="background: #ff4444; color: #fff;">${isAr ? 'نفذت الكمية' : 'SOLD OUT'}</div>`;
+            overlayHTML = `<div class="sold-out-overlay">${isAr ? 'نفذت الكمية' : 'SOLD OUT'}</div>`;
         }
+
+        let nameTranslated = p.name || '';
+        let colorTranslated = p.color || '';
+        let fabricTranslated = p.fabric || 'Heavyweight Cotton';
+
+        if (isAr) {
+            if (PRODUCT_TRANSLATIONS.ar[p.name]) nameTranslated = PRODUCT_TRANSLATIONS.ar[p.name];
+            if (PRODUCT_TRANSLATIONS.ar[p.color]) colorTranslated = PRODUCT_TRANSLATIONS.ar[p.color];
+            if (PRODUCT_TRANSLATIONS.ar[p.fabric || 'Heavyweight Cotton']) fabricTranslated = PRODUCT_TRANSLATIONS.ar[p.fabric || 'Heavyweight Cotton'];
+        }
+
+        const tapHintText = isSoldOut 
+            ? (isAr ? 'غير متوفر' : 'Out of Stock') 
+            : (isAr ? '← اضغط للاستكشاف والطلب' : '→ Tap to explore & order');
 
         return `
             <div class="product-card scroll-reveal" onclick="openProduct('${p.id}')" style="transition-delay: ${idx * 0.15}s;">
                 <div class="image-container">
                     ${badgeHTML}
                     ${overlayHTML}
-                    <img src="${frontImg}" alt="${p.name} Front" class="product-img front-print">
-                    <img src="${backImg}"    alt="${p.name} Back"   class="product-img back-print">
+                    <img src="${frontImg}" alt="${nameTranslated} Front" class="product-img front-print">
+                    <img src="${backImg}"    alt="${nameTranslated} Back"   class="product-img back-print">
                 </div>
                 <div class="product-meta">
                     <div class="details">
-                        <h3>${p.name}</h3>
-                        <p>${p.color || ''} · ${p.fabric || 'Heavyweight Cotton'}</p>
+                        <h3>${nameTranslated}</h3>
+                        <p>${colorTranslated} · ${fabricTranslated}</p>
                     </div>
                     <div class="price">EGP ${p.price}</div>
                 </div>
-                <div class="tap-hint">${isSoldOut ? 'Out of Stock' : '→ Tap to explore & order'}</div>
+                <div class="tap-hint">${tapHintText}</div>
             </div>
         `;
     }).join('');
@@ -218,11 +266,11 @@ const TRANSLATIONS = {
     how_title: "How to Order",
     how_sub: "3 steps · less than a minute",
     how_step1_title: "Pick Your Piece",
-    how_step1_desc: "Tap any garment to view its high-definition specs, artwork prints, dimensions, and sizing configurations.",
-    how_step2_title: "Checkout Instantly",
-    how_step2_desc: "Provide your delivery metrics securely directly inside the Shopify-style application checkout interface panel.",
-    how_step3_title: "Dispatch Order",
-    how_step3_desc: "The system automatically registers and maps your manifest details seamlessly to complete fulfillment loops quickly.",
+    how_step1_desc: "Tap any tee to see the full print, size guide, and details. Select your size when you're ready.",
+    how_step2_title: "Fill in Your Address",
+    how_step2_desc: "Enter your name, phone number, and delivery address. We ship to all 27 Egyptian governorates.",
+    how_step3_title: "We Ship to You",
+    how_step3_desc: "Your order is confirmed and sent out within 1–4 business days. Pay cash when it arrives at your door.",
     measurements_cm: "Measurements in centimeters",
     tbl_size: "Size",
     tbl_chest: "Chest (Width)",
@@ -494,6 +542,9 @@ function applyLanguage(lang) {
     if (typeof refreshDynamicContent === 'function') {
         refreshDynamicContent(lang);
     }
+    if (fetchedProducts && fetchedProducts.length > 0) {
+        renderProductsGrid(fetchedProducts, fetchedInventory);
+    }
 }
 
 function populateCityOptions() {
@@ -515,16 +566,18 @@ function populateCityOptions() {
 
 // Initialize data and load city options immediately on launch
 async function initApp() {
-    // Migration to auto-update local shipping rates if they are outdated
-    if (localStorage.getItem('mjr_shipping_migrated_v3') !== 'true') {
-        localStorage.setItem('storeZones', JSON.stringify(bostaDefaultTiers));
-        localStorage.setItem('mjr_shipping_migrated_v3', 'true');
+    // Always ensure shipping zones are seeded — no migration gate
+    let storedZones = null;
+    try {
+        storedZones = JSON.parse(localStorage.getItem('storeZones'));
+    } catch(e) {
+        console.error("Failed to parse storeZones in initApp:", e);
     }
-    
-    currentLoadedShippingRates = JSON.parse(localStorage.getItem('storeZones')) || bostaDefaultTiers;
-    if(!localStorage.getItem('storeZones')) {
+    if (!storedZones || storedZones.length === 0) {
         localStorage.setItem('storeZones', JSON.stringify(bostaDefaultTiers));
+        storedZones = bostaDefaultTiers;
     }
+    currentLoadedShippingRates = storedZones;
     
     // Build the checkout menu selection array dynamically
     populateCityOptions();
@@ -631,9 +684,11 @@ async function initApp() {
         }
 
         // 8. Payment method rows visibility
+        // Apple Pay and Card are hidden by default — only enabled if admin explicitly turns them on
         const showCOD = localStorage.getItem('mjr_show_cod') !== 'false';
-        const showApplePay = localStorage.getItem('mjr_show_apple_pay') !== 'false';
-        const showCard = localStorage.getItem('mjr_show_card') !== 'false';
+        const supportsApplePay = !!(window.ApplePaySession && window.ApplePaySession.canMakePayments());
+        const showApplePay = localStorage.getItem('mjr_show_apple_pay') === 'true' && supportsApplePay;
+        const showCard = localStorage.getItem('mjr_show_card') === 'true';
         const codRow = document.getElementById('checkoutPayRowCOD');
         const appleRow = document.getElementById('checkoutPayRowApple');
         const cardRow = document.getElementById('checkoutPayRowCard');
@@ -867,9 +922,29 @@ function renderGarmentModal(data, lang) {
     container.innerHTML = html;
 }
 
+// Static fallback for policies (used if API fetch fails)
+const STATIC_POLICIES = {
+    en: [
+        "<strong>Confirmation Call:</strong> After your order is placed, our team will call you within 48 hours to confirm. If we can't reach you, the order is automatically cancelled.",
+        "<strong>Shipping Time:</strong> Your tee ships 1–4 business days after your order is confirmed over the phone.",
+        "<strong>Package Integrity:</strong> Packages cannot be opened at the door — this protects your piece during transit.",
+        "<strong>Rejected Deliveries:</strong> If you refuse delivery at the door, return shipping costs will be charged to you.",
+        "<strong>Exchange & Return:</strong> We accept exchanges and returns within 14 calendar days from your confirmed delivery date."
+    ],
+    ar: [
+        "<strong>مكالمة التأكيد:</strong> بعد ما تتم عملية الطلب، فريقنا بيتصل بيك خلال 48 ساعة في أوقات مختلفة. لو معدتيش رد، الأوردر بيتلغى تلقائياً.",
+        "<strong>مدة التوصيل:</strong> شحنتك بتوصل خلال 1 لـ 4 أيام عمل بعد تأكيد الأوردر تليفونياً.",
+        "<strong>سلامة المنتج:</strong> حسب سياسة شركة الشحن، مش مسموح بفتح الطرد عند الاستلام، وده لضمان وصول قطعتك سليمة.",
+        "<strong>رفض الاستلام:</strong> لو رفضت استلام الشحنة من المندوب، مصاريف الشحن الرجعة بترجع عليك.",
+        "<strong>الاستبدال والاسترجاع:</strong> بنقبل الاستبدال أو الاسترجاع خلال 14 يوم من تاريخ استلام الشحنة."
+    ]
+};
+
 function renderRefundPolicyModal(data, lang) {
     const container = document.getElementById('refundPolicyContent');
     if (!container) return;
+    // Use API data if available, otherwise fall back to static content
+    const rules = (data && data[lang] && data[lang].length > 0) ? data[lang] : STATIC_POLICIES[lang] || STATIC_POLICIES.en;
     const title = lang === 'ar' ? 'سياسة الاستبدال والاسترجاع' : 'Exchange & Return Policy';
     let html = `
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
@@ -879,7 +954,7 @@ function renderRefundPolicyModal(data, lang) {
         </div>
         <ul style="list-style: none; display: flex; flex-direction: column; gap: 16px; padding: 0;">
     `;
-    data[lang].forEach((rule, idx) => {
+    rules.forEach((rule, idx) => {
         const num = String(idx + 1).padStart(2, '0');
         html += `
             <li style="display: flex; gap: 12px; font-size: 11px; line-height: 1.8; color: #555;">
@@ -901,27 +976,76 @@ function refreshDynamicContent(lang) {
     if (contentCache['policies']) renderRefundPolicyModal(contentCache['policies'], lang);
 }
 
+// Helper to lock/unlock body scroll (fixes iOS Safari background scrolling behind modals)
+function lockBodyScroll() {
+    const scrollY = window.scrollY;
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.dataset.scrollY = scrollY;
+}
+function unlockBodyScroll() {
+    const scrollY = document.body.dataset.scrollY || 0;
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+    document.body.style.top = '';
+    window.scrollTo(0, parseInt(scrollY));
+}
+
 // --- STANDARD MODAL INTERACTIONS ---
 async function openHow() {
     document.getElementById('howModal').classList.add('open');
+    lockBodyScroll();
     const data = await fetchDynamicContent('how');
     if (data) renderHowModal(data, currentLang);
+    // Fallback if API fails
+    else {
+        const container = document.getElementById('howModalRight');
+        if (container) renderHowModal({ en: [
+            { n: '01', title: 'Pick Your Piece', desc: 'Tap any tee to see the full print, size guide, and details. Select your size when you\'re ready.' },
+            { n: '02', title: 'Fill in Your Address', desc: 'Enter your name, phone number, and delivery address. We ship to all 27 Egyptian governorates.' },
+            { n: '03', title: 'We Ship to You', desc: 'Your order is confirmed and sent out within 1–4 business days. Pay cash when it arrives at your door.' }
+        ], ar: [
+            { n: '01', title: 'اختار قطعتك', desc: 'دوس على أي قطعة عشان تشوف تفاصيلها ورسوماتها ومقاساتها بالظبط.' },
+            { n: '02', title: 'ادخل بياناتك', desc: 'املا بيانات الشحن والتوصيل بسهولة وأمان في صفحة الدفع.' },
+            { n: '03', title: 'بنشحن ليك', desc: 'السيستم هيسجل طلبك تلقائياً وهنشحنلك القطعة في أسرع وقت. الدفع عند الاستلام.' }
+        ] }, currentLang);
+    }
 }
-function closeHow(e) { if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) document.getElementById('howModal').classList.remove('open'); }
+function closeHow(e) {
+    if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) {
+        document.getElementById('howModal').classList.remove('open');
+        unlockBodyScroll();
+    }
+}
 
 async function openSize() {
     document.getElementById('sizeModal').classList.add('open');
+    lockBodyScroll();
     const data = await fetchDynamicContent('size');
     if (data) renderSizeModal(data, currentLang);
 }
-function closeSize(e) { if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) document.getElementById('sizeModal').classList.remove('open'); }
+function closeSize(e) {
+    if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) {
+        document.getElementById('sizeModal').classList.remove('open');
+        unlockBodyScroll();
+    }
+}
 
 async function openBrand() {
     document.getElementById('brandModal').classList.add('open');
+    lockBodyScroll();
     const data = await fetchDynamicContent('brand');
     if (data) renderBrandModal(data, currentLang);
 }
-function closeBrand(e) { if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) document.getElementById('brandModal').classList.remove('open'); }
+function closeBrand(e) {
+    if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) {
+        document.getElementById('brandModal').classList.remove('open');
+        unlockBodyScroll();
+    }
+}
 
 // --- PRODUCT DETAIL CONTEXT VIEWS ---
 let activeProductInventory = [];
@@ -955,8 +1079,9 @@ async function openProduct(id) {
     // Find product in fetchedProducts or fallback
     let p = fetchedProducts.find(prod => String(prod.id) === String(id));
     if (!p) {
-        const staticP = productsData[id];
+        const staticP = productsData[id] || productsData.black || { title: 'Onyx Graphic Tee', sub: 'Onyx Black', price: 520, desc: '', imgFront: 'blackinfront.jpg', imgBack: 'Blackback.jpg' };
         p = {
+            id: id,
             name: staticP.title,
             color: staticP.sub,
             price: staticP.price,
@@ -974,14 +1099,26 @@ async function openProduct(id) {
         defaultBack = 'whiteback.jpg';
     }
     
-    document.getElementById('ppSub').innerText = p.color || '';
-    document.getElementById('ppTitle').innerText = p.name;
-    document.getElementById('ppPrice').innerText = "EGP " + p.price;
-    document.getElementById('ppDesc').innerHTML = p.description || p.desc || '';
+    const isAr = (currentLang === 'ar');
+    let colorTranslated = p.color || '';
+    let nameTranslated = p.name || '';
+    let descTranslated = p.description || p.desc || '';
     
-    document.getElementById('ppMainImg').src = p.front_image_url || defaultFront;
-    document.getElementById('thumbImg0').src = p.front_image_url || defaultFront;
-    document.getElementById('thumbImg1').src = p.back_image_url || defaultBack;
+    if (isAr) {
+        if (PRODUCT_TRANSLATIONS.ar[p.name]) nameTranslated = PRODUCT_TRANSLATIONS.ar[p.name];
+        if (PRODUCT_TRANSLATIONS.ar[p.color]) colorTranslated = PRODUCT_TRANSLATIONS.ar[p.color];
+        if (PRODUCT_TRANSLATIONS.ar[p.description]) descTranslated = PRODUCT_TRANSLATIONS.ar[p.description];
+        else if (PRODUCT_TRANSLATIONS.ar[p.desc]) descTranslated = PRODUCT_TRANSLATIONS.ar[p.desc];
+    }
+    
+    document.getElementById('ppSub').innerText = colorTranslated;
+    document.getElementById('ppTitle').innerText = nameTranslated;
+    document.getElementById('ppPrice').innerText = "EGP " + p.price;
+    document.getElementById('ppDesc').innerHTML = descTranslated;
+    
+    document.getElementById('ppMainImg').src = resolveImgSrc(p.front_image_url, defaultFront);
+    document.getElementById('thumbImg0').src = resolveImgSrc(p.front_image_url, defaultFront);
+    document.getElementById('thumbImg1').src = resolveImgSrc(p.back_image_url, defaultBack);
     
     // Reset active selections on load
     document.querySelectorAll('.pp-thumb').forEach(t => t.classList.remove('active'));
@@ -1096,7 +1233,7 @@ function closeProduct() {
 function switchImg(index) {
     let p = fetchedProducts.find(prod => String(prod.id) === String(activeProductId));
     if (!p) {
-        const staticP = productsData[activeProductId];
+        const staticP = productsData[activeProductId] || productsData.black || { imgFront: 'blackinfront.jpg', imgBack: 'Blackback.jpg' };
         p = {
             front_image_url: staticP.imgFront,
             back_image_url: staticP.imgBack
@@ -1105,7 +1242,7 @@ function switchImg(index) {
     
     let defaultFront = 'blackinfront.jpg';
     let defaultBack = 'Blackback.jpg';
-    const searchStr = (p.name + ' ' + (p.color || '')).toLowerCase();
+    const searchStr = ((p.name || '') + ' ' + (p.color || '')).toLowerCase();
     if (searchStr.includes('white') || searchStr.includes('alabaster')) {
         defaultFront = 'whiteinfront.jpg';
         defaultBack = 'whiteback.jpg';
@@ -1113,7 +1250,7 @@ function switchImg(index) {
     
     document.querySelectorAll('.pp-thumb').forEach(t => t.classList.remove('active'));
     document.getElementById('thumb' + index).classList.add('active');
-    document.getElementById('ppMainImg').src = (index === 0) ? (p.front_image_url || defaultFront) : (p.back_image_url || defaultBack);
+    document.getElementById('ppMainImg').src = (index === 0) ? resolveImgSrc(p.front_image_url, defaultFront) : resolveImgSrc(p.back_image_url, defaultBack);
 }
 
 function pickSize(element) {
@@ -1142,7 +1279,7 @@ function openCheckout() {
     
     let p = fetchedProducts.find(prod => String(prod.id) === String(activeProductId));
     if (!p) {
-        const staticP = productsData[activeProductId];
+        const staticP = productsData[activeProductId] || productsData.black || { title: 'Onyx Graphic Tee', price: 520, imgFront: 'blackinfront.jpg' };
         p = {
             name: staticP.title,
             price: staticP.price,
@@ -1156,22 +1293,74 @@ function openCheckout() {
         defaultFront = 'whiteinfront.jpg';
     }
     
+    let nameTranslated = p.name;
+    if (currentLang === 'ar' && PRODUCT_TRANSLATIONS.ar[p.name]) {
+        nameTranslated = PRODUCT_TRANSLATIONS.ar[p.name];
+    }
+
     // Sync review sidebar layouts
-    document.getElementById('chkItemThumb').src = p.front_image_url || defaultFront;
-    document.getElementById('chkItemTitle').innerText = p.name;
+    document.getElementById('chkItemThumb').src = resolveImgSrc(p.front_image_url, defaultFront);
+    document.getElementById('chkItemTitle').innerText = nameTranslated;
     document.getElementById('chkItemVariant').innerText = (currentLang === 'ar' ? "المقاس: " : "Size: ") + activeSelectedSize;
-    document.getElementById('chkItemPrice').innerText = "EGP " + p.price + ".00";
+    document.getElementById('chkItemPrice').innerText = "EGP " + Number(p.price).toFixed(2);
     
     // Reset shipping fields
     document.getElementById('chkCity').value = "";
     document.getElementById('chkShipping').innerText = currentLang === 'ar' ? "اختار المحافظة" : "Select city";
+    
+    // Pre-populate fields from activeCustomerSession and saved address
+    if (typeof activeCustomerSession !== 'undefined' && activeCustomerSession) {
+        const emailEl = document.getElementById('chkEmail');
+        if (emailEl) emailEl.value = activeCustomerSession.email || '';
+        
+        const nameParts = (activeCustomerSession.username || '').split(' ');
+        const firstEl = document.getElementById('chkFirst');
+        const lastEl = document.getElementById('chkLast');
+        if (firstEl && !firstEl.value) firstEl.value = nameParts[0] || '';
+        if (lastEl && !lastEl.value) lastEl.value = nameParts.slice(1).join(' ') || '';
+
+        if (activeCustomerSession.email) {
+            try {
+                const savedAddr = JSON.parse(localStorage.getItem(`mjr_address_${activeCustomerSession.email.toLowerCase()}`));
+                if (savedAddr) {
+                    if (firstEl && savedAddr.first) firstEl.value = savedAddr.first;
+                    if (lastEl && savedAddr.last) lastEl.value = savedAddr.last;
+                    const phoneEl = document.getElementById('chkContact');
+                    if (phoneEl && savedAddr.phone) phoneEl.value = savedAddr.phone;
+                    const addrEl = document.getElementById('chkAddress');
+                    if (addrEl && savedAddr.address) addrEl.value = savedAddr.address;
+                    const bldEl = document.getElementById('chkBuilding');
+                    if (bldEl && savedAddr.building) bldEl.value = savedAddr.building;
+                    const flrEl = document.getElementById('chkFloor');
+                    if (flrEl && savedAddr.floor) flrEl.value = savedAddr.floor;
+                    const aptEl = document.getElementById('chkApartment');
+                    if (aptEl && savedAddr.apartment) aptEl.value = savedAddr.apartment;
+                    const landEl = document.getElementById('chkLandmark');
+                    if (landEl && savedAddr.landmark) landEl.value = savedAddr.landmark;
+                    const cityEl = document.getElementById('chkCity');
+                    if (cityEl && savedAddr.city) {
+                        cityEl.value = savedAddr.city;
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load saved address:", err);
+            }
+        }
+    }
+
+    // Set save address checkbox unchecked by default
+    const saveCheckbox = document.getElementById('chkSaveAddress');
+    if (saveCheckbox) saveCheckbox.checked = false;
+
     calculateTotals();
     
     document.getElementById('checkoutPage').classList.add('open');
+    lockBodyScroll();
 }
 
 function closeCheckout() {
     document.getElementById('checkoutPage').classList.remove('open');
+    unlockBodyScroll();
 }
 
 function selectCheckoutPayment(element, method) {
@@ -1210,6 +1399,7 @@ function applyCheckoutCoupon() {
         activeDiscountValue = 0;
         activeDiscountCode = '';
         calculateTotals();
+        showToast(currentLang === 'ar' ? 'كود الخصم غير صحيح.' : 'Invalid coupon code.', 'error');
         return;
     }
     
@@ -1232,22 +1422,35 @@ function applyCheckoutCoupon() {
     inputEl.style.borderColor = '#25d366';
         
     calculateTotals();
+    showToast(currentLang === 'ar' ? 'تم تطبيق كود الخصم بنجاح!' : 'Coupon applied successfully!', 'success');
 }
 
 // Custom functions for Washing Instructions and Garment Care modals
 async function openWashingModal() {
     document.getElementById('washingModal').classList.add('open');
+    lockBodyScroll();
     const data = await fetchDynamicContent('washing');
     if (data) renderWashingModal(data, currentLang);
 }
-function closeWashingModal(e) { if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) document.getElementById('washingModal').classList.remove('open'); }
+function closeWashingModal(e) {
+    if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) {
+        document.getElementById('washingModal').classList.remove('open');
+        unlockBodyScroll();
+    }
+}
 
 async function openGarmentModal() {
     document.getElementById('garmentModal').classList.add('open');
+    lockBodyScroll();
     const data = await fetchDynamicContent('garment');
     if (data) renderGarmentModal(data, currentLang);
 }
-function closeGarmentModal(e) { if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) document.getElementById('garmentModal').classList.remove('open'); }
+function closeGarmentModal(e) {
+    if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) {
+        document.getElementById('garmentModal').classList.remove('open');
+        unlockBodyScroll();
+    }
+}
 
 // Order Tracker Modal Control & Lookup Functions
 function openOrderTrackerModal() {
@@ -1256,10 +1459,12 @@ function openOrderTrackerModal() {
     document.getElementById('trackerResults').style.display = 'none';
     document.getElementById('trackerSearchForm').style.display = 'block';
     document.getElementById('orderTrackerModal').classList.add('open');
+    lockBodyScroll();
 }
 function closeOrderTrackerModal(e) {
     if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) {
         document.getElementById('orderTrackerModal').classList.remove('open');
+        unlockBodyScroll();
     }
 }
 function backToTrackerSearch() {
@@ -1278,8 +1483,11 @@ async function trackOrdersByPhone() {
         return;
     }
     
-    document.getElementById('trackerSearchBtn').disabled = true;
-    document.getElementById('trackerSearchBtn').innerText = currentLang === 'ar' ? 'جاري البحث...' : 'Searching...';
+    const searchBtn = document.getElementById('trackerSearchBtn');
+    if (searchBtn) {
+        searchBtn.disabled = true;
+        searchBtn.innerHTML = `<span class="chk-spinner"></span>${currentLang === 'ar' ? 'جاري البحث...' : 'Searching...'}`;
+    }
     
     let ordersList = [];
     
@@ -1302,7 +1510,12 @@ async function trackOrdersByPhone() {
     }
     
     // 2. Fetch from Local Storage Fallback
-    const localOrders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+    let localOrders = [];
+    try {
+        localOrders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+    } catch(e) {
+        console.error("Failed to parse storeOrders in trackOrdersByPhone:", e);
+    }
     const matchedLocal = localOrders.filter(o => o.phone && String(o.phone).trim() === phoneInput);
     
     // Combine arrays ensuring no duplicates (by ID)
@@ -1312,8 +1525,10 @@ async function trackOrdersByPhone() {
         }
     });
     
-    document.getElementById('trackerSearchBtn').disabled = false;
-    document.getElementById('trackerSearchBtn').innerText = currentLang === 'ar' ? 'تتبع الطلب' : 'Track Order';
+    if (searchBtn) {
+        searchBtn.disabled = false;
+        searchBtn.innerText = currentLang === 'ar' ? 'تتبع الطلب' : 'Track Order';
+    }
     
     if (ordersList.length === 0) {
         errEl.innerText = currentLang === 'ar' ? 'لم يتم العثور على أي طلبات لهذا الرقم.' : 'No orders found for this phone number.';
@@ -1382,7 +1597,7 @@ function calculateTotals() {
     
     let p = fetchedProducts.find(prod => String(prod.id) === String(activeProductId));
     if (!p) {
-        const staticP = productsData[activeProductId];
+        const staticP = productsData[activeProductId] || productsData.black || { price: 520 };
         p = { price: staticP.price };
     }
     
@@ -1414,11 +1629,13 @@ function calculateTotals() {
     }
     
     if (selectedCity) {
-        document.getElementById('chkShipping').innerText = "EGP " + shippingFeeValue + ".00";
+        document.getElementById('chkShipping').innerText = "EGP " + Number(shippingFeeValue).toFixed(2);
+        document.getElementById('chkTotal').innerHTML = `<span class="chk-currency-code">EGP </span>${computedTotalSum.toFixed(2)}`;
     } else {
         document.getElementById('chkShipping').innerText = currentLang === 'ar' ? "اختار المحافظة" : "Select city";
+        // Show subtotal as total estimate until city is selected
+        document.getElementById('chkTotal').innerHTML = `<span class="chk-currency-code">EGP </span>${finalSubtotal.toFixed(2)}`;
     }
-    document.getElementById('chkTotal').innerHTML = `<span class="chk-currency-code">EGP</span>` + computedTotalSum + ".00";
 }
 
 // Post Manifest Order to Storage Pipeline
@@ -1482,11 +1699,11 @@ async function submitShopifyCheckout() {
         status: 'pending'
     };
 
-    // Disable button to prevent double submission
+    // Disable button and show loading spinner to prevent double submission
     const submitBtn = document.querySelector('.chk-submit-button');
     if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerText = "Processing...";
+        submitBtn.innerHTML = `<span class="chk-spinner"></span>${currentLang === 'ar' ? 'جارٍ المعالجة...' : 'Processing...'}`;
     }
 
     // 1. Verify stock availability in Supabase
@@ -1577,50 +1794,121 @@ async function submitShopifyCheckout() {
         }
     }
 
-    if (!success) {
-        // Fallback to local storage
-        const localOrder = {
-            id: orderId,
-            customerName: firstInput + " " + lastInput,
+    const computedTotalSum = finalSubtotal + shippingFeeValue;
+
+    // Save customer address in localStorage under their account email if Save Address checkbox is checked
+    const saveCheckbox = document.getElementById('chkSaveAddress');
+    if (saveCheckbox && saveCheckbox.checked && emailInput) {
+        const addressToSave = {
+            first: firstInput,
+            last: lastInput,
             phone: contactInput,
-            email: emailInput,
-            city: cityInput,
-            address: combinedAddress,
-            itemPrice: p.price,
-            shippingFee: shippingFeeValue,
-            total: p.price + shippingFeeValue,
-            status: 'Pending',
-            date: new Date().toLocaleDateString() + " (" + activeSelectedSize + " - " + activeSelectedPayment + ")"
+            address: addressInputMain,
+            building: buildingInput,
+            floor: floorInput,
+            apartment: apartmentInput,
+            landmark: landmarkInput,
+            city: cityInput
         };
-        let globalOrdersArray = JSON.parse(localStorage.getItem('storeOrders')) || [];
-        globalOrdersArray.push(localOrder);
-        localStorage.setItem('storeOrders', JSON.stringify(globalOrdersArray));
-        showToast("✨ Order logged locally (Offline Mode)! Order ID: " + orderId, "success");
-    } else {
-        showToast("✨ Order placed successfully! Order ID: " + orderId, "success");
+        localStorage.setItem(`mjr_address_${emailInput.toLowerCase()}`, JSON.stringify(addressToSave));
     }
 
+    // Always save order to local history cache
+    const localOrder = {
+        id: orderId,
+        customerName: firstInput + " " + lastInput,
+        phone: contactInput,
+        email: emailInput,
+        city: cityInput,
+        address: combinedAddress,
+        itemPrice: p.price,
+        shippingFee: shippingFeeValue,
+        total: computedTotalSum,
+        status: success ? 'pending' : 'Pending',
+        date: new Date().toLocaleDateString() + " (" + activeSelectedSize + " - " + activeSelectedPayment + ")"
+    };
+    let globalOrdersArray = [];
+    try {
+        globalOrdersArray = JSON.parse(localStorage.getItem('storeOrders')) || [];
+    } catch(e) {
+        console.error("Failed to parse storeOrders in submitShopifyCheckout:", e);
+    }
+    globalOrdersArray.push(localOrder);
+    localStorage.setItem('storeOrders', JSON.stringify(globalOrdersArray));
+
+    // Show order confirmation modal instead of just a toast
+    showOrderConfirmationModal(orderId, firstInput, p.name, activeSelectedSize, finalSubtotal, shippingFeeValue, computedTotalSum, contactInput, cityInput);
+
     // Dispatch Email receipt via EmailJS
-    sendEmailReceipt(orderId, emailInput, firstInput, lastInput, p.name, activeSelectedSize, activeSelectedPayment, p.price, shippingFeeValue, p.price + shippingFeeValue, contactInput, combinedAddress, cityInput);
+    sendEmailReceipt(orderId, emailInput, firstInput, lastInput, p.name, activeSelectedSize, activeSelectedPayment, finalSubtotal, shippingFeeValue, computedTotalSum, contactInput, combinedAddress, cityInput);
 
     if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.innerText = "Complete Order";
+        submitBtn.innerHTML = currentLang === 'ar' ? 'أكد الطلب دلوقتي' : 'Complete Order';
     }
     
     // Clear checkout views and forms
     closeCheckout();
     closeProduct();
-    document.getElementById('chkContact').value = "";
-    document.getElementById('chkFirst').value = "";
-    document.getElementById('chkLast').value = "";
-    document.getElementById('chkAddress').value = "";
-    document.getElementById('chkBuilding').value = "";
-    document.getElementById('chkFloor').value = "";
-    document.getElementById('chkApartment').value = "";
-    document.getElementById('chkLandmark').value = "";
-    document.getElementById('chkPostal').value = "";
-    document.getElementById('chkEmail').value = "";
+    ['chkContact','chkFirst','chkLast','chkAddress','chkBuilding','chkFloor','chkApartment','chkLandmark','chkPostal','chkEmail'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+}
+
+// --- ORDER CONFIRMATION MODAL ---
+function showOrderConfirmationModal(orderId, firstName, productName, size, subtotal, shipping, total, phone, city) {
+    // Remove any existing confirmation modal
+    const existing = document.getElementById('orderConfirmModal');
+    if (existing) existing.remove();
+
+    const isAr = currentLang === 'ar';
+    const waMsg = encodeURIComponent(
+        isAr
+            ? `مرحباً! تم تأكيد طلبي رقم ${orderId} على MAJARAH.\nالمنتج: ${productName} (${size})\nالإجمالي: EGP ${total.toFixed(2)}\nشكراً!`
+            : `Hi! My order ${orderId} at MAJARAH is confirmed.\nProduct: ${productName} (${size})\nTotal: EGP ${total.toFixed(2)}\nThanks!`
+    );
+    const waLink = `https://wa.me/201229067066?text=${waMsg}`;
+
+    const modal = document.createElement('div');
+    modal.id = 'orderConfirmModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);';
+    modal.innerHTML = `
+        <div style="background:#080808;border:1px solid #1a1a1a;border-radius:8px;max-width:460px;width:100%;padding:40px 35px;text-align:center;position:relative;animation:confirmSlideUp 0.4s cubic-bezier(0.16,1,0.3,1);">
+            <div style="font-size:48px;margin-bottom:16px;">✅</div>
+            <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:#555;margin-bottom:8px;">${isAr ? 'تم تأكيد الطلب' : 'Order Confirmed'}</div>
+            <h2 style="font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:#fff;margin:0 0 6px 0;">${isAr ? 'شكراً، ' + firstName + '!' : 'Thank you, ' + firstName + '!'}</h2>
+            <p style="font-size:12px;color:#666;line-height:1.7;margin:0 0 24px 0;">
+                ${isAr
+                    ? `طلبك <strong style="color:#fff">${orderId}</strong> وصلنا وهيتم التواصل معاك خلال 48 ساعة لتأكيده. بعد التأكيد، بيوصلك خلال 1–4 أيام عمل.`
+                    : `Order <strong style="color:#fff">${orderId}</strong> received. We'll call you within 48 hours to confirm. After confirmation, delivery takes 1–4 business days.`
+                }
+            </p>
+            <div style="background:#0d0d0d;border:1px solid #151515;border-radius:6px;padding:16px;margin-bottom:24px;text-align:left;">
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:8px;"><span>${isAr ? 'المنتج' : 'Product'}</span><span style="color:#ccc;">${productName} (${size})</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:8px;"><span>${isAr ? 'المحافظة' : 'City'}</span><span style="color:#ccc;">${city}</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:8px;"><span>${isAr ? 'المنتج' : 'Subtotal'}</span><span style="color:#ccc;">EGP ${subtotal.toFixed(2)}</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:10px;"><span>${isAr ? 'الشحن' : 'Shipping'}</span><span style="color:#ccc;">EGP ${shipping.toFixed(2)}</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#fff;border-top:1px solid #1a1a1a;padding-top:10px;"><span>${isAr ? 'الإجمالي' : 'Total'}</span><span>EGP ${total.toFixed(2)}</span></div>
+            </div>
+            <a href="${waLink}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;background:#25d366;color:#fff;text-decoration:none;border-radius:6px;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                ${isAr ? 'تأكيد الطلب عبر واتساب' : 'Confirm via WhatsApp'}
+            </a>
+            <button onclick="closeOrderConfirmModal()" style="width:100%;padding:12px;background:transparent;border:1px solid #222;color:#666;border-radius:6px;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='#444';this.style.color='#fff'" onmouseout="this.style.borderColor='#222';this.style.color='#666'">
+                ${isAr ? 'إغلاق' : 'Close'}
+            </button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    // Prevent background scroll
+    document.body.style.overflow = 'hidden';
+}
+
+function closeOrderConfirmModal() {
+    const modal = document.getElementById('orderConfirmModal');
+    if (modal) modal.remove();
+    unlockBodyScroll();
 }
 
 // Send Email Receipt via Backend (Brevo) or fallback to client-side EmailJS
@@ -1702,12 +1990,14 @@ function sendEmailReceipt(orderId, email, first, last, product, size, payment, s
 // --- SIZE RECOMMENDER FUNCTIONS ---
 function openSizeRecommender() {
     document.getElementById('sizeRecommenderModal').classList.add('open');
+    lockBodyScroll();
     updateRecommenderLabels();
 }
 
 function closeSizeRecommender(e) {
     if (!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) {
         document.getElementById('sizeRecommenderModal').classList.remove('open');
+        unlockBodyScroll();
     }
 }
 
@@ -1806,14 +2096,17 @@ function applyRecommendedSize() {
 // --- REFUND CONTROLLER FUNCTIONS ---
 async function openRefundModal() {
     document.getElementById('refundLookupModal').classList.add('open');
+    lockBodyScroll();
     backToRefundLookup();
     const data = await fetchDynamicContent('policies');
-    if (data) renderRefundPolicyModal(data, currentLang);
+    // Always render policy — uses static fallback if API fails
+    renderRefundPolicyModal(data, currentLang);
 }
 
 function closeRefundModal(e) {
     if (!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) {
         document.getElementById('refundLookupModal').classList.remove('open');
+        unlockBodyScroll();
     }
 }
 
@@ -1866,7 +2159,12 @@ async function lookupOrderForRefund() {
     }
 
     if (!order) {
-        const localOrders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+        let localOrders = [];
+        try {
+            localOrders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+        } catch(e) {
+            console.error("Failed to parse storeOrders in refund lookup:", e);
+        }
         order = localOrders.find(o => {
             const cleanInputId = orderIdInput.replace('#', '').trim().toLowerCase();
             const cleanOrderId = String(o.id).replace('#', '').trim().toLowerCase();
@@ -2058,7 +2356,12 @@ async function submitRefundRequest() {
     let success = false;
 
     if (activeRefundOrder.isLocal) {
-        const localOrders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+        let localOrders = [];
+        try {
+            localOrders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+        } catch(e) {
+            console.error("Failed to parse storeOrders in submitRefundRequest:", e);
+        }
         const index = localOrders.findIndex(o => String(o.id) === String(activeRefundOrder.id));
         if (index !== -1) {
             localOrders[index] = {
@@ -2295,6 +2598,11 @@ function initCosmicCanvas() {
 
 // --- PRE-LAUNCH HYPE MODE FUNCTIONS ---
 function checkPrelaunch() {
+    const plErr = document.getElementById('prelaunchBypassError');
+    if (plErr) plErr.style.display = 'none';
+    const plInput = document.getElementById('prelaunchBypassPass');
+    if (plInput) plInput.value = '';
+
     const bypass = localStorage.getItem('mjr_bypass_prelaunch') === 'true';
     const showPrelaunch = localStorage.getItem('mjr_show_prelaunch') !== 'false';
     const dateStr = localStorage.getItem('mjr_prelaunch_date');
@@ -2537,6 +2845,7 @@ function initUserSession() {
 
 function openAuthModal() {
     document.getElementById('authModal').classList.add('open');
+    lockBodyScroll();
     if (activeCustomerSession) {
         switchAuthTab('profile');
     } else {
@@ -2547,6 +2856,7 @@ function openAuthModal() {
 function closeAuthModal(e) {
     if (!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) {
         document.getElementById('authModal').classList.remove('open');
+        unlockBodyScroll();
     }
 }
 
@@ -2600,6 +2910,24 @@ async function submitAuthSignup() {
     if (!username || !email || !password || !confirm) {
         if (errEl) {
             errEl.innerText = "All fields are required.";
+            errEl.style.display = 'block';
+        }
+        return;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        if (errEl) {
+            errEl.innerText = "Please enter a valid email address.";
+            errEl.style.display = 'block';
+        }
+        return;
+    }
+    
+    const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+    if (!usernameRegex.test(username)) {
+        if (errEl) {
+            errEl.innerText = "Username must be 3-20 characters long and contain only letters, numbers, or underscores.";
             errEl.style.display = 'block';
         }
         return;
@@ -2933,7 +3261,12 @@ async function loadCustomerProfile() {
     }
     
     // 2. Fetch from Local Storage Fallback
-    const localOrders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+    let localOrders = [];
+    try {
+        localOrders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+    } catch(e) {
+        console.error("Failed to parse storeOrders in loadCustomerProfile:", e);
+    }
     const matchedLocal = localOrders.filter(o => o.email && o.email.toLowerCase() === activeCustomerSession.email.toLowerCase());
     
     // Combine arrays ensuring no duplicates (by ID)
@@ -3021,7 +3354,9 @@ function triggerFooterContact() {
     const chatWin = document.getElementById('chatWindow');
     if (chatWin) {
         chatWin.style.display = 'block';
-        showToast("Support channels opened on bottom-left!", "info");
+        // Scroll to bottom of page so chat widget is visible
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        showToast(currentLang === 'ar' ? 'تواصل معانا عبر واتساب أو انستجرام 👇' : 'Chat with us via WhatsApp or Instagram 👇', 'info');
     }
 }
 
@@ -3035,6 +3370,46 @@ document.addEventListener('click', (e) => {
         }
     }
 });
+
+// --- MOBILE TOUCH FLIP FOR PRODUCT CARDS ---
+// On mobile, a single tap flips the card to show the back image
+// A second tap opens the product page
+let mobileFlippedCard = null;
+document.addEventListener('touchstart', (e) => {
+    const card = e.target.closest('.product-card');
+    if (!card) {
+        // Tap outside a card — unflip
+        if (mobileFlippedCard) {
+            mobileFlippedCard.classList.remove('mobile-flipped');
+            mobileFlippedCard = null;
+        }
+        return;
+    }
+    // On mobile, if card is not flipped, flip it first
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    if (isTouchDevice) {
+        if (mobileFlippedCard && mobileFlippedCard !== card) {
+            mobileFlippedCard.classList.remove('mobile-flipped');
+            mobileFlippedCard = null;
+        }
+        if (!card.classList.contains('mobile-flipped')) {
+            e.preventDefault();
+            card.classList.add('mobile-flipped');
+            mobileFlippedCard = card;
+        }
+        // If already flipped, let the onclick through to openProduct
+    }
+}, { passive: false });
+
+// --- DYNAMIC HINTS: hide hover hint on mobile ---
+(function updateMobileHint() {
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    const hintEl = document.querySelector('[data-t="tap_explore"]');
+    if (hintEl && isTouchDevice) {
+        const isAr = currentLang === 'ar';
+        hintEl.textContent = isAr ? 'اضغط على أي قطعة للاستكشاف · اضغط مرتين لرؤية الظهر' : 'Tap to explore · Tap again to see the back';
+    }
+})();
 
 // Run Application Bootstrap Setup Loop
 initApp();
