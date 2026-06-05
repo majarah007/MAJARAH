@@ -1,0 +1,8 @@
+# Log files
+*.log
+tunnel.log
+tunnel_err.log
+
+# OS files
+.DS_Store
+Thumbs.db
