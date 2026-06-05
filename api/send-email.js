@@ -39,72 +39,65 @@ module.exports = async (req, res) => {
       <meta charset="utf-8">
       <title>Order Confirmation #${orderId}</title>
       <style>
-        body { font-family: 'DM Mono', monospace; background-color: #000000; color: #ffffff; margin: 0; padding: 0; }
-        .wrapper { background-color: #000000; padding: 40px 20px; text-align: center; }
-        .container { background-color: #000000; border: 1px solid #222222; border-radius: 8px; max-width: 600px; margin: 0 auto; padding: 40px 30px; text-align: left; }
-        .logo { font-size: 26px; font-weight: 800; color: #ccff00; letter-spacing: 2px; text-align: center; margin-bottom: 30px; text-transform: uppercase; }
-        .title { font-size: 20px; font-weight: 600; border-bottom: 1px solid #1a1a1a; padding-bottom: 15px; margin-bottom: 25px; text-align: center; color: #ffffff; }
-        .greeting { font-size: 14px; line-height: 1.6; color: #cccccc; margin-bottom: 30px; }
-        .details-box { background-color: #090909; border: 1px solid #1a1a1a; border-radius: 6px; padding: 20px; margin-bottom: 30px; }
-        .details-title { color: #ccff00; font-size: 13px; font-weight: 700; margin-top: 0; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
-        .detail-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #1a1a1a; padding: 8px 0; font-size: 13px; color: #bbbbbb; }
-        .detail-row:last-child { border-bottom: none; }
-        .detail-value { color: #ffffff; font-weight: 500; }
-        .total-row { display: flex; justify-content: space-between; padding: 15px 0 0 0; font-size: 15px; font-weight: 600; color: #ccff00; border-top: 1px solid #222222; margin-top: 10px; }
-        .footer { font-size: 11px; color: #666666; text-align: center; margin-top: 30px; line-height: 1.5; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #000000; color: #ffffff; margin: 0; padding: 0; }
+        .wrapper { background-color: #000000; padding: 40px 20px; }
+        .container { background-color: #000000; max-width: 550px; margin: 0 auto; padding: 20px 10px; }
+        .logo { font-size: 28px; font-weight: 800; color: #ffffff; letter-spacing: 6px; text-align: center; text-transform: uppercase; margin-bottom: 4px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .sublogo { font-size: 12px; color: #888888; text-align: center; letter-spacing: 2px; margin-bottom: 24px; }
+        .divider { border-bottom: 1px solid #1c1c1c; margin: 24px 0; }
+        .dotted-divider { border-bottom: 1px dotted #2d2d2d; margin: 16px 0; }
+        .greeting-title { font-size: 15px; font-weight: 600; color: #ffffff; margin-bottom: 16px; }
+        .greeting-desc { font-size: 13px; line-height: 1.6; color: #aaaaaa; margin-bottom: 24px; }
+        .details-box { background-color: #080808; border: 1px solid #1c1c1c; border-radius: 6px; padding: 24px; margin-bottom: 24px; }
+        .detail-row { margin-bottom: 12px; font-size: 11px; letter-spacing: 1px; color: #555555; font-weight: 700; text-transform: uppercase; }
+        .detail-value { color: #ffffff; font-weight: 700; letter-spacing: 0px; text-transform: none; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .ledger-row { font-size: 13px; color: #888888; margin-bottom: 8px; }
+        .total-row { font-size: 18px; font-weight: 700; color: #ffffff; margin-top: 8px; }
+        .manifest-title { font-size: 11px; font-weight: 700; color: #555555; letter-spacing: 1.5px; margin-bottom: 12px; text-transform: uppercase; }
+        .manifest-row { font-size: 13px; color: #888888; margin-bottom: 6px; line-height: 1.5; }
+        .manifest-value { color: #cccccc; }
+        .footer-text { font-size: 9px; color: #444444; text-align: center; letter-spacing: 1.5px; margin-bottom: 8px; text-transform: uppercase; }
       </style>
     </head>
     <body>
       <div class="wrapper">
         <div class="container">
-          <div class="logo">Majarah · مَجَرَّة</div>
-          <div class="title">Order Confirmed</div>
+          <div class="logo">MAJARAH</div>
+          <div class="sublogo">مَجَرَّة</div>
+          <div class="divider"></div>
           
-          <div class="greeting">
-            Hi ${name || 'Customer'},\n\nThank you for shopping with us! We have received your order details and are preparing it for dispatch. Below is a copy of your receipt.
+          <div class="greeting-title">Hi ${name || 'Customer'},</div>
+          <div class="greeting-desc">
+            Thank you for your order! We are currently processing your pieces. Below is your official receipt.
           </div>
           
           <div class="details-box">
-            <div class="details-title">Order Details</div>
-            <div class="detail-row">
-              <span>Order ID:</span>
-              <span class="detail-value">#${orderId}</span>
-            </div>
-            <div class="detail-row">
-              <span>Item:</span>
-              <span class="detail-value">${productName}</span>
-            </div>
-            <div class="detail-row">
-              <span>Size:</span>
-              <span class="detail-value">${size || '—'}</span>
-            </div>
-            <div class="detail-row">
-              <span>Payment Method:</span>
-              <span class="detail-value">${payment || 'COD'}</span>
-            </div>
-            <div class="detail-row">
-              <span>Address:</span>
-              <span class="detail-value">${address}</span>
-            </div>
-            <div class="detail-row">
-              <span>Phone:</span>
-              <span class="detail-value">${phone}</span>
-            </div>
-            <div class="detail-row">
-              <span>City:</span>
-              <span class="detail-value">${city || '—'}</span>
-            </div>
+            <div class="detail-row">ORDER REFERENCE: <span class="detail-value">#${orderId}</span></div>
+            <div class="detail-row">GARMENT: <span class="detail-value">${productName} (Size: ${size || '—'})</span></div>
+            <div class="detail-row">PAYMENT TYPE: <span class="detail-value">${payment || 'COD'}</span></div>
+            <div class="detail-row">PHONE NUMBER: <span class="detail-value">${phone}</span></div>
             
-            <div class="total-row">
-              <span>Total Amount:</span>
-              <span>${total} EGP</span>
-            </div>
+            <div class="divider" style="margin: 16px 0; border-bottom: 1px solid #1c1c1c;"></div>
+            
+            <div class="ledger-row">Subtotal: ${subtotal} EGP</div>
+            <div class="ledger-row">Shipping Fee: ${shipping} EGP</div>
+            
+            <div class="dotted-divider"></div>
+            
+            <div class="total-row">Total: ${total} EGP</div>
           </div>
           
-          <div class="footer">
-            If you have any questions or would like to modify your order, please reply to this email or contact our support team.<br>
-            &copy; 2026 MAJARAH. All rights reserved.
-          </div>
+          <div class="divider"></div>
+          
+          <div class="manifest-title">DELIVERY MANIFEST</div>
+          <div class="manifest-row"><strong>Recipient:</strong> <span class="manifest-value">${name || ''}</span></div>
+          <div class="manifest-row"><strong>Address:</strong> <span class="manifest-value">${address}</span></div>
+          <div class="manifest-row"><strong>City/Governorate:</strong> <span class="manifest-value">${city || ''}, Egypt</span></div>
+          
+          <div class="divider"></div>
+          
+          <div class="footer-text">HOME DELIVERY · ALL EGYPT GOVERNORATES 🚚</div>
+          <div class="footer-text" style="color: #333333;">&copy; 2026 MAJARAH · مَجَرَّة</div>
         </div>
       </div>
     </body>
