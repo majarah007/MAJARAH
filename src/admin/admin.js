@@ -391,12 +391,27 @@ function initSupabase() {
   SB_URL = c.sbUrl || (window.SB_URL && window.SB_URL.indexOf("PLACEHOLDER") === -1 ? window.SB_URL : '');
   SB_KEY = c.sbKey || (window.SB_KEY && window.SB_KEY.indexOf("PLACEHOLDER") === -1 ? window.SB_KEY : '');
   
-  if (SB_URL && SB_KEY) {
-    document.getElementById('setupBanner').style.display = 'none';
-    document.getElementById('sbUrlSettings').value = SB_URL;
-    document.getElementById('sbKeySettings').value = SB_KEY;
-  } else {
-    document.getElementById('setupBanner').style.display = 'block';
+  // Supabase URL and Key are managed securely on the backend serverless proxy
+  document.getElementById('setupBanner').style.display = 'none';
+  const sbUrlSettingsInput = document.getElementById('sbUrlSettings');
+  const sbKeySettingsInput = document.getElementById('sbKeySettings');
+  if (sbUrlSettingsInput) {
+    sbUrlSettingsInput.value = 'Configured securely on Vercel';
+    sbUrlSettingsInput.disabled = true;
+  }
+  if (sbKeySettingsInput) {
+    sbKeySettingsInput.value = '••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••';
+    sbKeySettingsInput.disabled = true;
+  }
+  const saveReconnectBtn = document.querySelector('button[onclick="saveSupabaseFromSettings()"]');
+  if (saveReconnectBtn) {
+    saveReconnectBtn.disabled = true;
+    saveReconnectBtn.textContent = 'Managed on Server';
+  }
+  const copyBtn = document.querySelector('button[onclick="copyConfigJS()"]');
+  if (copyBtn) {
+    copyBtn.disabled = true;
+    copyBtn.style.display = 'none';
   }
 
   const emailjsServiceIdInput = document.getElementById('emailjsServiceId');
@@ -462,9 +477,9 @@ function initSupabase() {
   
   updatePromoPreviewStats();
 
-  if (SB_URL && SB_KEY) {
-    sbFetch('settings', 'GET', null)
-      .then(data => {
+  // Fetch settings from the secure database proxy on load
+  sbFetch('settings', 'GET', null)
+    .then(data => {
         if (data && data.length > 0) {
           data.forEach(item => {
             localStorage.setItem(`mjr_${item.key}`, item.value);
@@ -510,7 +525,6 @@ function initSupabase() {
         }
       })
       .catch(err => console.error("Error loading settings from database:", err));
-  }
 }
 
 // Returns the best available auth token: user JWT if logged in, anon key as fallback
