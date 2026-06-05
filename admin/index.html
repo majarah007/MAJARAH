@@ -1417,9 +1417,6 @@ async function getAuthToken() {
 async function sbFetch(table, method='GET', body=null, filters='', id=null) {
   if (!SB_URL || !SB_KEY) return null;
 
-  // Get the live JWT from the auth session (required for RLS policies)
-  const authToken = await getAuthToken();
-
   // Clean trailing slashes and construct url
   let baseUrl = SB_URL.replace(/\/+$/, "");
   let url = `${baseUrl}/rest/v1/${table}`;
@@ -1434,7 +1431,7 @@ async function sbFetch(table, method='GET', body=null, filters='', id=null) {
     method,
     headers: {
       'apikey': SB_KEY,
-      'Authorization': `Bearer ${authToken}`,
+      'Authorization': `Bearer ${SB_KEY}`,
       'Content-Type': 'application/json'
     }
   };
@@ -2924,8 +2921,6 @@ async function saveTweaks() {
   let successCount = 0;
   
   if (SB_URL && SB_KEY) {
-    // Get live JWT for RLS
-    const authToken = await getAuthToken();
     try {
       const baseUrl = SB_URL.replace(/\/+$/, "");
       
@@ -2935,7 +2930,7 @@ async function saveTweaks() {
           method: 'PATCH',
           headers: {
             'apikey': SB_KEY,
-            'Authorization': `Bearer ${authToken}`,
+            'Authorization': `Bearer ${SB_KEY}`,
             'Content-Type': 'application/json',
             'Prefer': 'return=representation'
           },
@@ -2956,7 +2951,7 @@ async function saveTweaks() {
             method: 'POST',
             headers: {
               'apikey': SB_KEY,
-              'Authorization': `Bearer ${authToken}`,
+              'Authorization': `Bearer ${SB_KEY}`,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({ key: item.key, value: item.value })
@@ -3008,14 +3003,13 @@ async function clearPrelaunchEmails() {
   if (textarea) textarea.value = '';
   
   if (SB_URL && SB_KEY) {
-    const authToken = await getAuthToken();
     try {
       const baseUrl = SB_URL.replace(/\/+$/, "");
       const res = await fetch(`${baseUrl}/rest/v1/settings?key=eq.prelaunch_emails`, {
         method: 'PATCH',
         headers: {
           'apikey': SB_KEY,
-          'Authorization': `Bearer ${authToken}`,
+          'Authorization': `Bearer ${SB_KEY}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ value: '[]' })
