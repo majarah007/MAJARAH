@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "routes": [
+    { "src": "/api/auth", "dest": "/api/auth.js" },
+    { "src": "/api/proxy", "dest": "/api/proxy.js" },
+    { "src": "/api/register-email", "dest": "/api/register-email.js" },
+    { "src": "/fien", "dest": "/dist/fien/index.html" },
+    { "src": "/fien/(.*)", "dest": "/dist/fien/$1" },
+    { "src": "/(ArabicBack.png|ArabicFront.png|Blackback.jpg|whiteback.jpg|whiteinfront.jpg|blackinfront.jpg|majarah.jpg|storefront_favicon.png|admin_favicon.png|Ding.wav)", "dest": "/dist/$1" },
+    { "src": "/(.*)", "dest": "/dist/$1" }
+  ]
+}

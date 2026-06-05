@@ -6,3 +6,11 @@ tunnel_err.log
 # OS files
 .DS_Store
 Thumbs.db
+
+# Dependencies
+node_modules/
+
+# Local env files
+.env
+.env.local
+.vercel

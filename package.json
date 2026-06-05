@@ -1,0 +1,24 @@
+{
+  "name": "majar.eg",
+  "version": "1.0.0",
+  "description": "",
+  "main": "supabase-config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/majarah007/MAJARAH.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/majarah007/MAJARAH/issues"
+  },
+  "homepage": "https://github.com/majarah007/MAJARAH#readme",
+  "devDependencies": {
+    "javascript-obfuscator": "^5.4.3"
+  }
+}

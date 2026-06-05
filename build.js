@@ -1,0 +1,148 @@
+const fs = require('fs');
+const path = require('path');
+const JavaScriptObfuscator = require('javascript-obfuscator');
+
+function ensureDirExists(dirPath) {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+}
+
+function cleanDir(dirPath) {
+  if (fs.existsSync(dirPath)) {
+    fs.rmSync(dirPath, { recursive: true, force: true });
+  }
+  ensureDirExists(dirPath);
+}
+
+function minifyCss(css) {
+  return css
+    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove comments
+    .replace(/\s+/g, ' ')             // Collapse whitespace
+    .replace(/\s*([\{\}:;,])\s*/g, '$1') // Remove spaces around delimiters
+    .trim();
+}
+
+function minifyHtml(html) {
+  return html
+    .replace(/<!--[\s\S]*?-->/g, '')  // Remove comments
+    .replace(/>\s+</g, '><')          // Remove spacing between tags
+    .trim();
+}
+
+console.log('🚀 Starting MAJARAH build process...');
+
+const distDir = path.join(__dirname, 'dist');
+const fienDistDir = path.join(distDir, 'fien');
+
+// 1. Clean output directory
+cleanDir(distDir);
+ensureDirExists(fienDistDir);
+
+// 2. Define source paths
+const srcStorefrontDir = path.join(__dirname, 'src', 'storefront');
+const srcAdminDir = path.join(__dirname, 'src', 'admin');
+
+// 3. Process Storefront
+console.log('📦 Compiling Storefront...');
+if (fs.existsSync(srcStorefrontDir)) {
+  const htmlSrc = fs.readFileSync(path.join(srcStorefrontDir, 'index.html'), 'utf8');
+  const jsSrc = fs.readFileSync(path.join(srcStorefrontDir, 'storefront.js'), 'utf8');
+  const cssSrc = fs.readFileSync(path.join(srcStorefrontDir, 'storefront.css'), 'utf8');
+
+  // Minify HTML and CSS
+  const minHtml = minifyHtml(htmlSrc);
+  const minCss = minifyCss(cssSrc);
+
+  // Obfuscate JS
+  console.log('🔒 Obfuscating storefront.js...');
+  const obfuscatedJs = JavaScriptObfuscator.obfuscate(jsSrc, {
+    compact: true,
+    controlFlowFlattening: true,
+    controlFlowFlatteningThreshold: 0.6,
+    deadCodeInjection: true,
+    deadCodeInjectionThreshold: 0.4,
+    numbersToExpressions: true,
+    simplify: true,
+    stringArray: true,
+    stringArrayCallsTransform: true,
+    stringArrayThreshold: 0.8,
+    splitStrings: true,
+    splitStringsChunkLength: 6,
+    unicodeEscapeSequence: false
+  }).getObfuscatedCode();
+
+  // Write outputs
+  fs.writeFileSync(path.join(distDir, 'index.html'), minHtml);
+  fs.writeFileSync(path.join(distDir, 'storefront.css'), minCss);
+  fs.writeFileSync(path.join(distDir, 'storefront.js'), obfuscatedJs);
+  console.log('✔ Storefront compiled successfully.');
+} else {
+  console.warn('⚠ Storefront source directory not found.');
+}
+
+// 4. Process Admin Panel
+console.log('📦 Compiling Admin Panel...');
+if (fs.existsSync(srcAdminDir)) {
+  const htmlSrc = fs.readFileSync(path.join(srcAdminDir, 'index.html'), 'utf8');
+  const jsSrc = fs.readFileSync(path.join(srcAdminDir, 'admin.js'), 'utf8');
+  const cssSrc = fs.readFileSync(path.join(srcAdminDir, 'admin.css'), 'utf8');
+
+  // Minify HTML and CSS
+  const minHtml = minifyHtml(htmlSrc);
+  const minCss = minifyCss(cssSrc);
+
+  // Obfuscate JS
+  console.log('🔒 Obfuscating admin.js...');
+  const obfuscatedJs = JavaScriptObfuscator.obfuscate(jsSrc, {
+    compact: true,
+    controlFlowFlattening: true,
+    controlFlowFlatteningThreshold: 0.7,
+    deadCodeInjection: true,
+    deadCodeInjectionThreshold: 0.4,
+    numbersToExpressions: true,
+    simplify: true,
+    stringArray: true,
+    stringArrayCallsTransform: true,
+    stringArrayThreshold: 0.8,
+    splitStrings: true,
+    splitStringsChunkLength: 6,
+    unicodeEscapeSequence: false
+  }).getObfuscatedCode();
+
+  // Write outputs
+  fs.writeFileSync(path.join(fienDistDir, 'index.html'), minHtml);
+  fs.writeFileSync(path.join(fienDistDir, 'admin.css'), minCss);
+  fs.writeFileSync(path.join(fienDistDir, 'admin.js'), obfuscatedJs);
+  console.log('✔ Admin Panel compiled successfully.');
+} else {
+  console.warn('⚠ Admin Panel source directory not found.');
+}
+
+// 5. Copy static assets (Favicons, background images, sound effects)
+console.log('📋 Copying static assets...');
+const staticAssets = [
+  'ArabicBack.png',
+  'ArabicFront.png',
+  'Blackback.jpg',
+  'whiteback.jpg',
+  'whiteinfront.jpg',
+  'blackinfront.jpg',
+  'majarah.jpg',
+  'storefront_favicon.png',
+  'admin_favicon.png',
+  'Ding.wav'
+];
+
+staticAssets.forEach(asset => {
+  const srcPath = path.join(__dirname, asset);
+  const destPath = path.join(distDir, asset);
+  if (fs.existsSync(srcPath)) {
+    fs.copyFileSync(srcPath, destPath);
+    console.log(`  -> Copied ${asset}`);
+  } else {
+    console.warn(`  ⚠ Asset ${asset} not found in root.`);
+  }
+});
+
+console.log('🎉 MAJARAH build completed successfully!');
