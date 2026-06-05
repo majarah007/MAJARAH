@@ -224,11 +224,17 @@ function renderDashboard() {
           <button class="btn btn-ghost btn-sm" onclick="copyConfigJS()" style="margin-left:8px;">Copy Config JS</button>
         </div>
         <div class="settings-card">
-          <h3>📧 EmailJS Receipts Setup</h3>
-          <div class="field-group"><label>Service ID</label><input type="text" id="emailjsServiceId" placeholder="e.g. service_xxxx"></div>
-          <div class="field-group"><label>Template ID</label><input type="text" id="emailjsTemplateId" placeholder="e.g. template_xxxx"></div>
-          <div class="field-group"><label>Public Key</label><input type="text" id="emailjsPublicKey" placeholder="e.g. pk_xxxx"></div>
-          <button class="btn btn-accent btn-sm" onclick="saveEmailJSConfig()">Save EmailJS Config</button>
+          <h3>📧 Email Receipts Setup</h3>
+          <p style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5;">
+            <strong>Brevo (Sendinblue):</strong> Configured securely on the server via Vercel environment variables (<code style="color:var(--green)">BREVO_API_KEY</code>, <code style="color:var(--green)">BREVO_SENDER_EMAIL</code>). No keys needed here.
+          </p>
+          <div style="border-top:1px solid #1a1a1a;margin-top:10px;padding-top:10px;">
+            <p style="font-size:11px;color:var(--muted);margin-bottom:8px;"><strong>EmailJS (Fallback):</strong> Configure client-side EmailJS here if needed.</p>
+            <div class="field-group"><label>Service ID</label><input type="text" id="emailjsServiceId" placeholder="e.g. service_xxxx"></div>
+            <div class="field-group"><label>Template ID</label><input type="text" id="emailjsTemplateId" placeholder="e.g. template_xxxx"></div>
+            <div class="field-group"><label>Public Key</label><input type="text" id="emailjsPublicKey" placeholder="e.g. pk_xxxx"></div>
+            <button class="btn btn-accent btn-sm" onclick="saveEmailJSConfig()">Save EmailJS Config</button>
+          </div>
         </div>
       </div>
     </div>

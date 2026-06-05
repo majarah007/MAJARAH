@@ -1623,39 +1623,78 @@ async function submitShopifyCheckout() {
     document.getElementById('chkEmail').value = "";
 }
 
-// Send Email Receipt via EmailJS if configured
+// Send Email Receipt via Backend (Brevo) or fallback to client-side EmailJS
 function sendEmailReceipt(orderId, email, first, last, product, size, payment, subtotal, shipping, total, phone, address, city) {
-    const adminConfig = JSON.parse(localStorage.getItem('mjr_admin_config')) || {};
-    if (adminConfig.emailjsPublicKey && adminConfig.emailjsServiceId && adminConfig.emailjsTemplateId && email) {
-        try {
-            if (typeof emailjs !== 'undefined') {
-                emailjs.init({ publicKey: adminConfig.emailjsPublicKey });
-                
-                const templateParams = {
-                    order_id: orderId,
-                    customer_name: first + ' ' + last,
-                    customer_email: email,
-                    customer_phone: phone,
-                    customer_city: city,
-                    customer_address: address,
-                    product_name: product,
-                    product_size: size,
-                    payment_method: payment,
-                    subtotal: subtotal + ' EGP',
-                    shipping_cost: shipping + ' EGP',
-                    total: total + ' EGP'
-                };
-                
-                emailjs.send(adminConfig.emailjsServiceId, adminConfig.emailjsTemplateId, templateParams)
-                    .then(() => {
-                        console.log("Email receipt sent successfully via EmailJS!");
-                    })
-                    .catch(err => {
-                        console.error("EmailJS dispatch failed:", err);
-                    });
+    if (!email) return;
+
+    // 1. Try sending via backend Brevo API first
+    const emailData = {
+        email,
+        name: first + ' ' + last,
+        orderId,
+        productName: product,
+        size,
+        subtotal,
+        shipping,
+        total,
+        phone,
+        address,
+        city,
+        payment
+    };
+
+    fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emailData)
+    })
+    .then(async (res) => {
+        if (res.ok) {
+            console.log("Email receipt sent successfully via backend Brevo SMTP!");
+        } else {
+            const errText = await res.text();
+            console.warn("Backend email dispatch bypassed or failed, attempting EmailJS fallback...", errText);
+            fallbackToEmailJS();
+        }
+    })
+    .catch((err) => {
+        console.error("Backend email fetch error, attempting EmailJS fallback...", err);
+        fallbackToEmailJS();
+    });
+
+    function fallbackToEmailJS() {
+        const adminConfig = JSON.parse(localStorage.getItem('mjr_admin_config')) || {};
+        if (adminConfig.emailjsPublicKey && adminConfig.emailjsServiceId && adminConfig.emailjsTemplateId) {
+            try {
+                if (typeof emailjs !== 'undefined') {
+                    emailjs.init({ publicKey: adminConfig.emailjsPublicKey });
+                    
+                    const templateParams = {
+                        order_id: orderId,
+                        customer_name: first + ' ' + last,
+                        customer_email: email,
+                        customer_phone: phone,
+                        customer_city: city,
+                        customer_address: address,
+                        product_name: product,
+                        product_size: size,
+                        payment_method: payment,
+                        subtotal: subtotal + ' EGP',
+                        shipping_cost: shipping + ' EGP',
+                        total: total + ' EGP'
+                    };
+                    
+                    emailjs.send(adminConfig.emailjsServiceId, adminConfig.emailjsTemplateId, templateParams)
+                        .then(() => {
+                            console.log("Email receipt sent successfully via EmailJS!");
+                        })
+                        .catch(err => {
+                            console.error("EmailJS dispatch failed:", err);
+                        });
+                }
+            } catch(e) {
+                console.error("EmailJS execution exception:", e);
             }
-        } catch(e) {
-            console.error("EmailJS execution exception:", e);
         }
     }
 }
