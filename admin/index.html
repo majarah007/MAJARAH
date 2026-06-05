@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="supabase-config.js"></script>
+<script src="../supabase-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MAJARAH · Admin</title>
-<link rel="icon" type="image/png" id="adminIcon" href="admin_favicon.png">
+<link rel="icon" type="image/png" id="adminIcon" href="../admin_favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -891,8 +891,8 @@
           <h3>📱 Live Mobile Preview Simulator</h3>
           <p style="font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.6;">Simulate and test how the storefront and admin panel look on different mobile screen sizes and orientations directly from your desktop browser.</p>
           <div style="display:flex; gap:12px; flex-wrap:wrap;">
-            <button class="btn btn-accent btn-sm" onclick="openMobileSimulator('index.html')">📱 Simulate Storefront (index.html)</button>
-            <button class="btn btn-ghost btn-sm" onclick="openMobileSimulator('admin.html')">⚙️ Simulate Admin Dashboard (admin.html)</button>
+            <button class="btn btn-accent btn-sm" onclick="openMobileSimulator('../index.html')">📱 Simulate Storefront (index.html)</button>
+            <button class="btn btn-ghost btn-sm" onclick="openMobileSimulator('./index.html')">⚙️ Simulate Admin Dashboard (admin)</button>
           </div>
         </div>
       </div>
@@ -1343,7 +1343,7 @@ function showSystemNotification(title, body) {
 
 // Play the Ding.wav audio file
 function playNotificationSound() {
-  const audio = new Audio('Ding.wav');
+  const audio = new Audio('../Ding.wav');
   audio.play().catch(e => {
     console.warn("Autoplay blocked by browser. Click on the admin panel to enable audio notifications.", e);
   });
@@ -1351,7 +1351,7 @@ function playNotificationSound() {
 
 // Mobile/Safari Audio Engine Unlocker
 function unlockMobileAudio() {
-  const audio = new Audio('Ding.wav');
+  const audio = new Audio('../Ding.wav');
   audio.volume = 0;
   audio.play().then(() => {
     console.log("Mobile audio context unlocked successfully.");
@@ -2862,12 +2862,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MOBILE PREVIEW SIMULATOR CONTROLS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let currentSimPage = 'index.html';
+let currentSimPage = '../index.html';
 let currentSimOrientation = 'portrait';
 let currentSimDevice = 'iphone12';
 
 function openMobileSimulator(pageName) {
-  currentSimPage = pageName || 'index.html';
+  currentSimPage = pageName || '../index.html';
   document.getElementById('simulatorModal').classList.add('open');
   
   // Set active buttons
@@ -2953,8 +2953,8 @@ function reloadSimulatorFrame() {
 
 function updateSimulatorControlsUI() {
   // Page buttons
-  document.getElementById('simPageStorefront').classList.toggle('sim-btn-active', currentSimPage === 'index.html');
-  document.getElementById('simPageAdmin').classList.toggle('sim-btn-active', currentSimPage === 'admin.html');
+  document.getElementById('simPageStorefront').classList.toggle('sim-btn-active', currentSimPage === '../index.html');
+  document.getElementById('simPageAdmin').classList.toggle('sim-btn-active', currentSimPage === './index.html');
   
   // Orientation buttons
   document.getElementById('simOrientPortrait').classList.toggle('sim-btn-active', currentSimOrientation === 'portrait');
@@ -2977,8 +2977,8 @@ setInterval(updateSimulatorClock, 30000);
     <div class="sim-controls">
       <div class="sim-control-group">
         <label>Page:</label>
-        <button class="btn btn-sm btn-ghost sim-btn-active" id="simPageStorefront" onclick="switchSimulatorPage('index.html')">Storefront (index.html)</button>
-        <button class="btn btn-sm btn-ghost" id="simPageAdmin" onclick="switchSimulatorPage('admin.html')">Admin Panel (admin.html)</button>
+        <button class="btn btn-sm btn-ghost sim-btn-active" id="simPageStorefront" onclick="switchSimulatorPage('../index.html')">Storefront (index.html)</button>
+        <button class="btn btn-sm btn-ghost" id="simPageAdmin" onclick="switchSimulatorPage('./index.html')">Admin Panel (admin)</button>
       </div>
       
       <div class="sim-control-group">
