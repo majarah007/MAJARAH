@@ -10,6 +10,6 @@
     { "src": "/fien", "status": 308, "headers": { "Location": "/fien/" } },
     { "src": "/fien/(.*)", "dest": "/dist/fien/$1" },
     { "src": "/(ArabicBack.png|ArabicFront.png|Blackback.jpg|whiteback.jpg|whiteinfront.jpg|blackinfront.jpg|majarah.jpg|storefront_favicon.png|admin_favicon.png|Ding.wav)", "dest": "/dist/$1" },
-    { "src": "/(.*)", "dest": "/dist/$1" }
+    { "src": "/((?!api/).*)", "dest": "/dist/$1" }
   ]
 }
