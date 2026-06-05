@@ -3,6 +3,10 @@
 <head>
 <script src="../supabase-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  window._sbAuthClient = createClient(window.SB_URL, window.SB_KEY);
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MAJARAH · Admin</title>
@@ -534,7 +538,7 @@
   <div class="login-box">
     <div class="login-logo">Majarah · مَجَرَّة</div>
     <div class="login-title">Admin Panel</div>
-    <input type="text" id="loginUser" placeholder="Username" autocomplete="off">
+    <input type="email" id="loginUser" placeholder="Email" autocomplete="email">
     <input type="password" id="loginPass" placeholder="Password">
     <button class="login-btn" onclick="doLogin()">Enter Dashboard</button>
     <div class="login-err" id="loginErr">Invalid credentials. Try again.</div>
@@ -1485,28 +1489,42 @@ document.addEventListener('keydown', (e) => {
   document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
 });
 
-function doLogin() {
-  const u = document.getElementById('loginUser').value;
-  const p = document.getElementById('loginPass').value;
-  const creds = getCredentials();
+async function doLogin() {
+  const email = document.getElementById('loginUser').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginErr');
+  errEl.style.display = 'none';
+  const btn = document.querySelector('.login-btn');
+  btn.textContent = 'Signing in...';
+  btn.disabled = true;
 
-  if (u === creds.user && p === creds.pass) {
-    localStorage.setItem('mjr_admin_logged_in', 'true');
-    setCookie('mjr_admin_logged_in', 'true', 30);
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    initSupabase();
-    syncDashboardData();
-    startAutoSync();
-    requestNotificationPermission();
+  // Wait for Supabase auth client to be ready (module load may be async)
+  let attempts = 0;
+  while (!window._sbAuthClient && attempts++ < 20) {
+    await new Promise(r => setTimeout(r, 100));
+  }
+
+  if (!window._sbAuthClient) {
+    errEl.textContent = 'Auth service not ready. Refresh and try again.';
+    errEl.style.display = 'block';
+    btn.textContent = 'Enter Dashboard';
+    btn.disabled = false;
+    return;
+  }
+
+  const { error } = await window._sbAuthClient.auth.signInWithPassword({ email, password: pass });
+  btn.textContent = 'Enter Dashboard';
+  btn.disabled = false;
+  if (error) {
+    errEl.textContent = error.message || 'Invalid credentials. Try again.';
+    errEl.style.display = 'block';
   } else {
-    document.getElementById('loginErr').style.display = 'block';
+    showDashboard();
   }
 }
 
-function logout() {
-  localStorage.removeItem('mjr_admin_logged_in');
-  eraseCookie('mjr_admin_logged_in');
+async function logout() {
+  if (window._sbAuthClient) await window._sbAuthClient.auth.signOut();
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('loginPass').value = '';
@@ -1514,20 +1532,36 @@ function logout() {
   stopAutoSync();
 }
 
-// Auto-login on load/refresh if session exists
-window.addEventListener('DOMContentLoaded', () => {
+function showDashboard() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  initSupabase();
+  syncDashboardData();
+  startAutoSync();
+  requestNotificationPermission();
+}
+
+// Auto-login on load/refresh if Supabase session exists
+window.addEventListener('DOMContentLoaded', async () => {
   applyGreenIcon();
 
-  if (localStorage.getItem('mjr_admin_logged_in') === 'true' || getCookie('mjr_admin_logged_in') === 'true') {
-    localStorage.setItem('mjr_admin_logged_in', 'true');
-    setCookie('mjr_admin_logged_in', 'true', 30);
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    initSupabase();
-    syncDashboardData();
-    startAutoSync();
-    requestNotificationPermission();
+  // Wait for the Supabase auth module to finish loading
+  let attempts = 0;
+  while (!window._sbAuthClient && attempts++ < 30) {
+    await new Promise(r => setTimeout(r, 100));
   }
+
+  if (window._sbAuthClient) {
+    const { data: { session } } = await window._sbAuthClient.auth.getSession();
+    if (session) {
+      showDashboard();
+      return;
+    }
+  }
+
+  // No active session — show login screen
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

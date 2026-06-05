@@ -4351,13 +4351,14 @@ function checkPrelaunch() {
     let existingBadge = document.getElementById('prelaunchBypassBadge');
     if (showPrelaunch && bypass && targetDate > now) {
         if (!existingBadge) {
-            const badge = document.createElement('div');
+            const badge = document.createElement('button');
             badge.id = 'prelaunchBypassBadge';
-            badge.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: rgba(8, 8, 8, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px 16px; border-radius: 30px; font-family: -apple-system, sans-serif; font-size: 10px; z-index: 99999; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(8px);';
-            badge.innerHTML = `
-                <span style="color: #666; letter-spacing: 1.5px; text-transform: uppercase;">🔓 PRE-LAUNCH BYPASS</span>
-                <button onclick="lockPrelaunchStore()" style="background: none; border: none; color: #ff4444; font-family: inherit; font-size: inherit; font-weight: 700; cursor: pointer; padding: 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255,68,68,0.3); transition: color 0.2s;" onmouseover="this.style.color='#ff6666'" onmouseout="this.style.color='#ff4444'">Lock Store</button>
-            `;
+            badge.onclick = lockPrelaunchStore;
+            badge.title = 'Lock Store';
+            badge.style.cssText = 'position:fixed;bottom:20px;right:20px;width:40px;height:40px;border-radius:50%;background:rgba(8,8,8,0.92);border:1px solid rgba(255,255,255,0.12);color:#fff;font-size:18px;cursor:pointer;z-index:99999;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,0.5);backdrop-filter:blur(8px);transition:transform 0.2s,background 0.2s;';
+            badge.onmouseover = () => { badge.style.background='rgba(255,68,68,0.15)'; badge.style.transform='scale(1.1)'; };
+            badge.onmouseout  = () => { badge.style.background='rgba(8,8,8,0.92)';    badge.style.transform='scale(1)'; };
+            badge.innerHTML = '🔒';
             document.body.appendChild(badge);
         }
     } else {
