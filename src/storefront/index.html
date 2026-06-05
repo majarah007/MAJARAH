@@ -142,39 +142,7 @@
         <span data-t="tap_explore">Tap any piece to explore · Hover to see the back</span>
     </div>
     <div class="grid">
-
-        <div class="product-card" onclick="openProduct('black')">
-            <div class="image-container">
-                <div class="badge">Limited Drop</div>
-                <img src="blackinfront.jpg" alt="Majarah Black Tee Front" class="product-img front-print">
-                <img src="Blackback.jpg"    alt="Majarah Black Tee Back"   class="product-img back-print">
-            </div>
-            <div class="product-meta">
-                <div class="details">
-                    <h3>Onyx Graphic Tee</h3>
-                    <p>Heavyweight Cotton · Oversized</p>
-                </div>
-                <div class="price">EGP 520</div>
-            </div>
-            <div class="tap-hint">→ Tap to explore & order</div>
-        </div>
-
-        <div class="product-card" onclick="openProduct('white')">
-            <div class="image-container">
-                <div class="badge">Limited Drop</div>
-                <img src="whiteinfront.jpg" alt="Majarah White Tee Front" class="product-img front-print">
-                <img src="whiteback.jpg"    alt="Majarah White Tee Back"   class="product-img back-print">
-            </div>
-            <div class="product-meta">
-                <div class="details">
-                    <h3>Alabaster Graphic Tee</h3>
-                    <p>Heavyweight Cotton · Oversized</p>
-                </div>
-                <div class="price">EGP 520</div>
-            </div>
-            <div class="tap-hint">→ Tap to explore & order</div>
-        </div>
-
+        <!-- Dynamic products grid will be loaded here -->
     </div>
 </main>
 
@@ -364,30 +332,8 @@
                 <div class="modal-h" data-t="how_title">How to Order</div>
                 <div class="modal-sub" data-t="how_sub">3 steps · less than a minute</div>
             </div>
-            <div class="how-modal-right">
-                <div class="steps">
-                    <div class="step">
-                        <div class="step-n">01</div>
-                        <div class="step-body">
-                            <h3 data-t="how_step1_title">Pick Your Piece</h3>
-                            <p data-t="how_step1_desc">Tap any garment to view its high-definition specs, artwork prints, dimensions, and sizing configurations.</p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-n">02</div>
-                        <div class="step-body">
-                            <h3 data-t="how_step2_title">Checkout Instantly</h3>
-                            <p data-t="how_step2_desc">Provide your delivery metrics securely directly inside the Shopify-style application checkout interface panel.</p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-n">03</div>
-                        <div class="step-body">
-                            <h3 data-t="how_step3_title">Dispatch Order</h3>
-                            <p data-t="how_step3_desc">The system automatically registers and maps your manifest details seamlessly to complete fulfillment loops quickly.</p>
-                        </div>
-                    </div>
-                </div>
+            <div class="how-modal-right" id="howModalRight">
+                <!-- Dynamically loaded on demand -->
             </div>
         </div>
     </div>
@@ -398,26 +344,9 @@
         <button class="modal-x" onclick="closeSize()">✕</button>
         <div class="modal-h" data-t="sizing_chart">Size Guide</div>
         <div class="modal-sub" data-t="measurements_cm">Measurements in centimeters</div>
-        <table class="size-table">
-            <thead>
-                <tr>
-                    <th data-t="tbl_size">Size</th>
-                    <th data-t="tbl_chest">Chest</th>
-                    <th data-t="tbl_length">Length</th>
-                    <th data-t="tbl_weight">Weight</th>
-                    <th data-t="tbl_height">Height</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td>S</td> <td>55 cm</td><td>69 cm</td><td>55 - 65 kg</td><td>160 - 170 cm</td></tr>
-                <tr><td>M</td> <td>57 cm</td><td>70 cm</td><td>65 - 75 kg</td><td>165 - 175 cm</td></tr>
-                <tr><td>L</td> <td>61 cm</td><td>73 cm</td><td>75 - 85 kg</td><td>170 - 180 cm</td></tr>
-                <tr><td>XL</td><td>64 cm</td><td>77 cm</td><td>85 - 100 kg</td><td>175 - 190 cm</td></tr>
-            </tbody>
-        </table>
-        <p class="size-note">
-            <span data-t="size_note_body"><strong>Fit is oversized.</strong> Garment patterns are cut loose. Size down if you prefer a standard, closer-to-body look.</span>
-        </p>
+        <div id="sizeModalContent">
+            <!-- Dynamically loaded on demand -->
+        </div>
     </div>
 </div>
 
@@ -426,10 +355,9 @@
         <button class="modal-x" onclick="closeBrand()">✕</button>
         <div class="modal-h" data-t="brand_title">The Brand</div>
         <div class="modal-sub" data-t="brand_sub">Majarah Universe</div>
-        <h2 class="modal-title-alt" data-t="brand_slogan">Between <em>stars,</em><br>nothing is wasted.</h2>
-        <p class="modal-body-text" data-t="brand_body">
-            <strong>Majarah — مَجَرَّة</strong> is an Egyptian streetwear collective founded to construct high-concept garments that act as blank canvases for cosmic identity architecture. Crafted in Cairo, scaled for the infinite.
-        </p>
+        <div id="brandModalContent">
+            <!-- Dynamically loaded on demand -->
+        </div>
     </div>
 </div>
 
@@ -454,35 +382,8 @@
             <button class="checkout-trigger-btn" onclick="lookupOrderForRefund()" data-t="find_order">Find Order</button>
             <p id="refundLookupError" style="font-size: 11px; color: #ff4444; margin-top: 12px; display: none; letter-spacing: 0.5px;"></p>
             
-            <!-- Majarah Refund Policy Details Section -->
-            <div style="margin-top: 30px; border-top: 1px solid #151515; padding-top: 28px;">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-                    <div style="flex: 1; height: 1px; background: #161616;"></div>
-                    <h4 style="font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: #555; white-space: nowrap; margin: 0;" data-t="policy_title">Exchange & Return Policy</h4>
-                    <div style="flex: 1; height: 1px; background: #161616;"></div>
-                </div>
-                <ul style="list-style: none; display: flex; flex-direction: column; gap: 16px; padding: 0;">
-                    <li style="display: flex; gap: 12px; font-size: 11px; line-height: 1.8; color: #555;">
-                        <span style="color: #333; font-family: 'Cinzel', serif; font-size: 9px; padding-top: 2px; letter-spacing: 1px; flex-shrink:0;">01</span>
-                        <span data-t="policy_item1"></span>
-                    </li>
-                    <li style="display: flex; gap: 12px; font-size: 11px; line-height: 1.8; color: #555;">
-                        <span style="color: #333; font-family: 'Cinzel', serif; font-size: 9px; padding-top: 2px; letter-spacing: 1px; flex-shrink:0;">02</span>
-                        <span data-t="policy_item2"></span>
-                    </li>
-                    <li style="display: flex; gap: 12px; font-size: 11px; line-height: 1.8; color: #555;">
-                        <span style="color: #333; font-family: 'Cinzel', serif; font-size: 9px; padding-top: 2px; letter-spacing: 1px; flex-shrink:0;">03</span>
-                        <span data-t="policy_item3"></span>
-                    </li>
-                    <li style="display: flex; gap: 12px; font-size: 11px; line-height: 1.8; color: #555;">
-                        <span style="color: #333; font-family: 'Cinzel', serif; font-size: 9px; padding-top: 2px; letter-spacing: 1px; flex-shrink:0;">04</span>
-                        <span data-t="policy_item4"></span>
-                    </li>
-                    <li style="display: flex; gap: 12px; font-size: 11px; line-height: 1.8; color: #555;">
-                        <span style="color: #333; font-family: 'Cinzel', serif; font-size: 9px; padding-top: 2px; letter-spacing: 1px; flex-shrink:0;">05</span>
-                        <span data-t="policy_item5"></span>
-                    </li>
-                </ul>
+            <div id="refundPolicyContent" style="margin-top: 30px; border-top: 1px solid #151515; padding-top: 28px;">
+                <!-- Dynamically loaded on demand -->
             </div>
         </div>
 
@@ -575,24 +476,9 @@
         <div class="modal-h" data-t="washing_title" style="font-family: 'Cinzel', serif; letter-spacing: 3px;">Washing Instructions</div>
         <div class="modal-sub" data-t="washing_sub" style="letter-spacing: 1px;">Care guide to preserve your garment's life</div>
         
-        <ul style="list-style: none; padding: 0; margin: 30px 0 0 0; display: flex; flex-direction: column; gap: 24px;">
-            <li style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #888; line-height: 1.6;">
-                <strong style="color: #fff; text-transform: uppercase; letter-spacing: 1.5px; font-size: 10px;" data-t="wash_cold_lbl">Hand Wash Cold</strong>
-                <span data-t="wash_cold_desc">Wash in cold water to keep fabric structured and soft.</span>
-            </li>
-            <li style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #888; line-height: 1.6;">
-                <strong style="color: #fff; text-transform: uppercase; letter-spacing: 1.5px; font-size: 10px;" data-t="inside_out_lbl">Wash Inside Out</strong>
-                <span data-t="inside_out_desc">Turn your piece inside out before washing to protect prints.</span>
-            </li>
-            <li style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #888; line-height: 1.6;">
-                <strong style="color: #fff; text-transform: uppercase; letter-spacing: 1.5px; font-size: 10px;" data-t="no_tumble_lbl">Do Not Tumble Dry</strong>
-                <span data-t="no_tumble_desc">Air dry naturally. Tumble drying will shrink or warp cotton.</span>
-            </li>
-            <li style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #888; line-height: 1.6;">
-                <strong style="color: #fff; text-transform: uppercase; letter-spacing: 1.5px; font-size: 10px;" data-t="similar_colors_lbl">Wash with Similar Colors</strong>
-                <span data-t="similar_colors_desc">Wash dark and light garments separately to avoid dye bleeding.</span>
-            </li>
-        </ul>
+        <div id="washingModalContent">
+            <!-- Dynamically loaded on demand -->
+        </div>
     </div>
 </div>
 
@@ -603,24 +489,9 @@
         <div class="modal-h" data-t="garment_title" style="font-family: 'Cinzel', serif; letter-spacing: 3px;">Garment Care</div>
         <div class="modal-sub" data-t="garment_sub" style="letter-spacing: 1px;">How to dry, iron, and store your pieces</div>
         
-        <ul style="list-style: none; padding: 0; margin: 30px 0 0 0; display: flex; flex-direction: column; gap: 24px;">
-            <li style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #888; line-height: 1.6;">
-                <strong style="color: #fff; text-transform: uppercase; letter-spacing: 1.5px; font-size: 10px;" data-t="iron_low_lbl">Iron Low Heat</strong>
-                <span data-t="iron_low_desc">Iron on a low setting. Never run the iron directly over printed graphics.</span>
-            </li>
-            <li style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #888; line-height: 1.6;">
-                <strong style="color: #fff; text-transform: uppercase; letter-spacing: 1.5px; font-size: 10px;" data-t="no_bleach_lbl">Do Not Bleach</strong>
-                <span data-t="no_bleach_desc">Bleaching agents destroy organic cotton fibers and ruin prints.</span>
-            </li>
-            <li style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #888; line-height: 1.6;">
-                <strong style="color: #fff; text-transform: uppercase; letter-spacing: 1.5px; font-size: 10px;" data-t="dry_shade_lbl">Dry in Shade</strong>
-                <span data-t="dry_shade_desc">Direct sunlight fades intense dyes. Dry indoors or in shaded areas.</span>
-            </li>
-            <li style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #888; line-height: 1.6;">
-                <strong style="color: #fff; text-transform: uppercase; letter-spacing: 1.5px; font-size: 10px;" data-t="store_folded_lbl">Store Folded</strong>
-                <span data-t="store_folded_desc">Hangers can stretch heavy cotton shoulder seams. Fold to store.</span>
-            </li>
-        </ul>
+        <div id="garmentModalContent">
+            <!-- Dynamically loaded on demand -->
+        </div>
     </div>
 </div>
 

@@ -491,6 +491,9 @@ function applyLanguage(lang) {
     if (typeof updateMarqueeDisplay === 'function') {
         updateMarqueeDisplay();
     }
+    if (typeof refreshDynamicContent === 'function') {
+        refreshDynamicContent(lang);
+    }
 }
 
 function populateCityOptions() {
@@ -753,14 +756,171 @@ async function initApp() {
     checkPrelaunch();
 }
 
+// --- DYNAMIC CONTENT ON-DEMAND LAZY LOADING ---
+const contentCache = {};
+
+async function fetchDynamicContent(key) {
+    if (contentCache[key]) {
+        return contentCache[key];
+    }
+    try {
+        const res = await fetch(`/api/content?key=${key}`);
+        if (res.ok) {
+            const data = await res.json();
+            contentCache[key] = data;
+            return data;
+        }
+    } catch (e) {
+        console.error(`Failed to fetch content for key ${key}:`, e);
+    }
+    return null;
+}
+
+function renderBrandModal(data, lang) {
+    const container = document.getElementById('brandModalContent');
+    if (!container) return;
+    const slogan = lang === 'ar' ? 'بين النجوم، لا شيء يضيع.' : 'Between <em>stars,</em><br>nothing is wasted.';
+    container.innerHTML = `
+        <h2 class="modal-title-alt" style="font-family: 'Cinzel', serif !important;">${slogan}</h2>
+        <p class="modal-body-text">${data[lang]}</p>
+    `;
+}
+
+function renderHowModal(data, lang) {
+    const container = document.getElementById('howModalRight');
+    if (!container) return;
+    let html = `<div class="steps">`;
+    data[lang].forEach(step => {
+        html += `
+            <div class="step">
+                <div class="step-n">${step.n}</div>
+                <div class="step-body">
+                    <h3>${step.title}</h3>
+                    <p>${step.desc}</p>
+                </div>
+            </div>
+        `;
+    });
+    html += `</div>`;
+    container.innerHTML = html;
+}
+
+function renderSizeModal(data, lang) {
+    const container = document.getElementById('sizeModalContent');
+    if (!container) return;
+    const headers = data.headers[lang];
+    let html = `
+        <table class="size-table">
+            <thead>
+                <tr>
+                    <th>${headers[0]}</th>
+                    <th>${headers[1]}</th>
+                    <th>${headers[2]}</th>
+                    <th>${headers[3]}</th>
+                    <th>${headers[4]}</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    data.rows.forEach(row => {
+        html += `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td><td>${row[3]}</td><td>${row[4]}</td></tr>`;
+    });
+    html += `
+            </tbody>
+        </table>
+        <p class="size-note">
+            <span>${data.note[lang]}</span>
+        </p>
+    `;
+    container.innerHTML = html;
+}
+
+function renderWashingModal(data, lang) {
+    const container = document.getElementById('washingModalContent');
+    if (!container) return;
+    let html = `<ul style="list-style: none; padding: 0; margin: 30px 0 0 0; display: flex; flex-direction: column; gap: 24px;">`;
+    data[lang].forEach(item => {
+        html += `
+            <li style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #888; line-height: 1.6;">
+                <strong style="color: #fff; text-transform: uppercase; letter-spacing: 1.5px; font-size: 10px;">${item.title}</strong>
+                <span>${item.desc}</span>
+            </li>
+        `;
+    });
+    html += `</ul>`;
+    container.innerHTML = html;
+}
+
+function renderGarmentModal(data, lang) {
+    const container = document.getElementById('garmentModalContent');
+    if (!container) return;
+    let html = `<ul style="list-style: none; padding: 0; margin: 30px 0 0 0; display: flex; flex-direction: column; gap: 24px;">`;
+    data[lang].forEach(item => {
+        html += `
+            <li style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #888; line-height: 1.6;">
+                <strong style="color: #fff; text-transform: uppercase; letter-spacing: 1.5px; font-size: 10px;">${item.title}</strong>
+                <span>${item.desc}</span>
+            </li>
+        `;
+    });
+    html += `</ul>`;
+    container.innerHTML = html;
+}
+
+function renderRefundPolicyModal(data, lang) {
+    const container = document.getElementById('refundPolicyContent');
+    if (!container) return;
+    const title = lang === 'ar' ? 'سياسة الاستبدال والاسترجاع' : 'Exchange & Return Policy';
+    let html = `
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+            <div style="flex: 1; height: 1px; background: #161616;"></div>
+            <h4 style="font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: #555; white-space: nowrap; margin: 0;">${title}</h4>
+            <div style="flex: 1; height: 1px; background: #161616;"></div>
+        </div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 16px; padding: 0;">
+    `;
+    data[lang].forEach((rule, idx) => {
+        const num = String(idx + 1).padStart(2, '0');
+        html += `
+            <li style="display: flex; gap: 12px; font-size: 11px; line-height: 1.8; color: #555;">
+                <span style="color: #333; font-family: 'Cinzel', serif; font-size: 9px; padding-top: 2px; letter-spacing: 1px; flex-shrink:0;">${num}</span>
+                <span>${rule}</span>
+            </li>
+        `;
+    });
+    html += `</ul>`;
+    container.innerHTML = html;
+}
+
+function refreshDynamicContent(lang) {
+    if (contentCache['brand']) renderBrandModal(contentCache['brand'], lang);
+    if (contentCache['how']) renderHowModal(contentCache['how'], lang);
+    if (contentCache['size']) renderSizeModal(contentCache['size'], lang);
+    if (contentCache['washing']) renderWashingModal(contentCache['washing'], lang);
+    if (contentCache['garment']) renderGarmentModal(contentCache['garment'], lang);
+    if (contentCache['policies']) renderRefundPolicyModal(contentCache['policies'], lang);
+}
+
 // --- STANDARD MODAL INTERACTIONS ---
-function openHow() { document.getElementById('howModal').classList.add('open'); }
+async function openHow() {
+    document.getElementById('howModal').classList.add('open');
+    const data = await fetchDynamicContent('how');
+    if (data) renderHowModal(data, currentLang);
+}
 function closeHow(e) { if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) document.getElementById('howModal').classList.remove('open'); }
 
-function openSize() { document.getElementById('sizeModal').classList.add('open'); }
+async function openSize() {
+    document.getElementById('sizeModal').classList.add('open');
+    const data = await fetchDynamicContent('size');
+    if (data) renderSizeModal(data, currentLang);
+}
 function closeSize(e) { if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) document.getElementById('sizeModal').classList.remove('open'); }
 
-function openBrand() { document.getElementById('brandModal').classList.add('open'); }
+async function openBrand() {
+    document.getElementById('brandModal').classList.add('open');
+    const data = await fetchDynamicContent('brand');
+    if (data) renderBrandModal(data, currentLang);
+}
 function closeBrand(e) { if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) document.getElementById('brandModal').classList.remove('open'); }
 
 // --- PRODUCT DETAIL CONTEXT VIEWS ---
@@ -1075,10 +1235,18 @@ function applyCheckoutCoupon() {
 }
 
 // Custom functions for Washing Instructions and Garment Care modals
-function openWashingModal() { document.getElementById('washingModal').classList.add('open'); }
+async function openWashingModal() {
+    document.getElementById('washingModal').classList.add('open');
+    const data = await fetchDynamicContent('washing');
+    if (data) renderWashingModal(data, currentLang);
+}
 function closeWashingModal(e) { if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) document.getElementById('washingModal').classList.remove('open'); }
 
-function openGarmentModal() { document.getElementById('garmentModal').classList.add('open'); }
+async function openGarmentModal() {
+    document.getElementById('garmentModal').classList.add('open');
+    const data = await fetchDynamicContent('garment');
+    if (data) renderGarmentModal(data, currentLang);
+}
 function closeGarmentModal(e) { if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) document.getElementById('garmentModal').classList.remove('open'); }
 
 // Order Tracker Modal Control & Lookup Functions
@@ -1597,9 +1765,11 @@ function applyRecommendedSize() {
 }
 
 // --- REFUND CONTROLLER FUNCTIONS ---
-function openRefundModal() {
+async function openRefundModal() {
     document.getElementById('refundLookupModal').classList.add('open');
     backToRefundLookup();
+    const data = await fetchDynamicContent('policies');
+    if (data) renderRefundPolicyModal(data, currentLang);
 }
 
 function closeRefundModal(e) {

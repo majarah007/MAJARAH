@@ -3,6 +3,7 @@
   "cleanUrls": true,
   "routes": [
     { "src": "/api/auth", "dest": "/api/auth.js" },
+    { "src": "/api/content", "dest": "/api/content.js" },
     { "src": "/api/proxy", "dest": "/api/proxy.js" },
     { "src": "/api/register-email", "dest": "/api/register-email.js" },
     { "src": "/fien", "dest": "/dist/fien/index.html" },
