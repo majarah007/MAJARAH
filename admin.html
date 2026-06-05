@@ -891,7 +891,7 @@
           <h3>📱 Live Mobile Preview Simulator</h3>
           <p style="font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.6;">Simulate and test how the storefront and admin panel look on different mobile screen sizes and orientations directly from your desktop browser.</p>
           <div style="display:flex; gap:12px; flex-wrap:wrap;">
-            <button class="btn btn-accent btn-sm" onclick="openMobileSimulator('Index.html')">📱 Simulate Storefront (Index.html)</button>
+            <button class="btn btn-accent btn-sm" onclick="openMobileSimulator('index.html')">📱 Simulate Storefront (index.html)</button>
             <button class="btn btn-ghost btn-sm" onclick="openMobileSimulator('admin.html')">⚙️ Simulate Admin Dashboard (admin.html)</button>
           </div>
         </div>
@@ -2862,12 +2862,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MOBILE PREVIEW SIMULATOR CONTROLS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let currentSimPage = 'Index.html';
+let currentSimPage = 'index.html';
 let currentSimOrientation = 'portrait';
 let currentSimDevice = 'iphone12';
 
 function openMobileSimulator(pageName) {
-  currentSimPage = pageName || 'Index.html';
+  currentSimPage = pageName || 'index.html';
   document.getElementById('simulatorModal').classList.add('open');
   
   // Set active buttons
@@ -2953,7 +2953,7 @@ function reloadSimulatorFrame() {
 
 function updateSimulatorControlsUI() {
   // Page buttons
-  document.getElementById('simPageStorefront').classList.toggle('sim-btn-active', currentSimPage === 'Index.html');
+  document.getElementById('simPageStorefront').classList.toggle('sim-btn-active', currentSimPage === 'index.html');
   document.getElementById('simPageAdmin').classList.toggle('sim-btn-active', currentSimPage === 'admin.html');
   
   // Orientation buttons
@@ -2977,7 +2977,7 @@ setInterval(updateSimulatorClock, 30000);
     <div class="sim-controls">
       <div class="sim-control-group">
         <label>Page:</label>
-        <button class="btn btn-sm btn-ghost sim-btn-active" id="simPageStorefront" onclick="switchSimulatorPage('Index.html')">Storefront (Index.html)</button>
+        <button class="btn btn-sm btn-ghost sim-btn-active" id="simPageStorefront" onclick="switchSimulatorPage('index.html')">Storefront (index.html)</button>
         <button class="btn btn-sm btn-ghost" id="simPageAdmin" onclick="switchSimulatorPage('admin.html')">Admin Panel (admin.html)</button>
       </div>
       
