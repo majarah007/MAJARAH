@@ -721,6 +721,19 @@ async function initApp() {
                     if (data && data.length > 0) {
                         data.forEach(item => {
                             localStorage.setItem(`mjr_${item.key}`, item.value);
+                            // Sync shipping zones from database to active checkout rates
+                            if (item.key === 'shipping_zones') {
+                                try {
+                                    const zones = JSON.parse(item.value);
+                                    if (Array.isArray(zones) && zones.length > 0) {
+                                        currentLoadedShippingRates = zones;
+                                        localStorage.setItem('storeZones', item.value);
+                                        populateCityOptions();
+                                    }
+                                } catch(e) {
+                                    console.error('Failed to parse shipping_zones from DB:', e);
+                                }
+                            }
                         });
                         updateMarqueeDisplay();
                         applyDynamicSettings();

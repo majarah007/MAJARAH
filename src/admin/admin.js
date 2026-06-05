@@ -512,6 +512,18 @@ function initSupabase() {
             if (item.key === 'show_cod' && showCODSel) showCODSel.value = item.value;
             if (item.key === 'show_apple_pay' && showApplePaySel) showApplePaySel.value = item.value;
             if (item.key === 'show_card' && showCardSel) showCardSel.value = item.value;
+            // Shipping zones — load into localStorage and render panel
+            if (item.key === 'shipping_zones') {
+              try {
+                const zones = JSON.parse(item.value);
+                if (Array.isArray(zones) && zones.length > 0) {
+                  localStorage.setItem('storeZones', item.value);
+                  setTimeout(renderShippingZones, 0);
+                }
+              } catch(e) {
+                console.error('Failed to parse shipping_zones from DB in admin:', e);
+              }
+            }
             
             // Pre-launch mode settings from Supabase
             const showPrelaunchSel = document.getElementById('tweakShowPrelaunch');
@@ -1651,15 +1663,32 @@ async function saveInventory() {
   }
   syncDashboardData();
 }
-function saveShipping() {
+async function saveShipping() {
   // Persist the current zone prices from inputs back to localStorage
   const zoneInputs = document.querySelectorAll('.zone-price-input');
   const zones = JSON.parse(localStorage.getItem('storeZones')) || [];
   zoneInputs.forEach((inp, i) => {
     if (zones[i]) zones[i].price = Number(inp.value) || 0;
   });
-  localStorage.setItem('storeZones', JSON.stringify(zones));
-  showToast('Shipping rates saved!');
+  const zonesJson = JSON.stringify(zones);
+  localStorage.setItem('storeZones', zonesJson);
+
+  // Persist to database so storefront picks up the changes
+  if (typeof SB_URL !== 'undefined' && SB_URL && typeof SB_KEY !== 'undefined' && SB_KEY) {
+    try {
+      const patchRes = await sbFetch('settings', 'PATCH', { value: zonesJson }, `?key=eq.shipping_zones`);
+      let saved = patchRes && patchRes.length > 0;
+      if (!saved) {
+        await sbFetch('settings', 'POST', { key: 'shipping_zones', value: zonesJson });
+      }
+      showToast('Shipping rates saved & synced to database!');
+    } catch(e) {
+      console.error('Failed to sync shipping zones to database:', e);
+      showToast('Shipping rates saved locally!');
+    }
+  } else {
+    showToast('Shipping rates saved!');
+  }
 }
 
 function addZone() {
