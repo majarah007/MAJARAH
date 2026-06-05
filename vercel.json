@@ -10,6 +10,9 @@
     { "src": "/fien", "status": 308, "headers": { "Location": "/fien/" } },
     { "src": "/fien/(.*)", "dest": "/dist/fien/$1" },
     { "src": "/(ArabicBack.png|ArabicFront.png|Blackback.jpg|whiteback.jpg|whiteinfront.jpg|blackinfront.jpg|majarah.jpg|storefront_favicon.png|admin_favicon.png|Ding.wav)", "dest": "/dist/$1" },
-    { "src": "/((?!api/).*)", "dest": "/dist/$1" }
+    { "src": "/storefront.css", "dest": "/dist/storefront.css" },
+    { "src": "/storefront.js", "dest": "/dist/storefront.js" },
+    { "src": "/index.html", "dest": "/dist/index.html" },
+    { "src": "/$", "dest": "/dist/index.html" }
   ]
 }
