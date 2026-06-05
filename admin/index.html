@@ -1403,17 +1403,22 @@ function initSupabase() {
   }
 }
 
+// Returns the best available auth token: user JWT if logged in, anon key as fallback
+async function getAuthToken() {
+  if (window._sbAuthClient) {
+    try {
+      const { data: { session } } = await window._sbAuthClient.auth.getSession();
+      if (session && session.access_token) return session.access_token;
+    } catch(e) {}
+  }
+  return SB_KEY;
+}
+
 async function sbFetch(table, method='GET', body=null, filters='', id=null) {
   if (!SB_URL || !SB_KEY) return null;
 
   // Get the live JWT from the auth session (required for RLS policies)
-  let authToken = SB_KEY; // fallback to anon key
-  if (window._sbAuthClient) {
-    try {
-      const { data: { session } } = await window._sbAuthClient.auth.getSession();
-      if (session && session.access_token) authToken = session.access_token;
-    } catch(e) { /* use anon key fallback */ }
-  }
+  const authToken = await getAuthToken();
 
   // Clean trailing slashes and construct url
   let baseUrl = SB_URL.replace(/\/+$/, "");
@@ -2408,7 +2413,8 @@ async function saveProduct() {
     document.getElementById('editProductId').value = '';
     syncDashboardData();
   } else {
-    alert("Error: Could not save product to database!\n\nThis happens if:\n1. Your tables haven't been created yet (make sure to run the SQL query in Supabase SQL Editor).\n2. Row Level Security (RLS) is active (run: ALTER TABLE products DISABLE ROW LEVEL SECURITY; in Supabase SQL Editor).\n3. Database connection configuration is wrong.");
+    showToast('Could not save product — check console for details', 'error');
+    console.error('saveProduct failed. Check RLS policies or Supabase connection.');
   }
 }
 
@@ -2919,13 +2925,7 @@ async function saveTweaks() {
   
   if (SB_URL && SB_KEY) {
     // Get live JWT for RLS
-    let authToken = SB_KEY;
-    if (window._sbAuthClient) {
-      try {
-        const { data: { session } } = await window._sbAuthClient.auth.getSession();
-        if (session && session.access_token) authToken = session.access_token;
-      } catch(e) {}
-    }
+    const authToken = await getAuthToken();
     try {
       const baseUrl = SB_URL.replace(/\/+$/, "");
       
@@ -3008,13 +3008,7 @@ async function clearPrelaunchEmails() {
   if (textarea) textarea.value = '';
   
   if (SB_URL && SB_KEY) {
-    let authToken = SB_KEY;
-    if (window._sbAuthClient) {
-      try {
-        const { data: { session } } = await window._sbAuthClient.auth.getSession();
-        if (session && session.access_token) authToken = session.access_token;
-      } catch(e) {}
-    }
+    const authToken = await getAuthToken();
     try {
       const baseUrl = SB_URL.replace(/\/+$/, "");
       const res = await fetch(`${baseUrl}/rest/v1/settings?key=eq.prelaunch_emails`, {
