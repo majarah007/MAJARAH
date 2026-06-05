@@ -1463,6 +1463,7 @@ async function doLogin() {
 async function logout() {
   if (window._sbAuthClient) await window._sbAuthClient.auth.signOut();
   document.getElementById('app').style.display = 'none';
+  document.getElementById('app').innerHTML = '';
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('loginPass').value = '';
   document.getElementById('loginUser').value = '';
@@ -1470,6 +1471,7 @@ async function logout() {
 }
 
 function showDashboard() {
+  renderDashboard();
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   initSupabase();
