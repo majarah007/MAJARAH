@@ -7,6 +7,7 @@ module.exports = async (req, res) => {
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
   );
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 
   if (req.method === 'OPTIONS') {
     res.status(200).end();
@@ -51,10 +52,10 @@ module.exports = async (req, res) => {
 
     const data = await getRes.json();
     let emails = [];
-    let rowId = null;
+    let hasRow = false;
 
     if (data && data.length > 0) {
-      rowId = data[0].id;
+      hasRow = true;
       try {
         emails = JSON.parse(data[0].value);
         if (!Array.isArray(emails)) emails = [];
@@ -75,9 +76,9 @@ module.exports = async (req, res) => {
     const updatedValue = JSON.stringify(emails);
     let saveRes;
 
-    if (rowId) {
+    if (hasRow) {
       // PATCH existing row
-      const patchUrl = `${sbUrl.replace(/\/+$/, '')}/rest/v1/settings?id=eq.${rowId}`;
+      const patchUrl = `${sbUrl.replace(/\/+$/, '')}/rest/v1/settings?key=eq.prelaunch_emails`;
       saveRes = await fetch(patchUrl, {
         method: 'PATCH',
         headers: {

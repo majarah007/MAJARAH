@@ -706,30 +706,35 @@ async function initApp() {
     updateMarqueeDisplay();
     applyDynamicSettings();
 
-    if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY") {
-        try {
-            const baseUrl = window.SB_URL.replace(/\/+$/, "");
-            const res = await fetch(`${baseUrl}/rest/v1/settings`, {
-                headers: {
-                    'apikey': window.SB_KEY,
-                    'Authorization': `Bearer ${window.SB_KEY}`
+    window.loadSettingsFromDb = async () => {
+        if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY") {
+            try {
+                const baseUrl = window.SB_URL.replace(/\/+$/, "");
+                const res = await fetch(`${baseUrl}/rest/v1/settings`, {
+                    headers: {
+                        'apikey': window.SB_KEY,
+                        'Authorization': `Bearer ${window.SB_KEY}`
+                    }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        data.forEach(item => {
+                            localStorage.setItem(`mjr_${item.key}`, item.value);
+                        });
+                        updateMarqueeDisplay();
+                        applyDynamicSettings();
+                        checkPrelaunch();
+                    }
                 }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                if (data && data.length > 0) {
-                    data.forEach(item => {
-                        localStorage.setItem(`mjr_${item.key}`, item.value);
-                    });
-                    updateMarqueeDisplay();
-                    applyDynamicSettings();
-                    checkPrelaunch();
-                }
+            } catch (err) {
+                console.error("Failed to load marquee settings from database:", err);
             }
-        } catch (err) {
-            console.error("Failed to load marquee settings from database:", err);
         }
-    }
+    };
+
+    await loadSettingsFromDb();
+    setInterval(loadSettingsFromDb, 15000);
 
     // Check theme preference
     const savedTheme = localStorage.getItem('mjr_theme');

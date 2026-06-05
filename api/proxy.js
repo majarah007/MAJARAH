@@ -32,6 +32,7 @@ module.exports = async (req, res) => {
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
   );
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 
   if (req.method === 'OPTIONS') {
     res.status(200).end();
@@ -125,7 +126,7 @@ module.exports = async (req, res) => {
     if (table === 'settings' && method === 'GET') {
       const decoded = verifyToken(token, jwtSecret);
       if (!decoded && Array.isArray(data)) {
-        data = data.filter(item => !['prelaunch_emails', 'prelaunch_password'].includes(item.key));
+        data = data.filter(item => !['prelaunch_emails'].includes(item.key));
       }
     }
 

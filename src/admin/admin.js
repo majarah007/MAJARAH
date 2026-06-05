@@ -660,7 +660,7 @@ function startAutoSync() {
   if (syncIntervalId) clearInterval(syncIntervalId);
   // Poll every 10 seconds for new orders or updates
   syncIntervalId = setInterval(() => {
-    if (localStorage.getItem('mjr_admin_logged_in') === 'true') {
+    if (localStorage.getItem('mjr_admin_token')) {
       syncDashboardData(true);
     }
   }, 10000);
