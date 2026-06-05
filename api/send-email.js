@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
   }
 
   const brevoApiKey = process.env.BREVO_API_KEY || '';
-  const senderEmail = process.env.BREVO_SENDER_EMAIL || 'info@majar.eg';
+  const senderEmail = process.env.BREVO_SENDER_EMAIL || 'majarah007@gmail.com';
   const senderName = process.env.BREVO_SENDER_NAME || 'Majarah';
 
   if (!brevoApiKey) {
