@@ -32,7 +32,7 @@ const productsData = {
     black: {
         title: "Onyx Graphic Tee",
         sub: "Drop 01 · 2026",
-        price: 450,
+        price: 500,
         desc: "<strong>Made from:</strong> 100% Heavyweight Cotton — 280 GSM, oversized cut with dropped shoulders. Screen-printed artwork on the front panel. Ribbed collar for structure.",
         imgFront: "blackinfront.jpg",
         imgBack: "Blackback.jpg"
@@ -40,7 +40,7 @@ const productsData = {
     white: {
         title: "Alabaster Graphic Tee",
         sub: "Drop 01 · 2026",
-        price: 450,
+        price: 500,
         desc: "<strong>Made from:</strong> 100% Heavyweight Cotton — 280 GSM, oversized cut with dropped shoulders. Screen-printed artwork on the front panel. Ribbed collar for structure.",
         imgFront: "whiteinfront.jpg",
         imgBack: "whiteback.jpg"
@@ -74,20 +74,20 @@ function resolveImgSrc(url, fallback) {
 
 // Official 27 Bosta Governorate Default Matrix Setup (Subsidized Shipping Strategy)
 const bostaDefaultTiers = [
-    { name: 'Cairo', price: 93 }, { name: 'Giza', price: 93 },
-    { name: 'Alexandria', price: 100 }, { name: 'Qalyubia', price: 103 },
-    { name: 'Sharqia', price: 103 }, { name: 'Dakahlia', price: 103 },
-    { name: 'Gharbia', price: 103 }, { name: 'Monufia', price: 103 },
-    { name: 'Beheira', price: 103 }, { name: 'Damietta', price: 103 },
-    { name: 'Port Said', price: 103 }, { name: 'Ismailia', price: 103 },
-    { name: 'Suez', price: 103 }, { name: 'Kafr El Sheikh', price: 103 },
-    { name: 'Fayoum', price: 168 }, { name: 'Beni Suef', price: 168 },
-    { name: 'Minya', price: 168 }, { name: 'Asyut', price: 168 },
-    { name: 'Sohag', price: 168 }, { name: 'Qena', price: 168 },
-    { name: 'Luxor', price: 168 }, { name: 'Aswan', price: 168 },
-    { name: 'Red Sea', price: 181 }, { name: 'Matrouh', price: 181 },
-    { name: 'New Valley', price: 181 }, { name: 'North Sinai', price: 181 },
-    { name: 'South Sinai', price: 181 }
+    { name: 'Cairo', price: 43 }, { name: 'Giza', price: 43 },
+    { name: 'Alexandria', price: 50 }, { name: 'Qalyubia', price: 53 },
+    { name: 'Sharqia', price: 53 }, { name: 'Dakahlia', price: 53 },
+    { name: 'Gharbia', price: 53 }, { name: 'Monufia', price: 53 },
+    { name: 'Beheira', price: 53 }, { name: 'Damietta', price: 53 },
+    { name: 'Port Said', price: 53 }, { name: 'Ismailia', price: 53 },
+    { name: 'Suez', price: 53 }, { name: 'Kafr El Sheikh', price: 53 },
+    { name: 'Fayoum', price: 118 }, { name: 'Beni Suef', price: 118 },
+    { name: 'Minya', price: 118 }, { name: 'Asyut', price: 118 },
+    { name: 'Sohag', price: 118 }, { name: 'Qena', price: 118 },
+    { name: 'Luxor', price: 118 }, { name: 'Aswan', price: 118 },
+    { name: 'Red Sea', price: 131 }, { name: 'Matrouh', price: 131 },
+    { name: 'New Valley', price: 131 }, { name: 'North Sinai', price: 131 },
+    { name: 'South Sinai', price: 131 }
 ];
 
 let activeProductId = null;
@@ -573,7 +573,7 @@ async function initApp() {
     } catch(e) {
         console.error("Failed to parse storeZones in initApp:", e);
     }
-    if (!storedZones || storedZones.length === 0 || (storedZones[0] && storedZones[0].price === 30)) {
+    if (!storedZones || storedZones.length === 0 || (storedZones[0] && [30, 93].includes(storedZones[0].price))) {
         localStorage.setItem('storeZones', JSON.stringify(bostaDefaultTiers));
         storedZones = bostaDefaultTiers;
     }
