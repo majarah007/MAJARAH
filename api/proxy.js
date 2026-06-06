@@ -2,6 +2,7 @@ const crypto = require('crypto');
 
 // Helper to verify JWT token
 function verifyToken(token, secret) {
+  if (!token) return false;
   try {
     const parts = token.split('.');
     if (parts.length !== 3) return false;
@@ -10,11 +11,19 @@ function verifyToken(token, secret) {
     const expectedSig = crypto
       .createHmac('sha256', secret)
       .update(`${header}.${payload}`)
-      .digest('base64url');
+      .digest('base64')
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
 
     if (signature !== expectedSig) return false;
 
-    const data = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+    // Decode base64url payload manually
+    let base64Payload = payload.replace(/-/g, '+').replace(/_/g, '/');
+    while (base64Payload.length % 4) {
+      base64Payload += '=';
+    }
+    const data = JSON.parse(Buffer.from(base64Payload, 'base64').toString('utf8'));
     if (data.exp && Date.now() / 1000 > data.exp) return false;
 
     return data;
@@ -75,9 +84,15 @@ module.exports = async (req, res) => {
   }
 
   // Proxy the request to Supabase
-  const sbUrl = process.env.SUPABASE_URL || 'https://nojnqefgbpyibuhduxdx.supabase.co';
-  // Use service role key on the backend to bypass RLS and perform full CRUD safely
-  const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vam5xZWZnYnB5aWJ1aGR1eGR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDE4MTIsImV4cCI6MjA5NjE3NzgxMn0.lguSZ6IU4jQmJYKXMf0vD7Qy14j-8cjcUgDWgK8TyoM';
+  let sbUrl = process.env.SUPABASE_URL || 'https://nojnqefgbpyibuhduxdx.supabase.co';
+  if (sbUrl.includes('PLACEHOLDER') || sbUrl.includes('majarah-db')) {
+      sbUrl = 'https://nojnqefgbpyibuhduxdx.supabase.co';
+  }
+  
+  let sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+  if (!sbKey || sbKey === 'majarah-guest-dummy-key' || sbKey.includes('PLACEHOLDER')) {
+      sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vam5xZWZnYnB5aWJ1aGR1eGR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDE4MTIsImV4cCI6MjA5NjE3NzgxMn0.lguSZ6IU4jQmJYKXMf0vD7Qy14j-8cjcUgDWgK8TyoM';
+  }
 
   if (!sbKey) {
     res.status(500).json({ error: 'Supabase credentials are not configured on the server.' });

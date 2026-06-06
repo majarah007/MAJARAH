@@ -1,5 +1,9 @@
 const crypto = require('crypto');
 
+function base64url(str) {
+  return Buffer.from(str).toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+
 module.exports = async (req, res) => {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -37,19 +41,22 @@ module.exports = async (req, res) => {
 
   if (isUserMatch && isPassMatch) {
     // Generate JWT header & payload
-    const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
-    const payload = Buffer.from(
+    const header = base64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    const payload = base64url(
       JSON.stringify({
         user: expectedUser,
         exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60 // 24 hours expiry
       })
-    ).toString('base64url');
+    );
 
     // Sign token
     const signature = crypto
       .createHmac('sha256', jwtSecret)
       .update(`${header}.${payload}`)
-      .digest('base64url');
+      .digest('base64')
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
 
     const token = `${header}.${payload}.${signature}`;
 
