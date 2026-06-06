@@ -41,18 +41,74 @@ async function loadAdminConfig() {
         if (res.ok) {
             const data = await res.json();
             if (data && data[0] && data[0].config) {
-                // Merge database config into local config to prevent data loss
-                window.ADMIN_CONFIG = { ...window.ADMIN_CONFIG, ...data[0].config };
+                // Database is the absolute truth — replace local config
+                window.ADMIN_CONFIG = data[0].config;
                 
-                // Sync back to localStorage for persistence
+                // Sync to localStorage for next time
                 Object.keys(window.ADMIN_CONFIG).forEach(k => {
                     if (CONFIG_KEYS.includes(k)) {
                         localStorage.setItem(`mjr_${k}`, JSON.stringify(window.ADMIN_CONFIG[k]));
                     }
                 });
+                
+                // Re-populate inputs if we are on a config-heavy page
+                const activePage = document.querySelector('.page.active');
+                if (activePage && (activePage.id === 'page-tweaks' || activePage.id === 'page-settings')) {
+                    populateTweaksFromConfig();
+                }
             }
         }
     } catch (e) { console.error("Config fetch failed:", e); }
+}
+
+function populateTweaksFromConfig() {
+    const cfg = (key, fallback) => window.ADMIN_CONFIG[key] !== undefined ? window.ADMIN_CONFIG[key] : fallback;
+    
+    // Marquee
+    const promoInput = document.getElementById('promoTextSetting');
+    const speedInput = document.getElementById('tweakPromoSpeed');
+    const repeatsInput = document.getElementById('tweakPromoRepeats');
+    const showMarqueeSelect = document.getElementById('tweakShowMarquee');
+    
+    if (promoInput) promoInput.value = cfg('promoText', '🔥 MAJARAH 01DROP 🔥');
+    if (speedInput) speedInput.value = cfg('promoSpeed', '80');
+    if (repeatsInput) repeatsInput.value = cfg('promoRepeats', '12');
+    if (showMarqueeSelect) showMarqueeSelect.value = String(cfg('promoVisible', true));
+    
+    // Feature Toggles
+    if (document.getElementById('tweakShowSignIn')) document.getElementById('tweakShowSignIn').value = String(cfg('showSignIn', true));
+    if (document.getElementById('tweakShowStars')) document.getElementById('tweakShowStars').value = String(cfg('showStars', true));
+    if (document.getElementById('tweakShowSizeCalc')) document.getElementById('tweakShowSizeCalc').value = String(cfg('showSizeCalc', true));
+    if (document.getElementById('tweakShowInstagram')) document.getElementById('tweakShowInstagram').value = String(cfg('instagramVisible', true));
+    if (document.getElementById('tweakShowTiktok')) document.getElementById('tweakShowTiktok').value = String(cfg('tiktokVisible', true));
+    if (document.getElementById('tweakShowCoupons')) document.getElementById('tweakShowCoupons').value = String(cfg('showCoupons', true));
+    
+    const couponCodesInput = document.getElementById('tweakCouponCodes');
+    if (couponCodesInput) {
+        const coupons = cfg('coupons', {});
+        couponCodesInput.value = Object.entries(coupons).map(([k,v]) => `${k}:${v}`).join(',');
+    }
+    
+    // Payment
+    if (document.getElementById('tweakShowCOD')) document.getElementById('tweakShowCOD').value = String(cfg('paymentCOD', true));
+    if (document.getElementById('tweakShowApplePay')) document.getElementById('tweakShowApplePay').value = String(cfg('paymentApplePay', false));
+    if (document.getElementById('tweakShowCard')) document.getElementById('tweakShowCard').value = String(cfg('paymentCard', false));
+    
+    // Prelaunch
+    if (document.getElementById('tweakShowPrelaunch')) document.getElementById('tweakShowPrelaunch').value = String(cfg('showPrelaunch', false));
+    if (document.getElementById('tweakPrelaunchDate')) document.getElementById('tweakPrelaunchDate').value = cfg('prelaunchDate', '2026-07-01T20:00:00');
+    if (document.getElementById('tweakPrelaunchPassword')) document.getElementById('tweakPrelaunchPassword').value = cfg('bypassPassword', 'majarah2026');
+    
+    // Teaser
+    if (document.getElementById('tweakShowTeaser')) document.getElementById('tweakShowTeaser').value = String(cfg('drop2TeaserVisible', false));
+    if (document.getElementById('tweakTeaserDate')) document.getElementById('tweakTeaserDate').value = cfg('drop2TeaserDate', '2026-09-01T20:00:00');
+    if (document.getElementById('tweakTeaserBadge')) document.getElementById('tweakTeaserBadge').value = cfg('drop2TeaserBadge', 'TEASER / DROP 02');
+    if (document.getElementById('tweakTeaserTitle')) document.getElementById('tweakTeaserTitle').value = cfg('drop2TeaserTitle', 'ECLIPSE COLLECTION');
+    if (document.getElementById('tweakTeaserDesc')) document.getElementById('tweakTeaserDesc').value = cfg('drop2TeaserDesc', '');
+    if (document.getElementById('tweakTeaserName1')) document.getElementById('tweakTeaserName1').value = cfg('drop2Product1Name', '');
+    if (document.getElementById('tweakTeaserImage1')) document.getElementById('tweakTeaserImage1').value = cfg('drop2Product1Image', '');
+    if (document.getElementById('tweakTeaserName2')) document.getElementById('tweakTeaserName2').value = cfg('drop2Product2Name', '');
+    if (document.getElementById('tweakTeaserImage2')) document.getElementById('tweakTeaserImage2').value = cfg('drop2Product2Image', '');
 }
 
 async function saveConfigToSupabase(partialConfig, secondArg) {
