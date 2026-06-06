@@ -99,6 +99,9 @@ module.exports = async (req, res) => {
     'Prefer': req.headers['prefer'] || 'return=representation'
   };
 
+  console.log('DEBUG: Target URL:', targetUrl.toString());
+  console.log('DEBUG: Headers being sent to Supabase:', { ...headers, apikey: '***', Authorization: 'Bearer ***' });
+
   try {
     const sbResponse = await fetch(targetUrl.toString(), {
       method: method,
