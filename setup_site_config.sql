@@ -8,16 +8,19 @@ CREATE UNIQUE INDEX IF NOT EXISTS site_config_single_row ON site_config ((true))
 
 ALTER TABLE public.site_config ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public Read Access" ON public.site_config;
 CREATE POLICY "Public Read Access"
 ON public.site_config FOR SELECT
 TO anon USING (true);
 
+DROP POLICY IF EXISTS "Service Role Full Access" ON public.site_config;
 CREATE POLICY "Service Role Full Access"
 ON public.site_config FOR ALL
 TO service_role
 USING (true)
 WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Anon Full Access" ON public.site_config;
 CREATE POLICY "Anon Full Access"
 ON public.site_config FOR ALL
 TO anon
