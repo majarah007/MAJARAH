@@ -138,8 +138,12 @@ module.exports = async (req, res) => {
 
     const rawText = await sbResponse.text();
     let data = {};
-    if (rawText) {
-        data = JSON.parse(rawText);
+    if (rawText && rawText.trim() !== '') {
+        try {
+            data = JSON.parse(rawText);
+        } catch (e) {
+            console.warn('Proxy warning: Supabase returned non-JSON body on success', rawText);
+        }
     }
 
     // Filter sensitive key/value pairs from settings table if client is a guest (no valid JWT)
