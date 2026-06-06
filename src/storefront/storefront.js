@@ -2557,11 +2557,10 @@ function checkPrelaunch() {
     if (plInput) plInput.value = '';
 
     const bypass = localStorage.getItem('mjr_bypass_prelaunch') === 'true';
-    // Default to 'false' (live store) when no explicit siteConfig value has been loaded yet
-    const rawPrelaunch = siteConfig.showPrelaunch;
-    const showPrelaunch = rawPrelaunch === true;
-    const dateStr = siteConfig.prelaunchDate;
-    const targetDate = window.parseLaunchDate ? window.parseLaunchDate(dateStr) : new Date(dateStr || '2026-07-01T20:00:00').getTime();
+    // Use cfg helper instead of undefined siteConfig
+    const showPrelaunch = cfg('showPrelaunch', false);
+    const dateStr = cfg('prelaunchDate', '2026-07-01T20:00:00');
+    const targetDate = window.parseLaunchDate ? window.parseLaunchDate(dateStr) : new Date(dateStr).getTime();
     const now = new Date().getTime();
     
     const plScreen = document.getElementById('prelaunchScreen');
@@ -2613,8 +2612,8 @@ function lockPrelaunchStore() {
 
 let prelaunchCountdownInterval = null;
 function initPrelaunchCountdown() {
-    const dateStr = siteConfig.prelaunchDate;
-    const targetDate = window.parseLaunchDate ? window.parseLaunchDate(dateStr) : new Date(dateStr || '2026-07-01T20:00:00').getTime();
+    const dateStr = cfg('prelaunchDate', '2026-07-01T20:00:00');
+    const targetDate = window.parseLaunchDate ? window.parseLaunchDate(dateStr) : new Date(dateStr).getTime();
     
     function updateCountdown() {
         const now = new Date().getTime();
