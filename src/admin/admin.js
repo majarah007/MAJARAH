@@ -40,7 +40,7 @@ async function saveConfigToSupabase(partialConfig) {
       const merged = { ...existing, ...partialConfig };
       
       // Upsert via Proxy
-      const upsertRes = await fetch(`/api/proxy?table=site_config`, {
+      const upsertRes = await fetch(`/api/proxy?table=site_config&on_conflict=id`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
