@@ -1327,7 +1327,7 @@ function applyCheckoutCoupon() {
         return;
     }
     
-    const codesStr = siteConfig.couponCodes || 'SAVE10:10%,OFF50:50';
+    const codesStr = cfg('couponCodes', 'SAVE10:10%,OFF50:50');
     const couponPairs = codesStr.split(',').map(pair => pair.trim().split(':'));
     const matched = couponPairs.find(pair => pair[0].toUpperCase() === input);
     
