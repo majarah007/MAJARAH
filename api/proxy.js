@@ -136,7 +136,11 @@ module.exports = async (req, res) => {
       return;
     }
 
-    let data = await sbResponse.json();
+    const rawText = await sbResponse.text();
+    let data = {};
+    if (rawText) {
+        data = JSON.parse(rawText);
+    }
 
     // Filter sensitive key/value pairs from settings table if client is a guest (no valid JWT)
     if (table === 'settings' && method === 'GET') {
