@@ -78,7 +78,7 @@ module.exports = async (req, res) => {
   // WHATWG URL API (Fixes Deprecation Warning)
   // FALLBACK: Hardcoded for MAJARAH to bypass Vercel Env Var injection failure
   const baseUrl = 'https://nojnqefgbpyibuhduxdx.supabase.co';
-  const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vam5xZWZnYnB5aWJ1aGR1eGR4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDYwMTgxMiwiZXhwIjoyMDk2MTc3ODEyfQ.fB-B0lYw-D6_7v7t1Y-X2s4Jm5w9e_aT8M9wX-y0w4k';
+  const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vam5xZWZnYnB5aWJ1aGR1eGR4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDYwMTgxMiwiZXhwIjoyMDk2MTc3ODEyfQ.Yfv4U59RuTsGcpb4Mo5FKGzrr4YlF9S5xwH7fqG3kck';
 
   // Debugging log to confirm it's using the hardcoded keys
   console.log('DEBUG: Using hardcoded Supabase keys');
