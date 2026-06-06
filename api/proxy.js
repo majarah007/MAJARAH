@@ -57,7 +57,7 @@ module.exports = async (req, res) => {
   const method = req.method;
   const authHeader = req.headers.authorization || '';
   const token = authHeader.replace(/^Bearer\s+/, '').trim();
-  const jwtSecret = process.env.JWT_SECRET || 'majarah-jwt-super-secret-key-2026';
+  const jwtSecret = 'majarah-jwt-super-secret-key-2026';
 
   let isAuthorized = false;
   const isPublicGet = method === 'GET' && ['products', 'inventory', 'settings', 'site_config'].includes(table);
