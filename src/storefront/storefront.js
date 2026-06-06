@@ -27,49 +27,109 @@ window.fetch = async function(url, options = {}) {
     return originalFetch(url, options);
 };
 
-// --- GLOBAL DATA & CONTROLS ---
-const productsData = {
-    black: {
-        title: "Onyx Graphic Tee",
-        sub: "Drop 01 · 2026",
-        price: 500,
-        desc: "<strong>Made from:</strong> 100% Heavyweight Cotton — 280 GSM, oversized cut with dropped shoulders. Screen-printed artwork on the front panel. Ribbed collar for structure.",
-        imgFront: "blackinfront.jpg",
-        imgBack: "Blackback.jpg"
-    },
-    white: {
-        title: "Alabaster Graphic Tee",
-        sub: "Drop 01 · 2026",
-        price: 500,
-        desc: "<strong>Made from:</strong> 100% Heavyweight Cotton — 280 GSM, oversized cut with dropped shoulders. Screen-printed artwork on the front panel. Ribbed collar for structure.",
-        imgFront: "whiteinfront.jpg",
-        imgBack: "whiteback.jpg"
-    }
-};
+// ── GLOBAL CONFIGURATION — loaded from Supabase site_config ──
+window.SITE_CONFIG = {};
 
-// --- PRODUCT TRANSLATIONS MAPPING FOR ARABIC LOCALIZATION ---
-const PRODUCT_TRANSLATIONS = {
-    ar: {
-        "Onyx Graphic Tee": "تيشيرت أونيكس جرافيك",
-        "Alabaster Graphic Tee": "تيشيرت ألاباستر جرافيك",
-        "Arabic Edition": "النسخة العربية",
-        "Black Majarah": "مَجَرَّة أسود",
-        "White Majarah": "مَجَرَّة أبيض",
-        "Onyx Black": "أسود أونيكس",
-        "Alabaster White": "أبيض ألاباستر",
-        "Drop 01 · 2026": "دروب 01 · 2026",
-        "Heavyweight Cotton": "قطن ثقيل الوزن",
-        "Heavyweight Organic Cotton": "قطن عضوي ثقيل الوزن",
-        "Premium Oversized": "أوفرسايز بريميوم",
-        "<strong>Made from:</strong> 100% Heavyweight Cotton — 280 GSM, oversized cut with dropped shoulders. Screen-printed artwork on the front panel. Ribbed collar for structure.": "<strong>مصنوع من:</strong> قطن ثقيل الوزن 100٪ - 280 جرام، قصّة أوفرسايز مع أكتاف منسدلة. طباعة شاشة حريرية على الصدر. ياقة مضلعة لتماسك التصميم."
+async function loadSiteConfig() {
+    try {
+        const res = await fetch('/api/proxy?table=site_config&id=eq.1&select=config');
+        if (!res.ok) throw new Error('Config load failed');
+        const data = await res.json();
+        if (Array.isArray(data) && data[0]) {
+            window.SITE_CONFIG = data[0].config || {};
+        }
+        applyConfigToDOM();
+    } catch (e) {
+        console.warn("Using local cache for config:", e);
+        // Fallback to localStorage if DB is down
+        const keys = [
+            'promoText', 'promoVisible', 'promoSpeed', 'promoRepeats',
+            'showPrelaunch', 'prelaunchDate', 'bypassPassword',
+            'drop2TeaserVisible', 'drop2TeaserDate', 'drop2TeaserTitle',
+            'drop2TeaserDesc', 'drop2TeaserBadge', 'drop2Product1Name',
+            'drop2Product1Image', 'drop2Product2Name', 'drop2Product2Image',
+            'showSignIn', 'instagramVisible', 'tiktokVisible', 'showSizeCalc',
+            'showStars', 'coupons', 'paymentCOD', 'paymentApplePay', 'paymentCard',
+            'shippingRates', 'translations'
+        ];
+        keys.forEach(k => {
+            const val = localStorage.getItem(`mjr_${k}`);
+            if (val !== null) {
+                try {
+                    window.SITE_CONFIG[k] = JSON.parse(val);
+                } catch(err) {
+                    window.SITE_CONFIG[k] = val;
+                }
+            }
+        });
+        applyConfigToDOM();
     }
-};
+}
 
-// --- IMAGE SRC RESOLVER HELPER ---
-// Ensures product images always resolve to a valid src, never empty string
-function resolveImgSrc(url, fallback) {
-    if (url && url.trim() !== '') return url.trim();
-    return fallback || 'blackinfront.jpg';
+function cfg(key, fallback = '') {
+    const val = window.SITE_CONFIG[key];
+    if (val === undefined || val === null || val === '') return fallback;
+    return val;
+}
+
+function applyConfigToDOM() {
+    // 1. Marquee
+    const marquee = document.getElementById('storefrontPromoMarquee');
+    if (marquee) marquee.style.display = cfg('promoVisible', true) ? 'block' : 'none';
+    const pText = document.getElementById('promoText');
+    const pTextDup = document.getElementById('promoTextDup');
+    if (pText) pText.textContent = cfg('promoText', '🔥 MAJARAH DROP 01 OUT NOW 🔥');
+    if (pTextDup) pTextDup.textContent = cfg('promoText', '🔥 MAJARAH DROP 01 OUT NOW 🔥');
+    
+    // 2. Prelaunch
+    const isPrelaunch = cfg('showPrelaunch', false);
+    const prelaunchScreen = document.getElementById('prelaunchScreen');
+    if (isPrelaunch && prelaunchScreen) {
+        const bypass = localStorage.getItem('mjr_bypass_prelaunch') === 'true';
+        const targetDate = window.parseLaunchDate(cfg('prelaunchDate'));
+        if (!bypass && targetDate > Date.now()) {
+            prelaunchScreen.style.display = 'flex';
+            document.documentElement.style.overflow = 'hidden';
+        }
+    }
+
+    // 3. Teaser
+    const teaser = document.getElementById('drop2TeaserSection');
+    if (teaser) teaser.style.display = cfg('drop2TeaserVisible', false) ? 'block' : 'none';
+    if (cfg('drop2TeaserVisible', false)) {
+        document.getElementById('teaserBadge').textContent = cfg('drop2TeaserBadge', 'TEASER');
+        document.getElementById('teaserTitle').textContent = cfg('drop2TeaserTitle', 'ECLIPSE');
+        document.getElementById('teaserDesc').textContent = cfg('drop2TeaserDesc', '');
+        document.getElementById('teaserName1').textContent = cfg('drop2Product1Name', '');
+        document.getElementById('teaserName2').textContent = cfg('drop2Product2Name', '');
+        document.getElementById('teaserImg1').src = cfg('drop2Product1Image', '');
+        document.getElementById('teaserImg2').src = cfg('drop2Product2Image', '');
+    }
+
+    // 4. Visibility Toggles
+    const authLi = document.getElementById('navAuthLi');
+    if (authLi) authLi.style.display = cfg('showSignIn', true) ? 'block' : 'none';
+    const footerIG = document.getElementById('footerInstagramLink');
+    if (footerIG) footerIG.style.display = cfg('instagramVisible', true) ? 'flex' : 'none';
+    const footerTT = document.getElementById('footerTiktokLink');
+    if (footerTT) footerTT.style.display = cfg('tiktokVisible', true) ? 'flex' : 'none';
+    const footerSizeCalc = document.getElementById('footerSizeCalcLink');
+    if (footerSizeCalc) footerSizeCalc.style.display = cfg('showSizeCalc', true) ? 'block' : 'none';
+    const productSizeCalc = document.getElementById('productPageSizeCalcBtn');
+    if (productSizeCalc) productSizeCalc.style.display = cfg('showSizeCalc', true) ? 'block' : 'none';
+    
+    // 5. Checkout
+    const couponWrap = document.getElementById('chkCouponWrapper');
+    if (couponWrap) {
+        const coupons = cfg('coupons', {});
+        couponWrap.style.display = (Object.keys(coupons).length > 0) ? 'flex' : 'none';
+    }
+    const payCOD = document.getElementById('checkoutPayRowCOD');
+    if (payCOD) payCOD.style.display = cfg('paymentCOD', true) ? 'flex' : 'none';
+    const payApple = document.getElementById('checkoutPayRowApple');
+    if (payApple) payApple.style.display = cfg('paymentApplePay', true) ? 'flex' : 'none';
+    const payCard = document.getElementById('checkoutPayRowCard');
+    if (payCard) payCard.style.display = cfg('paymentCard', true) ? 'flex' : 'none';
 }
 
 // Official 27 Bosta Governorate Default Matrix Setup (Subsidized Shipping Strategy)
@@ -109,8 +169,9 @@ async function loadProducts() {
         color: productsData[key].sub,
         price: productsData[key].price,
         description: productsData[key].desc,
-        front_image_url: productsData[key].imgFront,
-        back_image_url: productsData[key].imgBack,
+        images: productsData[key].images || [],
+        front_image_url: productsData[key].images ? productsData[key].images[0] : '',
+        back_image_url: productsData[key].images ? productsData[key].images[1] : '',
         fabric: "Heavyweight Cotton",
         fit: "Premium Oversized",
         status: 'active'
@@ -130,7 +191,18 @@ async function loadProducts() {
             if (res.ok) {
                 const dbProducts = await res.json();
                 if (dbProducts && dbProducts.length > 0) {
-                    products = dbProducts;
+                    products = dbProducts.map(p => {
+                        if (!p.images) {
+                            p.images = [p.front_image_url, p.back_image_url].filter(Boolean);
+                        } else if (typeof p.images === 'string') {
+                            try {
+                                p.images = JSON.parse(p.images);
+                            } catch(e) {
+                                p.images = [p.front_image_url, p.back_image_url].filter(Boolean);
+                            }
+                        }
+                        return p;
+                    });
                 }
             }
 
@@ -234,6 +306,7 @@ const TRANSLATIONS = {
     signin: "Sign In",
     explore: "Explore Drop 01",
     universe_within: "The Universe Within",
+    universe_tagline: "Drop 01 &mdash; 100% heavyweight cotton. Screen-printed in Cairo. Ships across all of Egypt.",
     tap_explore: "Tap any piece to explore · Hover to see the back",
     company: "Company",
     get_help: "Get Help",
@@ -270,7 +343,7 @@ const TRANSLATIONS = {
     how_step2_title: "Fill in Your Address",
     how_step2_desc: "Enter your name, phone number, and delivery address. We ship to all 27 Egyptian governorates.",
     how_step3_title: "We Ship to You",
-    how_step3_desc: "Your order is confirmed and sent out within 1–4 business days. Pay cash when it arrives at your door.",
+    how_step3_desc: "We call to confirm, then ship within 1–4 business days. Pay cash at your door — no upfront payment needed.",
     measurements_cm: "Measurements in centimeters",
     tbl_size: "Size",
     tbl_chest: "Chest (Width)",
@@ -339,13 +412,18 @@ const TRANSLATIONS = {
     dry_shade_lbl: "Dry in Shade",
     dry_shade_desc: "Direct sunlight fades intense dyes. Dry indoors or in shaded areas.",
     store_folded_lbl: "Store Folded",
-    store_folded_desc: "Hangers can stretch heavy cotton shoulder seams. Fold to store."
+    store_folded_desc: "Hangers can stretch heavy cotton shoulder seams. Fold to store.",
+    days_label: "DAYS",
+    hours_label: "HOURS",
+    mins_label: "MINS",
+    secs_label: "SECS"
   },
   ar: {
     collection: "القطع",
     signin: "دخول",
     explore: "اكتشف دروب 01",
     universe_within: "الكون جوّانا",
+    universe_tagline: "دروب 01 &mdash; قطن ثقيل 100٪. طباعة يدوية في القاهرة. شحن لكل مصر.",
     tap_explore: "دوس على أي قطعة عشان تكتشفها · عدي بالماوس عشان تشوف الظهر",
     company: "الشركة",
     get_help: "مساعدة",
@@ -382,7 +460,7 @@ const TRANSLATIONS = {
     how_step2_title: "ادخل بياناتك",
     how_step2_desc: "املا بيانات الشحن والتوصيل بسهولة وأمان في صفحة الدفع والطلب.",
     how_step3_title: "شحن الطلب",
-    how_step3_desc: "السيستم هيسجل طلبك تلقائياً وهنشحنلك القطعة في أسرع وقت.",
+    how_step3_desc: "بعد ما تأكد طلبك تليفونياً، بنشحنه في 1–4 أيام شغل. الدفع عند الاستلام نقداً على الباب.",
     measurements_cm: "المقاسات بالسنتيمتر",
     tbl_size: "المقاس",
     tbl_chest: "الصدر (عرض)",
@@ -451,7 +529,11 @@ const TRANSLATIONS = {
     dry_shade_lbl: "تجفيف في الظل",
     dry_shade_desc: "أشعة الشمس المباشرة تبهت ألوان الصبغة. جفف القطعة في الظل أو في الداخل.",
     store_folded_lbl: "تخزين مطوياً",
-    store_folded_desc: "التعليق قد يمدد خياطة الأكتاف بسبب ثقل وزن القطن. يفضل حفظها مطوية."
+    store_folded_desc: "التعليق قد يمدد خياطة الأكتاف بسبب ثقل وزن القطن. يفضل حفظها مطوية.",
+    days_label: "أيام",
+    hours_label: "ساعات",
+    mins_label: "دقائق",
+    secs_label: "ثواني"
   }
 };
 
@@ -566,20 +648,8 @@ function populateCityOptions() {
 
 // Initialize data and load city options immediately on launch
 async function initApp() {
-    // Always ensure shipping zones are seeded — no migration gate
-    let storedZones = null;
-    try {
-        storedZones = JSON.parse(localStorage.getItem('storeZones'));
-    } catch(e) {
-        console.error("Failed to parse storeZones in initApp:", e);
-    }
-    if (!storedZones || storedZones.length === 0 || (storedZones[0] && [30, 93].includes(storedZones[0].price))) {
-        localStorage.setItem('storeZones', JSON.stringify(bostaDefaultTiers));
-        storedZones = bostaDefaultTiers;
-    }
-    currentLoadedShippingRates = storedZones;
+    await loadSiteConfig();
     
-    // Build the checkout menu selection array dynamically
     populateCityOptions();
     applyLanguage(currentLang);
 
@@ -593,16 +663,12 @@ async function initApp() {
         console.error("EmailJS init failed:", e);
     }
 
-    // Load announcement, speed, and repeats dynamically from database settings table
+    // Load announcement, speed, and repeats
     window.updateMarqueeDisplay = () => {
-        let text = localStorage.getItem('mjr_promo_text') || '🔥 MAJARAH DROP 01 OUT NOW · FAST HOME DELIVERY ALL OVER EGYPT 🔥';
-        if (currentLang === 'ar' && text === '🔥 MAJARAH DROP 01 OUT NOW · FAST HOME DELIVERY ALL OVER EGYPT 🔥') {
-            text = '🔥 دروب MAJARAH 01 نزل دلوقتي · توصيل سريع لكل مصر 🔥';
-        }
-        const speed = parseFloat(localStorage.getItem('mjr_promo_speed') || '25');
-        const dbRepeats = parseInt(localStorage.getItem('mjr_promo_repeats') || '1');
+        let text = cfg('promo_text', '🔥 MAJARAH DROP 01 OUT NOW 🔥');
+        const speed = parseFloat(cfg('promo_speed', '25'));
+        const dbRepeats = parseInt(cfg('promo_repeats', '1'));
         
-        // Dynamic calculations to prevent marquee gaps on wide viewports
         const charWidthEst = 8;
         const textWidthEst = text.length * charWidthEst;
         const minRepeats = Math.max(12, Math.ceil((window.innerWidth * 2.5) / textWidthEst));
@@ -629,125 +695,7 @@ async function initApp() {
         }
     });
 
-    window.applyDynamicSettings = () => {
-        // 1. Marquee visibility
-        const showMarquee = localStorage.getItem('mjr_show_marquee') !== 'false';
-        const marqueeEl = document.getElementById('storefrontPromoMarquee');
-        if (marqueeEl) {
-            marqueeEl.style.display = showMarquee ? 'block' : 'none';
-        }
-        
-        // 2. Sign In visibility
-        const showSignIn = localStorage.getItem('mjr_show_signin') !== 'false';
-        const authLi = document.getElementById('navAuthLi');
-        if (authLi) {
-            authLi.style.display = showSignIn ? 'block' : 'none';
-        }
-        
-        // 3. Instagram visibility
-        const showIG = localStorage.getItem('mjr_show_instagram') !== 'false';
-        const igEl = document.getElementById('footerInstagramLink');
-        if (igEl) {
-            igEl.style.display = showIG ? 'inline-block' : 'none';
-        }
-        
-        // 4. TikTok visibility
-        const showTT = localStorage.getItem('mjr_show_tiktok') !== 'false';
-        const ttEl = document.getElementById('footerTiktokLink');
-        if (ttEl) {
-            ttEl.style.display = showTT ? 'inline-block' : 'none';
-        }
-        
-        // 5. Stars canvas visibility
-        const showStars = localStorage.getItem('mjr_show_stars') !== 'false';
-        const canvasEl = document.getElementById('cosmic-canvas');
-        if (canvasEl) {
-            canvasEl.style.display = showStars ? 'block' : 'none';
-        }
-        
-        // 6. Size Calculator visibility
-        const showSizeCalc = localStorage.getItem('mjr_show_size_calc') !== 'false';
-        const fCalc = document.getElementById('footerSizeCalcLink');
-        if (fCalc && fCalc.parentElement) {
-            fCalc.parentElement.style.display = showSizeCalc ? 'block' : 'none';
-        }
-        const pCalc = document.getElementById('productPageSizeCalcBtn');
-        if (pCalc) {
-            pCalc.style.display = showSizeCalc ? 'inline-block' : 'none';
-        }
-        
-        // 7. Coupons input visibility
-        const showCoupons = localStorage.getItem('mjr_show_coupons') === 'true';
-        const coupEl = document.getElementById('chkCouponWrapper');
-        if (coupEl) {
-            coupEl.style.display = showCoupons ? 'flex' : 'none';
-        }
-
-        // 8. Payment method rows visibility
-        // Apple Pay and Card are hidden by default — only enabled if admin explicitly turns them on
-        const showCOD = localStorage.getItem('mjr_show_cod') !== 'false';
-        const supportsApplePay = !!(window.ApplePaySession && window.ApplePaySession.canMakePayments());
-        const showApplePay = localStorage.getItem('mjr_show_apple_pay') === 'true' && supportsApplePay;
-        const showCard = localStorage.getItem('mjr_show_card') === 'true';
-        const codRow = document.getElementById('checkoutPayRowCOD');
-        const appleRow = document.getElementById('checkoutPayRowApple');
-        const cardRow = document.getElementById('checkoutPayRowCard');
-        if (codRow) codRow.style.display = showCOD ? 'flex' : 'none';
-        if (appleRow) appleRow.style.display = showApplePay ? 'flex' : 'none';
-        if (cardRow) cardRow.style.display = showCard ? 'flex' : 'none';
-        // If active payment option is hidden, select first visible one
-        const activePayRow = document.querySelector('.chk-payment-row.active');
-        if (activePayRow && activePayRow.style.display === 'none') {
-            const firstVisible = document.querySelector('.chk-payment-row:not([style*="none"])');
-            if (firstVisible) firstVisible.click();
-        }
-    };
-
     updateMarqueeDisplay();
-    applyDynamicSettings();
-
-    window.loadSettingsFromDb = async () => {
-        if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY") {
-            try {
-                const baseUrl = window.SB_URL.replace(/\/+$/, "");
-                const res = await fetch(`${baseUrl}/rest/v1/settings`, {
-                    headers: {
-                        'apikey': window.SB_KEY,
-                        'Authorization': `Bearer ${window.SB_KEY}`
-                    }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && data.length > 0) {
-                        data.forEach(item => {
-                            localStorage.setItem(`mjr_${item.key}`, item.value);
-                            // Sync shipping zones from database to active checkout rates
-                            if (item.key === 'shipping_zones') {
-                                try {
-                                    const zones = JSON.parse(item.value);
-                                    if (Array.isArray(zones) && zones.length > 0) {
-                                        currentLoadedShippingRates = zones;
-                                        localStorage.setItem('storeZones', item.value);
-                                        populateCityOptions();
-                                    }
-                                } catch(e) {
-                                    console.error('Failed to parse shipping_zones from DB:', e);
-                                }
-                            }
-                        });
-                        updateMarqueeDisplay();
-                        applyDynamicSettings();
-                        checkPrelaunch();
-                    }
-                }
-            } catch (err) {
-                console.error("Failed to load marquee settings from database:", err);
-            }
-        }
-    };
-
-    await loadSettingsFromDb();
-    setInterval(loadSettingsFromDb, 15000);
 
     // Check theme preference
     const savedTheme = localStorage.getItem('mjr_theme');
@@ -759,14 +707,11 @@ async function initApp() {
         if (path) path.setAttribute('d', 'M12 5a7 7 0 1 0 0 14 7 7 0 0 0 0-14z M12 1v2 M12 21v2 M4.22 4.22l1.42 1.42 M18.36 18.36l1.42 1.42 M1 12h2 M21 12h2 M4.22 19.78l1.42-1.42 M18.36 5.64l1.42-1.42');
     }
 
-    // Check user authentication session cookie status
     initUserSession();
-
-    // Initialize cosmic canvas & scroll reveal engines
     initCosmicCanvas();
     initScrollReveal();
 
-    // Real-time coupon validator event listener
+    // Real-time coupon validator
     const couponInput = document.getElementById('chkCouponInput');
     if (couponInput) {
         couponInput.addEventListener('input', function(e) {
@@ -776,7 +721,6 @@ async function initApp() {
             
             if (!input) {
                 msgEl.style.display = 'none';
-                msgEl.innerText = '';
                 inputEl.style.borderColor = '#222';
                 activeDiscountValue = 0;
                 activeDiscountCode = '';
@@ -784,41 +728,28 @@ async function initApp() {
                 return;
             }
             
-            const codesStr = localStorage.getItem('mjr_coupon_codes') || 'SAVE10:10%,OFF50:50';
-            const couponPairs = codesStr.split(',').map(pair => pair.trim().split(':'));
-            const matched = couponPairs.find(pair => pair[0].toUpperCase() === input);
-            
-            if (matched) {
-                const valueStr = matched[1];
+            const valStr = validateCoupon(input);
+            if (valStr) {
                 activeDiscountCode = input;
-                
-                if (valueStr.endsWith('%')) {
+                if (valStr.endsWith('%')) {
                     activeDiscountType = 'percent';
-                    activeDiscountValue = parseFloat(valueStr.slice(0, -1));
+                    activeDiscountValue = parseFloat(valStr.slice(0, -1));
                 } else {
                     activeDiscountType = 'fixed';
-                    activeDiscountValue = parseFloat(valueStr);
+                    activeDiscountValue = parseFloat(valStr);
                 }
-                
                 msgEl.style.display = 'block';
                 msgEl.style.color = '#25d366';
-                msgEl.innerText = currentLang === 'ar' 
-                    ? `تم تطبيق الكود بنجاح! خصم ${valueStr}` 
-                    : `Coupon applied successfully! ${valueStr} discount.`;
+                msgEl.innerText = currentLang === 'ar' ? `تم تطبيق الكود! خصم ${valStr}` : `Applied! ${valStr} discount.`;
                 inputEl.style.borderColor = '#25d366';
             } else {
                 activeDiscountValue = 0;
                 activeDiscountCode = '';
-                
                 if (input.length >= 3) {
                     msgEl.style.display = 'block';
                     msgEl.style.color = '#ff4444';
-                    msgEl.innerText = currentLang === 'ar' ? 'كود الخصم غير صحيح.' : 'Invalid coupon code.';
+                    msgEl.innerText = currentLang === 'ar' ? 'كود غير صحيح' : 'Invalid code.';
                     inputEl.style.borderColor = '#ff4444';
-                } else {
-                    msgEl.style.display = 'none';
-                    msgEl.innerText = '';
-                    inputEl.style.borderColor = '#222';
                 }
             }
             calculateTotals();
@@ -1096,90 +1027,80 @@ async function openProduct(id) {
     
     // Find product in fetchedProducts or fallback
     let p = fetchedProducts.find(prod => String(prod.id) === String(id));
-    if (!p) {
-        const staticP = productsData[id] || productsData.black || { title: 'Onyx Graphic Tee', sub: 'Onyx Black', price: 520, desc: '', imgFront: 'blackinfront.jpg', imgBack: 'Blackback.jpg' };
-        p = {
-            id: id,
-            name: staticP.title,
-            color: staticP.sub,
-            price: staticP.price,
-            description: staticP.desc,
-            front_image_url: staticP.imgFront,
-            back_image_url: staticP.imgBack
-        };
-    }
-    
-    let defaultFront = 'blackinfront.jpg';
-    let defaultBack = 'Blackback.jpg';
-    const searchStr = (p.name + ' ' + (p.color || '')).toLowerCase();
-    if (searchStr.includes('white') || searchStr.includes('alabaster')) {
-        defaultFront = 'whiteinfront.jpg';
-        defaultBack = 'whiteback.jpg';
-    }
+    if (!p) return;
     
     const isAr = (currentLang === 'ar');
-    let colorTranslated = p.color || '';
-    let nameTranslated = p.name || '';
-    let descTranslated = p.description || p.desc || '';
-    
-    if (isAr) {
-        if (PRODUCT_TRANSLATIONS.ar[p.name]) nameTranslated = PRODUCT_TRANSLATIONS.ar[p.name];
-        if (PRODUCT_TRANSLATIONS.ar[p.color]) colorTranslated = PRODUCT_TRANSLATIONS.ar[p.color];
-        if (PRODUCT_TRANSLATIONS.ar[p.description]) descTranslated = PRODUCT_TRANSLATIONS.ar[p.description];
-        else if (PRODUCT_TRANSLATIONS.ar[p.desc]) descTranslated = PRODUCT_TRANSLATIONS.ar[p.desc];
-    }
+    let colorTranslated = isAr ? (PRODUCT_TRANSLATIONS.ar[p.color] || p.color) : p.color;
+    let nameTranslated = isAr ? (PRODUCT_TRANSLATIONS.ar[p.name] || p.name) : p.name;
+    let descTranslated = isAr ? (PRODUCT_TRANSLATIONS.ar[p.description] || p.description) : p.description;
     
     document.getElementById('ppSub').innerText = colorTranslated;
     document.getElementById('ppTitle').innerText = nameTranslated;
     document.getElementById('ppPrice').innerText = "EGP " + p.price;
     document.getElementById('ppDesc').innerHTML = descTranslated;
     
-    document.getElementById('ppMainImg').src = resolveImgSrc(p.front_image_url, defaultFront);
-    document.getElementById('thumbImg0').src = resolveImgSrc(p.front_image_url, defaultFront);
-    document.getElementById('thumbImg1').src = resolveImgSrc(p.back_image_url, defaultBack);
-    
-    // Reset active selections on load
-    document.querySelectorAll('.pp-thumb').forEach(t => t.classList.remove('active'));
-    document.getElementById('thumb0').classList.add('active');
-    
-    // Render/update size buttons dynamically based on inventory
+    // 1. Dynamic Thumbs — Fix logic to handle JSON strings or Arrays
+    const thumbsContainer = document.getElementById('pp-thumbs');
+    if (thumbsContainer) {
+        thumbsContainer.innerHTML = '';
+        let imgs = [];
+        try {
+            imgs = typeof p.images === 'string' ? JSON.parse(p.images) : p.images;
+        } catch(e) { 
+            imgs = [p.front_image_url, p.back_image_url].filter(Boolean); 
+        }
+        if (!Array.isArray(imgs)) imgs = [p.front_image_url, p.back_image_url].filter(Boolean);
+        
+        imgs.forEach((src, i) => {
+            const div = document.createElement('div');
+            div.className = 'pp-thumb' + (i === 0 ? ' active' : '');
+            div.onclick = () => switchImg(i);
+            div.innerHTML = `<img src="${src}" alt="View ${i}">`;
+            thumbsContainer.appendChild(div);
+        });
+        
+        // Set initial main img
+        if (imgs.length > 0) {
+            document.getElementById('ppMainImg').src = imgs[0];
+        } else {
+            document.getElementById('ppMainImg').src = p.front_image_url || 'blackinfront.jpg';
+        }
+    }
+
+    // 2. Size buttons based on inventory
     const sizeContainer = document.querySelector('.pp-sizes');
     let totalStock = 0;
     if (sizeContainer) {
         const sizes = ['S', 'M', 'L', 'XL'];
         sizeContainer.innerHTML = sizes.map(size => {
-            let stock = 10; // Default fallback if offline
-            if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY") {
-                const invItem = activeProductInventory.find(item => item.size === size);
-                stock = invItem ? Number(invItem.stock) : 0;
-            }
+            let stock = 0;
+            const invItem = activeProductInventory.find(item => item.size === size);
+            stock = invItem ? Number(invItem.stock) : 0;
             totalStock += stock;
             
             if (stock <= 0) {
-                return `<button class="pp-size-btn sold-out" disabled style="opacity: 0.25; cursor: not-allowed; text-decoration: line-through; position: relative;">${size}</button>`;
+                return `<button class="pp-size-btn sold-out" disabled style="opacity: 0.25; cursor: not-allowed; text-decoration: line-through;">${size}</button>`;
             } else {
                 return `<button class="pp-size-btn" onclick="pickSize(this)">${size}</button>`;
             }
         }).join('');
     }
     
-    // Update Buy It Now button state based on total stock
+    // Update Buy It Now button state
     const buyBtn = document.querySelector('#productPage .checkout-trigger-btn');
     if (buyBtn) {
         if (totalStock <= 0) {
             buyBtn.disabled = true;
-            buyBtn.innerText = "SOLD OUT";
+            buyBtn.innerText = isAr ? "نفذت الكمية" : "SOLD OUT";
             buyBtn.style.opacity = "0.5";
-            buyBtn.style.cursor = "not-allowed";
         } else {
             buyBtn.disabled = false;
-            buyBtn.innerText = currentLang === 'ar' ? 'اشتريه دلوقتي' : 'Buy It Now';
+            buyBtn.innerText = isAr ? 'اشتريه دلوقتي' : 'Buy It Now';
             buyBtn.style.opacity = "1";
-            buyBtn.style.cursor = "pointer";
         }
     }
 
-    // Render MAJARAH-style stock indicator
+    // 3. Stock indicator
     const stockIndicator = document.getElementById('ppStockIndicator');
     const stockText = document.getElementById('ppStockText');
     const stockTag = document.getElementById('ppStockTag');
@@ -1187,56 +1108,33 @@ async function openProduct(id) {
     const stockSegments = document.getElementById('ppStockSegments');
     
     if (stockIndicator && stockText && stockTag && stockPulse && stockSegments) {
-        const MAX_DISPLAY = 10; // segments represent up to 10 units visually
+        const MAX_DISPLAY = 10;
         const TOTAL_SEGS = 10;
-        const isAr = currentLang === 'ar';
         
         if (totalStock <= 0) {
             stockIndicator.style.display = 'none';
         } else {
             stockIndicator.style.display = 'block';
-            
-            // Determine urgency tier
-            let tier = 'good'; // good / low / urgent
+            let tier = 'good';
             if (totalStock <= 3) tier = 'urgent';
             else if (totalStock <= 7) tier = 'low';
             
-            // Text label
             if (tier === 'urgent') {
-                stockText.innerHTML = isAr
-                    ? `باقي <strong style="color:#ff4444">${totalStock}</strong> قطعة بس · احجز دلوقتي`
-                    : `Only <strong style="color:#ff4444">${totalStock}</strong> left in stock`;
+                stockText.innerHTML = isAr ? `باقي <strong style="color:#ff4444">${totalStock}</strong> قطعة بس` : `Only <strong style="color:#ff4444">${totalStock}</strong> left`;
             } else if (tier === 'low') {
-                stockText.innerHTML = isAr
-                    ? `باقي <strong style="color:#ff9500">${totalStock}</strong> قطعة`
-                    : `<strong style="color:#ff9500">${totalStock}</strong> units remaining`;
+                stockText.innerHTML = isAr ? `باقي <strong style="color:#ff9500">${totalStock}</strong> قطعة` : `<strong style="color:#ff9500">${totalStock}</strong> remaining`;
             } else {
-                stockText.innerHTML = isAr
-                    ? `متاح · ${totalStock} قطعة`
-                    : `In Stock · ${totalStock} units`;
+                stockText.innerHTML = isAr ? `متاح · ${totalStock} قطعة` : `In Stock · ${totalStock} units`;
             }
             
-            // Tag badge
             stockTag.className = 'mjr-stock-tag ' + tier;
-            stockTag.textContent = tier === 'urgent' ? (isAr ? 'ينتهي قريباً' : 'Almost Gone') 
-                                 : tier === 'low'    ? (isAr ? 'كميات محدودة' : 'Limited')
-                                                     : (isAr ? 'متوفر' : 'In Stock');
+            stockTag.textContent = tier === 'urgent' ? (isAr ? 'ينتهي قريباً' : 'Almost Gone') : tier === 'low' ? (isAr ? 'كميات محدودة' : 'Limited') : (isAr ? 'متوفر' : 'In Stock');
             
-            // Pulse dot
             if (tier === 'urgent') stockPulse.classList.add('active');
             else stockPulse.classList.remove('active');
             
-            // Segmented bar — fill proportionally up to MAX_DISPLAY
             const filledSegs = Math.min(TOTAL_SEGS, Math.ceil((Math.min(totalStock, MAX_DISPLAY) / MAX_DISPLAY) * TOTAL_SEGS));
-            stockSegments.style.display = 'flex';
-            stockSegments.style.gap = '3px';
-            stockSegments.style.height = '3px';
-            stockSegments.style.width = '100%';
-            stockSegments.innerHTML = Array.from({length: TOTAL_SEGS}, (_, i) => {
-                const isFilled = i < filledSegs;
-                const cls = isFilled ? `mjr-stock-seg filled ${tier}` : 'mjr-stock-seg';
-                return `<div class="${cls}" style="flex:1;height:100%;"></div>`;
-            }).join('');
+            stockSegments.innerHTML = Array.from({length: TOTAL_SEGS}, (_, i) => `<div class="mjr-stock-seg ${i < filledSegs ? 'filled '+tier : ''}" style="flex:1;height:100%;"></div>`).join('');
         }
     }
     
@@ -1248,27 +1146,24 @@ function closeProduct() {
     document.getElementById('productPage').classList.remove('open');
 }
 
-function switchImg(index) {
-    let p = fetchedProducts.find(prod => String(prod.id) === String(activeProductId));
-    if (!p) {
-        const staticP = productsData[activeProductId] || productsData.black || { imgFront: 'blackinfront.jpg', imgBack: 'Blackback.jpg' };
-        p = {
-            front_image_url: staticP.imgFront,
-            back_image_url: staticP.imgBack
-        };
+function switchImg(idx) {
+    const p = fetchedProducts.find(prod => String(prod.id) === String(activeProductId));
+    if (!p) return;
+    let imgs = [];
+    try {
+        imgs = typeof p.images === 'string' ? JSON.parse(p.images) : p.images;
+    } catch(e) { 
+        imgs = [p.front_image_url, p.back_image_url].filter(Boolean); 
     }
+    if (!Array.isArray(imgs)) imgs = [p.front_image_url, p.back_image_url].filter(Boolean);
     
-    let defaultFront = 'blackinfront.jpg';
-    let defaultBack = 'Blackback.jpg';
-    const searchStr = ((p.name || '') + ' ' + (p.color || '')).toLowerCase();
-    if (searchStr.includes('white') || searchStr.includes('alabaster')) {
-        defaultFront = 'whiteinfront.jpg';
-        defaultBack = 'whiteback.jpg';
-    }
+    document.getElementById('ppMainImg').src = imgs[idx] || p.front_image_url;
     
-    document.querySelectorAll('.pp-thumb').forEach(t => t.classList.remove('active'));
-    document.getElementById('thumb' + index).classList.add('active');
-    document.getElementById('ppMainImg').src = (index === 0) ? resolveImgSrc(p.front_image_url, defaultFront) : resolveImgSrc(p.back_image_url, defaultBack);
+    const thumbs = document.querySelectorAll('.pp-thumb');
+    thumbs.forEach((t, i) => {
+        if (i === idx) t.classList.add('active');
+        else t.classList.remove('active');
+    });
 }
 
 function pickSize(element) {
@@ -1405,7 +1300,7 @@ function applyCheckoutCoupon() {
         return;
     }
     
-    const codesStr = localStorage.getItem('mjr_coupon_codes') || 'SAVE10:10%,OFF50:50';
+    const codesStr = siteConfig.couponCodes || 'SAVE10:10%,OFF50:50';
     const couponPairs = codesStr.split(',').map(pair => pair.trim().split(':'));
     const matched = couponPairs.find(pair => pair[0].toUpperCase() === input);
     
@@ -1608,23 +1503,36 @@ async function trackOrdersByPhone() {
     document.getElementById('trackerResults').style.display = 'block';
 }
 
+function validateCoupon(code) {
+    const codesStr = cfg('coupon_codes', '');
+    if (!codesStr) return null;
+    const pairs = codesStr.split(',').map(p => p.trim().split(':'));
+    const match = pairs.find(p => p[0].toUpperCase() === code.toUpperCase());
+    if (!match) return null;
+    return match[1]; // e.g. "10%" or "50"
+}
+
+function getShippingRate(cityName) {
+    const ratesStr = cfg('shipping_rates', '[]');
+    let rates = [];
+    try {
+        rates = typeof ratesStr === 'string' ? JSON.parse(ratesStr) : ratesStr;
+    } catch(e) { 
+        rates = bostaDefaultTiers; 
+    }
+    if (!Array.isArray(rates)) rates = bostaDefaultTiers;
+    const match = rates.find(r => r.name === cityName);
+    return match ? Number(match.price) : 0;
+}
+
 // Dynamic Price Calculation
 function calculateTotals() {
-    // Re-verify rate adjustments made dynamically by admin scripts
-    currentLoadedShippingRates = JSON.parse(localStorage.getItem('storeZones')) || bostaDefaultTiers;
-    
     let p = fetchedProducts.find(prod => String(prod.id) === String(activeProductId));
-    if (!p) {
-        const staticP = productsData[activeProductId] || productsData.black || { price: 520 };
-        p = { price: staticP.price };
-    }
+    if (!p) return;
     
     const selectedCity = document.getElementById('chkCity').value;
-    const targetZoneObj = currentLoadedShippingRates.find(z => z.name === selectedCity);
+    const shippingFeeValue = getShippingRate(selectedCity);
     
-    const shippingFeeValue = targetZoneObj ? targetZoneObj.price : 0;
-    
-    // Apply discount if any
     let basePrice = Number(p.price) || 0;
     let discountAmount = 0;
     if (activeDiscountCode && activeDiscountValue > 0) {
@@ -2622,8 +2530,10 @@ function checkPrelaunch() {
     if (plInput) plInput.value = '';
 
     const bypass = localStorage.getItem('mjr_bypass_prelaunch') === 'true';
-    const showPrelaunch = localStorage.getItem('mjr_show_prelaunch') !== 'false';
-    const dateStr = localStorage.getItem('mjr_prelaunch_date');
+    // Default to 'false' (live store) when no explicit siteConfig value has been loaded yet
+    const rawPrelaunch = siteConfig.showPrelaunch;
+    const showPrelaunch = rawPrelaunch === true;
+    const dateStr = siteConfig.prelaunchDate;
     const targetDate = window.parseLaunchDate ? window.parseLaunchDate(dateStr) : new Date(dateStr || '2026-07-01T20:00:00').getTime();
     const now = new Date().getTime();
     
@@ -2676,7 +2586,7 @@ function lockPrelaunchStore() {
 
 let prelaunchCountdownInterval = null;
 function initPrelaunchCountdown() {
-    const dateStr = localStorage.getItem('mjr_prelaunch_date');
+    const dateStr = siteConfig.prelaunchDate;
     const targetDate = window.parseLaunchDate ? window.parseLaunchDate(dateStr) : new Date(dateStr || '2026-07-01T20:00:00').getTime();
     
     function updateCountdown() {
@@ -2722,7 +2632,7 @@ function handlePrelaunchBypass(e) {
     const passInput = document.getElementById('prelaunchBypassPass');
     if (!passInput) return;
     const enteredPass = passInput.value.trim();
-    const correctPass = localStorage.getItem('mjr_prelaunch_password') || 'majarah2026';
+    const correctPass = siteConfig.prelaunchPassword || 'majarah2026';
     
     if (enteredPass === correctPass) {
         localStorage.setItem('mjr_bypass_prelaunch', 'true');

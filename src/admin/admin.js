@@ -1,6 +1,65 @@
 window.SB_URL = "https://majarah-db.co";
 window.SB_KEY = "majarah-guest-dummy-key";
 
+// ── GLOBAL CONFIGURATION — sync with Supabase ──
+window.ADMIN_CONFIG = {};
+
+async function loadAdminConfig() {
+    try {
+        const res = await fetch(`${SB_URL}/rest/v1/site_config?id=eq.1&select=config`, {
+            headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data[0]) {
+                window.ADMIN_CONFIG = data[0].config || {};
+            }
+        }
+    } catch (e) { console.error("Config fetch failed:", e); }
+}
+
+async function saveConfigToSupabase(partialConfig) {
+  if (!SB_URL || !SB_KEY) {
+    showToast('Supabase not connected. Check credentials.', 'error');
+    return;
+  }
+  
+  try {
+      const getRes = await fetch(`${SB_URL}/rest/v1/site_config?id=eq.1&select=config`, {
+        headers: {
+          'apikey': SB_KEY,
+          'Authorization': `Bearer ${SB_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const current = await getRes.json();
+      const existing = current?.[0]?.config || {};
+      const merged = { ...existing, ...partialConfig };
+      
+      const upsertRes = await fetch(`${SB_URL}/rest/v1/site_config`, {
+        method: 'POST',
+        headers: {
+          'apikey': SB_KEY,
+          'Authorization': `Bearer ${SB_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({ id: 1, config: merged, updated_at: new Date().toISOString() })
+      });
+      
+      if (upsertRes.ok) {
+        window.ADMIN_CONFIG = merged; 
+        showToast('Saved globally ✓ — all devices will see this change', 'success');
+      } else {
+        const err = await upsertRes.text();
+        showToast('Save failed: ' + err, 'error');
+      }
+  } catch(e) {
+      showToast('Sync failed: ' + e.message, 'error');
+  }
+}
+
 // ── DASHBOARD HTML — injected only after auth ──
 function renderDashboard() {
   document.getElementById('app').innerHTML = `
@@ -192,6 +251,52 @@ function renderDashboard() {
           <button class="btn btn-accent btn-sm" onclick="saveTweaks()" style="margin-top:20px;width:100%;padding:12px;">Save Pre-Launch Configuration</button>
         </div>
         <div class="settings-card" style="grid-column:span 2;">
+          <h3>👀 Drop 2 Teaser Section</h3>
+          <p style="font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.6;">Configure a blurred/blacked-out teaser grid with two products and a countdown release timer.</p>
+          <div class="field-row">
+            <div class="field-group">
+              <label>Teaser Section Status</label>
+              <select id="tweakShowTeaser" style="width:100%;">
+                <option value="true">Active (Visible on Storefront)</option>
+                <option value="false" selected>Hidden (Disabled)</option>
+              </select>
+            </div>
+            <div class="field-group" style="flex:2;">
+              <label>Target Release Date &amp; Time (ISO Format)</label>
+              <input type="text" id="tweakTeaserDate" placeholder="e.g. 2026-07-11T20:00:00" style="width:100%;">
+            </div>
+          </div>
+          <div class="field-row" style="margin-top:10px;">
+            <div class="field-group">
+              <label>Header Badge / Tag</label>
+              <input type="text" id="tweakTeaserBadge" placeholder="e.g. TEASER / DROP 02" style="width:100%;">
+            </div>
+            <div class="field-group" style="flex:2;">
+              <label>Header Title</label>
+              <input type="text" id="tweakTeaserTitle" placeholder="e.g. ECLIPSE COLLECTION" style="width:100%;">
+            </div>
+          </div>
+          <div class="field-group" style="margin-top:10px;">
+            <label>Header Description</label>
+            <input type="text" id="tweakTeaserDesc" placeholder="e.g. The next evolution of identity architecture. Pre-register to secure access." style="width:100%;">
+          </div>
+          <div style="border-top:1px solid #1a1a1a;margin-top:15px;padding-top:15px;">
+            <h4 style="font-size:12px;color:#fff;margin-bottom:10px;">👕 Teaser Product 1 (Shirt)</h4>
+            <div class="field-row">
+              <div class="field-group"><label>Product 1 Name</label><input type="text" id="tweakTeaserName1" placeholder="e.g. ECLIPSE SHIRT" style="width:100%;"></div>
+              <div class="field-group" style="flex:2;"><label>Product 1 Image URL</label><input type="text" id="tweakTeaserImage1" placeholder="e.g. blackinfront.jpg" style="width:100%;"></div>
+            </div>
+          </div>
+          <div style="border-top:1px solid #1a1a1a;margin-top:15px;padding-top:15px;">
+            <h4 style="font-size:12px;color:#fff;margin-bottom:10px;">🩳 Teaser Product 2 (Shorts)</h4>
+            <div class="field-row">
+              <div class="field-group"><label>Product 2 Name</label><input type="text" id="tweakTeaserName2" placeholder="e.g. ECLIPSE SHORTS" style="width:100%;"></div>
+              <div class="field-group" style="flex:2;"><label>Product 2 Image URL</label><input type="text" id="tweakTeaserImage2" placeholder="e.g. whiteinfront.jpg" style="width:100%;"></div>
+            </div>
+          </div>
+          <button class="btn btn-accent btn-sm" onclick="saveTweaks()" style="margin-top:20px;width:100%;padding:12px;">Save Teaser Configuration</button>
+        </div>
+        <div class="settings-card" style="grid-column:span 2;">
           <h3>📱 Live Mobile Preview Simulator</h3>
           <p style="font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.6;">Simulate and test how the storefront looks on different mobile screen sizes.</p>
           <div style="display:flex;gap:12px;flex-wrap:wrap;">
@@ -349,6 +454,27 @@ function renderDashboard() {
     </div>
   </div>
 </div>
+
+<div class="modal-overlay" id="configCopyModal">
+  <div class="modal" style="max-width: 600px; padding: 25px;">
+    <button class="modal-x" onclick="closeModal('configCopyModal')">✕</button>
+    <h2>Save Configurations</h2>
+    <div class="modal-sub">Deploy settings to Vercel via config.json</div>
+    <p style="font-size: 11px; line-height: 1.6; color: var(--muted); margin: 12px 0;">
+      All store configurations (marquee, pre-launch, teaser, payment gates, and shipping rates) are now served globally from a CDN-hosted file. Follow these steps to apply your changes:
+    </p>
+    <ol style="font-size: 11px; line-height: 1.8; color: var(--muted); padding-left: 20px; margin-bottom: 15px;">
+      <li>Click <strong>"Copy JSON Content"</strong> below to copy the generated configuration.</li>
+      <li>Open your local project directory and paste it into the <code>config.json</code> file at the root.</li>
+      <li>Commit the file and push it to GitHub/Gitlab to trigger a Vercel CDN rebuild and deploy.</li>
+    </ol>
+    <textarea id="configCopyTextarea" readonly style="width: 100%; height: 180px; font-family: monospace; font-size: 11px; background: #0c0c0c; border: 1px solid var(--border); color: #888; padding: 10px; border-radius: 4px; resize: vertical; margin-bottom: 15px; outline: none;"></textarea>
+    <div style="display: flex; gap: 12px;">
+      <button class="btn btn-accent" onclick="copyConfigJsonText()">📋 Copy JSON Content</button>
+      <button class="btn btn-ghost" onclick="closeModal('configCopyModal')">Close</button>
+    </div>
+  </div>
+</div>
 `;
 }
 
@@ -381,60 +507,25 @@ const sleep = ms => new Promise(res => setTimeout(res, ms));
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let SB_URL = '', SB_KEY = '';
 
-function initSupabase() {
+async function initSupabase() {
   const c = getConfig();
   
-  // Auto-update localStorage keys if window.SB_URL (from supabase-config.js) has been updated
+  // Auto-update localStorage keys if window.SB_URL has been updated
   if (window.SB_URL && window.SB_URL.indexOf("PLACEHOLDER") === -1 && window.SB_URL !== c.sbUrl) {
     c.sbUrl = window.SB_URL;
     c.sbKey = window.SB_KEY;
     setConfig({ sbUrl: c.sbUrl, sbKey: c.sbKey });
   }
-  
-  // Auto-correct the common URL typo in localStorage
-  if (c.sbUrl === "https://pquahubswstyibogjvb.supabase.co") {
-    c.sbUrl = "https://pquahubswstyibiogjvb.supabase.co";
-    setConfig({ sbUrl: c.sbUrl });
-  }
 
   SB_URL = c.sbUrl || (window.SB_URL && window.SB_URL.indexOf("PLACEHOLDER") === -1 ? window.SB_URL : '');
   SB_KEY = c.sbKey || (window.SB_KEY && window.SB_KEY.indexOf("PLACEHOLDER") === -1 ? window.SB_KEY : '');
   
-  // Supabase URL and Key are managed securely on the backend serverless proxy
   document.getElementById('setupBanner').style.display = 'none';
-  const sbUrlSettingsInput = document.getElementById('sbUrlSettings');
-  const sbKeySettingsInput = document.getElementById('sbKeySettings');
-  if (sbUrlSettingsInput) {
-    sbUrlSettingsInput.value = 'Configured securely on Vercel';
-    sbUrlSettingsInput.disabled = true;
-  }
-  if (sbKeySettingsInput) {
-    sbKeySettingsInput.value = '••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••';
-    sbKeySettingsInput.disabled = true;
-  }
-  const saveReconnectBtn = document.querySelector('button[onclick="saveSupabaseFromSettings()"]');
-  if (saveReconnectBtn) {
-    saveReconnectBtn.disabled = true;
-    saveReconnectBtn.textContent = 'Managed on Server';
-  }
-  const copyBtn = document.querySelector('button[onclick="copyConfigJS()"]');
-  if (copyBtn) {
-    copyBtn.disabled = true;
-    copyBtn.style.display = 'none';
-  }
 
-  const emailjsServiceIdInput = document.getElementById('emailjsServiceId');
-  const emailjsTemplateIdInput = document.getElementById('emailjsTemplateId');
-  const emailjsPublicKeyInput = document.getElementById('emailjsPublicKey');
-  if (emailjsServiceIdInput) emailjsServiceIdInput.value = c.emailjsServiceId || '';
-  if (emailjsTemplateIdInput) emailjsTemplateIdInput.value = c.emailjsTemplateId || '';
-  if (emailjsPublicKeyInput) emailjsPublicKeyInput.value = c.emailjsPublicKey || '';
+  // Load Global Config from Supabase
+  await loadAdminConfig();
 
-  // Populate WhatsApp setting
-  const waNumberInput = document.getElementById('waNumber');
-  if (waNumberInput) waNumberInput.value = c.waNumber || '';
-
-  // Populate Marquee, Toggles, and Coupons settings from localStorage (cache)
+  // Populate Marquee, Toggles, and Coupons settings from ADMIN_CONFIG
   const promoInput = document.getElementById('promoTextSetting');
   const speedInput = document.getElementById('tweakPromoSpeed');
   const repeatsInput = document.getElementById('tweakPromoRepeats');
@@ -447,105 +538,52 @@ function initSupabase() {
   const showCouponsSelect = document.getElementById('tweakShowCoupons');
   const couponCodesInput = document.getElementById('tweakCouponCodes');
   
-  if (promoInput) promoInput.value = localStorage.getItem('mjr_promo_text') || '';
-  if (speedInput) speedInput.value = localStorage.getItem('mjr_promo_speed') || '25';
-  if (repeatsInput) repeatsInput.value = localStorage.getItem('mjr_promo_repeats') || '1';
-  if (showMarqueeSelect) showMarqueeSelect.value = localStorage.getItem('mjr_show_marquee') || 'true';
-  if (signInSelect) signInSelect.value = localStorage.getItem('mjr_show_signin') || 'true';
-  if (showStarsSelect) showStarsSelect.value = localStorage.getItem('mjr_show_stars') || 'true';
-  if (showSizeCalcSelect) showSizeCalcSelect.value = localStorage.getItem('mjr_show_size_calc') || 'true';
-  if (showInstagramSelect) showInstagramSelect.value = localStorage.getItem('mjr_show_instagram') || 'true';
-  if (showTiktokSelect) showTiktokSelect.value = localStorage.getItem('mjr_show_tiktok') || 'true';
-  if (showCouponsSelect) showCouponsSelect.value = localStorage.getItem('mjr_show_coupons') || 'false';
-  if (couponCodesInput) couponCodesInput.value = localStorage.getItem('mjr_coupon_codes') || 'SAVE10:10%,OFF50:50';
-  // Payment method toggles
-  const showCODSelect = document.getElementById('tweakShowCOD');
-  const showApplePaySelect = document.getElementById('tweakShowApplePay');
-  const showCardSelect = document.getElementById('tweakShowCard');
-  if (showCODSelect) showCODSelect.value = localStorage.getItem('mjr_show_cod') || 'true';
-  if (showApplePaySelect) showApplePaySelect.value = localStorage.getItem('mjr_show_apple_pay') || 'true';
-  if (showCardSelect) showCardSelect.value = localStorage.getItem('mjr_show_card') || 'true';
-  
-  // Pre-launch mode selectors
-  const showPrelaunchSelect = document.getElementById('tweakShowPrelaunch');
-  const prelaunchDateInput = document.getElementById('tweakPrelaunchDate');
-  const prelaunchPasswordInput = document.getElementById('tweakPrelaunchPassword');
-  const prelaunchEmailsTextarea = document.getElementById('tweakPrelaunchEmails');
-  if (showPrelaunchSelect) showPrelaunchSelect.value = localStorage.getItem('mjr_show_prelaunch') || 'false';
-  if (prelaunchDateInput) prelaunchDateInput.value = localStorage.getItem('mjr_prelaunch_date') || '2026-07-01T20:00:00';
-  if (prelaunchPasswordInput) prelaunchPasswordInput.value = localStorage.getItem('mjr_prelaunch_password') || 'majarah2026';
-  if (prelaunchEmailsTextarea) {
-    const emailStr = localStorage.getItem('mjr_prelaunch_emails') || '[]';
-    try {
-      const arr = JSON.parse(emailStr);
-      prelaunchEmailsTextarea.value = Array.isArray(arr) ? arr.join('\n') : emailStr;
-    } catch(e) {
-      prelaunchEmailsTextarea.value = emailStr;
-    }
-  }
-  
-  updatePromoPreviewStats();
+  const cfg = (key, fallback) => window.ADMIN_CONFIG[key] !== undefined ? window.ADMIN_CONFIG[key] : fallback;
 
-  // Fetch settings from the secure database proxy on load
-  sbFetch('settings', 'GET', null)
-    .then(data => {
-        if (data && data.length > 0) {
-          data.forEach(item => {
-            localStorage.setItem(`mjr_${item.key}`, item.value);
-            
-            // Populate matching DOM field
-            if (item.key === 'promo_text' && promoInput) promoInput.value = item.value;
-            if (item.key === 'promo_speed' && speedInput) speedInput.value = item.value;
-            if (item.key === 'promo_repeats' && repeatsInput) repeatsInput.value = item.value;
-            if (item.key === 'show_marquee' && showMarqueeSelect) showMarqueeSelect.value = item.value;
-            if (item.key === 'show_signin' && signInSelect) signInSelect.value = item.value;
-            if (item.key === 'show_stars' && showStarsSelect) showStarsSelect.value = item.value;
-            if (item.key === 'show_size_calc' && showSizeCalcSelect) showSizeCalcSelect.value = item.value;
-            if (item.key === 'show_instagram' && showInstagramSelect) showInstagramSelect.value = item.value;
-            if (item.key === 'show_tiktok' && showTiktokSelect) showTiktokSelect.value = item.value;
-            if (item.key === 'show_coupons' && showCouponsSelect) showCouponsSelect.value = item.value;
-            if (item.key === 'coupon_codes' && couponCodesInput) couponCodesInput.value = item.value;
-            // Payment toggles from Supabase
-            const showCODSel = document.getElementById('tweakShowCOD');
-            const showApplePaySel = document.getElementById('tweakShowApplePay');
-            const showCardSel = document.getElementById('tweakShowCard');
-            if (item.key === 'show_cod' && showCODSel) showCODSel.value = item.value;
-            if (item.key === 'show_apple_pay' && showApplePaySel) showApplePaySel.value = item.value;
-            if (item.key === 'show_card' && showCardSel) showCardSel.value = item.value;
-            // Shipping zones — load into localStorage and render panel
-            if (item.key === 'shipping_zones') {
-              try {
-                const zones = JSON.parse(item.value);
-                if (Array.isArray(zones) && zones.length > 0) {
-                  localStorage.setItem('storeZones', item.value);
-                  setTimeout(renderShippingZones, 0);
-                }
-              } catch(e) {
-                console.error('Failed to parse shipping_zones from DB in admin:', e);
-              }
-            }
-            
-            // Pre-launch mode settings from Supabase
-            const showPrelaunchSel = document.getElementById('tweakShowPrelaunch');
-            const prelaunchDateIn = document.getElementById('tweakPrelaunchDate');
-            const prelaunchPasswordIn = document.getElementById('tweakPrelaunchPassword');
-            const prelaunchEmailsTex = document.getElementById('tweakPrelaunchEmails');
-            if (item.key === 'show_prelaunch' && showPrelaunchSel) showPrelaunchSel.value = item.value;
-            if (item.key === 'prelaunch_date' && prelaunchDateIn) prelaunchDateIn.value = item.value;
-            if (item.key === 'prelaunch_password' && prelaunchPasswordIn) prelaunchPasswordIn.value = item.value;
-            if (item.key === 'prelaunch_emails' && prelaunchEmailsTex) {
-              try {
-                const arr = JSON.parse(item.value);
-                prelaunchEmailsTex.value = Array.isArray(arr) ? arr.join('\n') : item.value;
-              } catch(e) {
-                prelaunchEmailsTex.value = item.value;
-              }
-            }
-          });
-          updatePromoPreviewStats();
-        }
-      })
-      .catch(err => console.error("Error loading settings from database:", err));
+  if (promoInput) promoInput.value = cfg('promo_text', '');
+  if (speedInput) speedInput.value = cfg('promo_speed', '25');
+  if (repeatsInput) repeatsInput.value = cfg('promo_repeats', '1');
+  if (showMarqueeSelect) showMarqueeSelect.value = cfg('show_marquee', 'true');
+  if (signInSelect) signInSelect.value = cfg('show_signin', 'true');
+  if (showStarsSelect) showStarsSelect.value = cfg('show_stars', 'true');
+  if (showSizeCalcSelect) showSizeCalcSelect.value = cfg('show_size_calc', 'true');
+  if (showInstagramSelect) showInstagramSelect.value = cfg('show_instagram', 'true');
+  if (showTiktokSelect) showTiktokSelect.value = cfg('show_tiktok', 'true');
+  if (showCouponsSelect) showCouponsSelect.value = cfg('show_coupons', 'false');
+  if (couponCodesInput) couponCodesInput.value = cfg('coupon_codes', 'SAVE10:10%,OFF50:50');
+  
+  // Payment methods
+  if (document.getElementById('tweakShowCOD')) document.getElementById('tweakShowCOD').value = cfg('show_cod', 'true');
+  if (document.getElementById('tweakShowApplePay')) document.getElementById('tweakShowApplePay').value = cfg('show_apple_pay', 'true');
+  if (document.getElementById('tweakShowCard')) document.getElementById('tweakShowCard').value = cfg('show_card', 'true');
+  
+  // Prelaunch
+  if (document.getElementById('tweakShowPrelaunch')) document.getElementById('tweakShowPrelaunch').value = cfg('show_prelaunch', 'false');
+  if (document.getElementById('tweakPrelaunchDate')) document.getElementById('tweakPrelaunchDate').value = cfg('prelaunch_date', '2026-07-01T20:00:00');
+  if (document.getElementById('tweakPrelaunchPassword')) document.getElementById('tweakPrelaunchPassword').value = cfg('prelaunch_password', 'majarah2026');
+  
+  // Teaser
+  if (document.getElementById('tweakShowTeaser')) document.getElementById('tweakShowTeaser').value = cfg('teaser_show', 'false');
+  if (document.getElementById('tweakTeaserDate')) document.getElementById('tweakTeaserDate').value = cfg('teaser_date', '2026-07-11T20:00:00');
+  if (document.getElementById('tweakTeaserBadge')) document.getElementById('tweakTeaserBadge').value = cfg('teaser_badge', 'TEASER / DROP 02');
+  if (document.getElementById('tweakTeaserTitle')) document.getElementById('tweakTeaserTitle').value = cfg('teaser_title', 'ECLIPSE COLLECTION');
+  if (document.getElementById('tweakTeaserDesc')) document.getElementById('tweakTeaserDesc').value = cfg('teaser_desc', '');
+  if (document.getElementById('tweakTeaserName1')) document.getElementById('tweakTeaserName1').value = cfg('teaser_name1', '');
+  if (document.getElementById('tweakTeaserImage1')) document.getElementById('tweakTeaserImage1').value = cfg('teaser_image1', '');
+  if (document.getElementById('tweakTeaserName2')) document.getElementById('tweakTeaserName2').value = cfg('teaser_name2', '');
+  if (document.getElementById('tweakTeaserImage2')) document.getElementById('tweakTeaserImage2').value = cfg('teaser_image2', '');
+
+  // Shipping
+  const ratesRaw = cfg('shipping_rates', '');
+  if (ratesRaw) {
+    try {
+        const rates = JSON.parse(ratesRaw);
+        localStorage.setItem('storeZones', JSON.stringify(rates));
+        renderShippingZones();
+    } catch(e) {}
+  }
+
+  updatePromoPreviewStats();
 }
 
 // Returns the best available auth token: user JWT if logged in, anon key as fallback
@@ -1248,10 +1286,49 @@ function exportOrdersCSV(provider) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // CORE ACTIONS & OPERATIONS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const TRANSLATION_KEYS = ['collection', 'signin', 'hero_sub', 'explore', 'universe_within', 'universe_tagline', 'tap_explore', 'company', 'about_us', 'contact_us', 'get_help', 'track_order', 'refund_ex', 'how_to_order', 'privacy', 'sizing', 'sizing_chart', 'size_calculator', 'care_guide', 'washing', 'garment_care', 'delivery_banner', 'buy_now', 'select_size', 'size_guide_btn', 'size_calculator_btn', 'contact', 'delivery_address', 'payment_method', 'cod', 'card', 'confirm_order', 'cancel', 'subtotal', 'shipping', 'total', 'back', 'back_to_search', 'find_order', 'track_refund_title', 'track_refund_sub', 'order_id_lbl', 'phone_lbl', 'how_title', 'how_sub', 'brand_title', 'brand_sub', 'size_recommend_title', 'size_recommend_sub', 'height', 'weight', 'fit_pref', 'fit_oversized', 'fit_regular', 'fit_snug', 'suggested_size_title', 'apply_size_btn', 'washing_title', 'washing_sub', 'garment_title', 'garment_sub', 'badge_local', 'badge_wallet', 'coupon_code_lbl', 'apply_btn', 'days_label', 'hours_label', 'mins_label', 'secs_label', 'tracker_modal_sub', 'measurements_cm'];
+
+function loadTranslationsPanel() {
+  const container = document.getElementById('translationsList');
+  if (!container) return;
+  
+  const translations = window.ADMIN_CONFIG.translations || { en: {}, ar: {} };
+  
+  container.innerHTML = TRANSLATION_KEYS.map(key => `
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; align-items: center;">
+      <div style="font-size: 11px; color: var(--muted);">${key}</div>
+      <input class="search-bar trans-en" data-key="${key}" value="${translations.en ? (translations.en[key] || '') : ''}" style="width: 100%;">
+      <input class="search-bar trans-ar" data-key="${key}" value="${translations.ar ? (translations.ar[key] || '') : ''}" placeholder="same as EN" dir="rtl" style="width: 100%;">
+    </div>
+  `).join('');
+}
+
+async function saveTranslations() {
+  const enInputs = document.querySelectorAll('.trans-en');
+  const arInputs = document.querySelectorAll('.trans-ar');
+  const translations = { en: {}, ar: {} };
+  
+  enInputs.forEach(inp => {
+    const key = inp.getAttribute('data-key');
+    translations.en[key] = inp.value.trim();
+  });
+  
+  arInputs.forEach(inp => {
+    const key = inp.getAttribute('data-key');
+    translations.ar[key] = inp.value.trim();
+  });
+  
+  await saveConfigToSupabase({ translations });
+}
+
 function showPage(pageId, element) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const targetPage = document.getElementById(`page-${pageId}`);
   if(targetPage) targetPage.classList.add('active');
+  
+  if (pageId === 'translations') {
+    loadTranslationsPanel();
+  }
   
   if(element) {
     document.querySelectorAll('.sb-item').forEach(item => item.classList.remove('active'));
@@ -1664,49 +1741,20 @@ async function saveInventory() {
   syncDashboardData();
 }
 async function saveShipping() {
-  // Persist the current zone prices from inputs back to localStorage
   const zoneInputs = document.querySelectorAll('.zone-price-input');
   const zones = JSON.parse(localStorage.getItem('storeZones')) || [];
   zoneInputs.forEach((inp, i) => {
     if (zones[i]) zones[i].price = Number(inp.value) || 0;
   });
-  const zonesJson = JSON.stringify(zones);
-  localStorage.setItem('storeZones', zonesJson);
-
-  // Persist to database so storefront picks up the changes
-  if (typeof SB_URL !== 'undefined' && SB_URL && typeof SB_KEY !== 'undefined' && SB_KEY) {
-    try {
-      const patchRes = await sbFetch('settings', 'PATCH', { value: zonesJson }, `?key=eq.shipping_zones`);
-      let saved = patchRes && patchRes.length > 0;
-      if (!saved) {
-        await sbFetch('settings', 'POST', { key: 'shipping_zones', value: zonesJson });
-      }
-      showToast('Shipping rates saved & synced to database!');
-    } catch(e) {
-      console.error('Failed to sync shipping zones to database:', e);
-      showToast('Shipping rates saved locally!');
-    }
-  } else {
-    showToast('Shipping rates saved!');
-  }
-}
-
-function addZone() {
-  const name = prompt('Zone name (e.g. South Sinai):');
-  const price = parseInt(prompt('Shipping price (EGP):'));
-  if (!name || isNaN(price)) return;
-  const zones = JSON.parse(localStorage.getItem('storeZones')) || [];
-  zones.push({ name: name.trim(), price });
   localStorage.setItem('storeZones', JSON.stringify(zones));
-  renderShippingZones();
-  showToast(`Zone "${name}" added!`);
+  await saveConfigToSupabase('shipping_rates', JSON.stringify(zones));
 }
 
-function saveShippingRules() {
+async function saveShippingRules() {
   const threshold = Number(document.getElementById('freeShipThreshold').value) || 0;
   const days = document.getElementById('deliveryDays').value.trim();
-  localStorage.setItem('storeShippingRules', JSON.stringify({ freeShipThreshold: threshold, deliveryDays: days }));
-  showToast('Shipping rules saved!');
+  await saveConfigToSupabase('shipping_threshold', threshold);
+  await saveConfigToSupabase('shipping_days', days);
 }
 
 function renderShippingZones() {
@@ -1994,106 +2042,132 @@ function updatePromoPreviewStats() {
   if (charCountEl) charCountEl.innerText = `${text.length} characters`;
 }
 
-async function saveTweaks() {
+function buildConfigFromInputs() {
   const text = document.getElementById('promoTextSetting').value.trim();
-  const speed = document.getElementById('tweakPromoSpeed').value.trim();
-  const repeats = document.getElementById('tweakPromoRepeats').value.trim();
-  const showMarquee = document.getElementById('tweakShowMarquee').value;
-  const showSignIn = document.getElementById('tweakShowSignIn').value;
-  const showStars = document.getElementById('tweakShowStars').value;
-  const showSizeCalc = document.getElementById('tweakShowSizeCalc').value;
-  const showInstagram = document.getElementById('tweakShowInstagram').value;
-  const showTiktok = document.getElementById('tweakShowTiktok').value;
-  const showCoupons = document.getElementById('tweakShowCoupons').value;
+  const speed = parseFloat(document.getElementById('tweakPromoSpeed').value) || 25;
+  const repeats = parseInt(document.getElementById('tweakPromoRepeats').value) || 1;
+  const showMarquee = document.getElementById('tweakShowMarquee').value === 'true';
+  const showSignIn = document.getElementById('tweakShowSignIn').value === 'true';
+  const showStars = document.getElementById('tweakShowStars').value === 'true';
+  const showSizeCalc = document.getElementById('tweakShowSizeCalc').value === 'true';
+  const showInstagram = document.getElementById('tweakShowInstagram').value === 'true';
+  const showTiktok = document.getElementById('tweakShowTiktok').value === 'true';
+  const showCoupons = document.getElementById('tweakShowCoupons').value === 'true';
   const couponCodes = document.getElementById('tweakCouponCodes').value.trim();
-  const showCOD = document.getElementById('tweakShowCOD') ? document.getElementById('tweakShowCOD').value : 'true';
-  const showApplePay = document.getElementById('tweakShowApplePay') ? document.getElementById('tweakShowApplePay').value : 'true';
-  const showCard = document.getElementById('tweakShowCard') ? document.getElementById('tweakShowCard').value : 'true';
   
-  // Pre-launch mode values
-  const showPrelaunch = document.getElementById('tweakShowPrelaunch') ? document.getElementById('tweakShowPrelaunch').value : 'false';
+  const showCOD = document.getElementById('tweakShowCOD') ? (document.getElementById('tweakShowCOD').value === 'true') : true;
+  const showApplePay = document.getElementById('tweakShowApplePay') ? (document.getElementById('tweakShowApplePay').value === 'true') : true;
+  const showCard = document.getElementById('tweakShowCard') ? (document.getElementById('tweakShowCard').value === 'true') : true;
+  
+  const showPrelaunch = document.getElementById('tweakShowPrelaunch') ? (document.getElementById('tweakShowPrelaunch').value === 'true') : false;
   const prelaunchDate = document.getElementById('tweakPrelaunchDate') ? document.getElementById('tweakPrelaunchDate').value.trim() : '2026-07-01T20:00:00';
   const prelaunchPassword = document.getElementById('tweakPrelaunchPassword') ? document.getElementById('tweakPrelaunchPassword').value.trim() : 'majarah2026';
   
-  if (!text || !speed || !repeats) {
-    showToast("Please fill all promotion marquee configuration fields!", "error");
-    return;
-  }
-  
-  // Set in localStorage cache
-  localStorage.setItem('mjr_promo_text', text);
-  localStorage.setItem('mjr_promo_speed', speed);
-  localStorage.setItem('mjr_promo_repeats', repeats);
-  localStorage.setItem('mjr_show_marquee', showMarquee);
-  localStorage.setItem('mjr_show_signin', showSignIn);
-  localStorage.setItem('mjr_show_stars', showStars);
-  localStorage.setItem('mjr_show_size_calc', showSizeCalc);
-  localStorage.setItem('mjr_show_instagram', showInstagram);
-  localStorage.setItem('mjr_show_tiktok', showTiktok);
-  localStorage.setItem('mjr_show_coupons', showCoupons);
-  localStorage.setItem('mjr_coupon_codes', couponCodes);
-  localStorage.setItem('mjr_show_cod', showCOD);
-  localStorage.setItem('mjr_show_apple_pay', showApplePay);
-  localStorage.setItem('mjr_show_card', showCard);
-  
-  // Pre-launch mode set in cache
-  localStorage.setItem('mjr_show_prelaunch', showPrelaunch);
-  localStorage.setItem('mjr_prelaunch_date', prelaunchDate);
-  localStorage.setItem('mjr_prelaunch_password', prelaunchPassword);
-  
-  const settingsList = [
-    { key: 'promo_text', value: text },
-    { key: 'promo_speed', value: speed },
-    { key: 'promo_repeats', value: repeats },
-    { key: 'show_marquee', value: showMarquee },
-    { key: 'show_signin', value: showSignIn },
-    { key: 'show_stars', value: showStars },
-    { key: 'show_size_calc', value: showSizeCalc },
-    { key: 'show_instagram', value: showInstagram },
-    { key: 'show_tiktok', value: showTiktok },
-    { key: 'show_coupons', value: showCoupons },
-    { key: 'coupon_codes', value: couponCodes },
-    { key: 'show_cod', value: showCOD },
-    { key: 'show_apple_pay', value: showApplePay },
-    { key: 'show_card', value: showCard },
-    { key: 'show_prelaunch', value: showPrelaunch },
-    { key: 'prelaunch_date', value: prelaunchDate },
-    { key: 'prelaunch_password', value: prelaunchPassword }
-  ];
-  
-  let successCount = 0;
-  
-  if (SB_URL && SB_KEY) {
+  const showTeaser = document.getElementById('tweakShowTeaser') ? (document.getElementById('tweakShowTeaser').value === 'true') : false;
+  const teaserDate = document.getElementById('tweakTeaserDate') ? document.getElementById('tweakTeaserDate').value.trim() : '2026-07-11T20:00:00';
+  const teaserBadge = document.getElementById('tweakTeaserBadge') ? document.getElementById('tweakTeaserBadge').value.trim() : 'TEASER / DROP 02';
+  const teaserTitle = document.getElementById('tweakTeaserTitle') ? document.getElementById('tweakTeaserTitle').value.trim() : 'ECLIPSE COLLECTION';
+  const teaserDesc = document.getElementById('tweakTeaserDesc') ? document.getElementById('tweakTeaserDesc').value.trim() : 'The next evolution of identity architecture. Pre-register to secure access.';
+  const teaserName1 = document.getElementById('tweakTeaserName1') ? document.getElementById('tweakTeaserName1').value.trim() : 'ECLIPSE SHIRT';
+  const teaserImage1 = document.getElementById('tweakTeaserImage1') ? document.getElementById('tweakTeaserImage1').value.trim() : 'blackinfront.jpg';
+  const teaserName2 = document.getElementById('tweakTeaserName2') ? document.getElementById('tweakTeaserName2').value.trim() : 'ECLIPSE SHORTS';
+  const teaserImage2 = document.getElementById('tweakTeaserImage2') ? document.getElementById('tweakTeaserImage2').value.trim() : 'whiteinfront.jpg';
+
+  // Shipping rates
+  const zones = JSON.parse(localStorage.getItem('storeZones')) || [];
+  const shippingRates = {};
+  zones.forEach(z => {
+    shippingRates[z.name] = z.price;
+  });
+
+  return {
+    promoText: text,
+    promoSpeed: speed,
+    promoRepeats: repeats,
+    showMarquee: showMarquee,
+    showSignIn: showSignIn,
+    showInstagram: showInstagram,
+    showTiktok: showTiktok,
+    showStars: showStars,
+    showSizeCalc: showSizeCalc,
+    showCoupons: showCoupons,
+    couponCodes: couponCodes,
+    showCOD: showCOD,
+    showApplePay: showApplePay,
+    showCard: showCard,
+    showPrelaunch: showPrelaunch,
+    prelaunchDate: prelaunchDate,
+    prelaunchPassword: prelaunchPassword,
+    teaserShow: showTeaser,
+    teaserDate: teaserDate,
+    teaserBadge: teaserBadge,
+    teaserTitle: teaserTitle,
+    teaserDesc: teaserDesc,
+    teaserName1: teaserName1,
+    teaserImage1: teaserImage1,
+    teaserName2: teaserName2,
+    teaserImage2: teaserImage2,
+    shippingRates: shippingRates
+  };
+}
+
+function openModal(modalId) {
+  const el = document.getElementById(modalId);
+  if (el) el.classList.add('open');
+}
+
+function copyConfigJsonText() {
+  const textarea = document.getElementById('configCopyTextarea');
+  if (textarea) {
+    textarea.select();
     try {
-      for (const item of settingsList) {
-        // Try PATCH first
-        const patchData = await sbFetch('settings', 'PATCH', { value: item.value }, `?key=eq.${item.key}`);
-        
-        let saved = false;
-        if (patchData && patchData.length > 0) {
-          saved = true;
-        }
-        
-        if (!saved) {
-          // POST if key doesn't exist
-          const postData = await sbFetch('settings', 'POST', { key: item.key, value: item.value });
-          if (postData) saved = true;
-        }
-        
-        if (saved) successCount++;
-      }
-    } catch(e) {
-      console.error("Database settings saving failed:", e);
-    }
+      navigator.clipboard.writeText(textarea.value);
+    } catch(err) {}
+    showToast("JSON copied to clipboard! Update config.json and push to deploy.", "success");
   }
-  
-  if (SB_URL && SB_KEY && successCount === settingsList.length) {
-    showToast("Configurations saved and synced to database!");
-  } else {
-    showToast("Configurations saved locally!");
+}
+
+async function saveTweaks() {
+  const partial = {
+    promoText: document.getElementById('promoTextSetting').value.trim(),
+    promoSpeed: Number(document.getElementById('tweakPromoSpeed').value),
+    promoRepeats: Number(document.getElementById('tweakPromoRepeats').value),
+    promoVisible: document.getElementById('tweakShowMarquee').value === 'true',
+    showSignIn: document.getElementById('tweakShowSignIn').value === 'true',
+    showStars: document.getElementById('tweakShowStars').value === 'true',
+    showSizeCalc: document.getElementById('tweakShowSizeCalc').value === 'true',
+    instagramVisible: document.getElementById('tweakShowInstagram').value === 'true',
+    tiktokVisible: document.getElementById('tweakShowTiktok').value === 'true',
+    paymentCOD: document.getElementById('tweakShowCOD').value === 'true',
+    paymentApplePay: document.getElementById('tweakShowApplePay').value === 'true',
+    paymentCard: document.getElementById('tweakShowCard').value === 'true',
+    showPrelaunch: document.getElementById('tweakShowPrelaunch').value === 'true',
+    prelaunchDate: document.getElementById('tweakPrelaunchDate').value.trim(),
+    bypassPassword: document.getElementById('tweakPrelaunchPassword').value.trim(),
+    drop2TeaserVisible: document.getElementById('tweakShowTeaser').value === 'true',
+    drop2TeaserDate: document.getElementById('tweakTeaserDate').value.trim(),
+    drop2TeaserBadge: document.getElementById('tweakTeaserBadge').value.trim(),
+    drop2TeaserTitle: document.getElementById('tweakTeaserTitle').value.trim(),
+    drop2TeaserDesc: document.getElementById('tweakTeaserDesc').value.trim(),
+    drop2Product1Name: document.getElementById('tweakTeaserName1').value.trim(),
+    drop2Product1Image: document.getElementById('tweakTeaserImage1').value.trim(),
+    drop2Product2Name: document.getElementById('tweakTeaserName2').value.trim(),
+    drop2Product2Image: document.getElementById('tweakTeaserImage2').value.trim()
+  };
+
+  const couponInput = document.getElementById('tweakCouponCodes').value.trim();
+  const coupons = {};
+  if (couponInput) {
+      couponInput.split(',').forEach(pair => {
+          const parts = pair.split(':');
+          if (parts.length === 2) {
+              coupons[parts[0].trim().toUpperCase()] = parts[1].trim();
+          }
+      });
   }
-  
-  updatePromoPreviewStats();
+  partial.coupons = coupons;
+
+  await saveConfigToSupabase(partial);
 }
 
 function exportPrelaunchEmailsCSV() {

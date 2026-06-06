@@ -4,6 +4,7 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Cinzel:wght@400;600;700;800&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MAJARAH</title>
     <link rel="icon" type="image/png" href="storefront_favicon.png">
@@ -16,30 +17,31 @@
     <div style="max-width: 600px; padding: 60px 20px; width: 90%; margin: auto;">
         <!-- Calligraphy logo "م" -->
         <div style="font-family: 'Cinzel', serif; font-size: 96px; font-weight: 700; letter-spacing: 10px; margin-bottom: 20px; color: #fff; text-shadow: 0 0 30px rgba(255,255,255,0.1);">م</div>
-        <div style="font-family: 'Cinzel', serif; font-size: 20px; font-weight: 600; letter-spacing: 8px; text-transform: uppercase; margin-bottom: 50px; color: #fff;">MAJARAH</div>
+        <!-- Logo -->
+        <div style="font-family: 'Cinzel', serif; font-size: clamp(20px, 4vw, 24px); font-weight: 600; letter-spacing: 8px; text-transform: uppercase; margin-bottom: 50px; color: #fff;">MAJARAH</div>
         
         <!-- Status Label -->
         <div id="prelaunchStatusText" style="font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: #666; margin-bottom: 25px;">DROP 01 LAUNCHING IN</div>
         
         <!-- Countdown timer -->
-        <div id="prelaunchCountdown" style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 50px;">
-            <div style="min-width: 70px;">
-                <div id="pl-days" style="font-family: 'Cinzel', serif; font-size: 48px; font-weight: 700; color: #fff; line-height: 1;">00</div>
+        <div id="prelaunchCountdown" style="display: flex; justify-content: center; align-items: center; gap: clamp(10px, 3vw, 20px); margin-bottom: 50px; flex-wrap: wrap;">
+            <div style="min-width: clamp(55px, 15vw, 70px);">
+                <div id="pl-days" style="font-family: 'Cinzel', serif; font-size: clamp(32px, 8vw, 48px); font-weight: 700; color: #fff; line-height: 1;">00</div>
                 <div style="font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: #444; margin-top: 10px;">Days</div>
             </div>
-            <div style="font-family: 'Cinzel', serif; font-size: 40px; font-weight: 700; color: #222; line-height: 1;">:</div>
-            <div style="min-width: 70px;">
-                <div id="pl-hours" style="font-family: 'Cinzel', serif; font-size: 48px; font-weight: 700; color: #fff; line-height: 1;">00</div>
+            <div style="font-family: 'Cinzel', serif; font-size: clamp(24px, 6vw, 40px); font-weight: 700; color: #222; line-height: 1;">:</div>
+            <div style="min-width: clamp(55px, 15vw, 70px);">
+                <div id="pl-hours" style="font-family: 'Cinzel', serif; font-size: clamp(32px, 8vw, 48px); font-weight: 700; color: #fff; line-height: 1;">00</div>
                 <div style="font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: #444; margin-top: 10px;">Hours</div>
             </div>
-            <div style="font-family: 'Cinzel', serif; font-size: 40px; font-weight: 700; color: #222; line-height: 1;">:</div>
-            <div style="min-width: 70px;">
-                <div id="pl-minutes" style="font-family: 'Cinzel', serif; font-size: 48px; font-weight: 700; color: #fff; line-height: 1;">00</div>
+            <div style="font-family: 'Cinzel', serif; font-size: clamp(24px, 6vw, 40px); font-weight: 700; color: #222; line-height: 1;">:</div>
+            <div style="min-width: clamp(55px, 15vw, 70px);">
+                <div id="pl-minutes" style="font-family: 'Cinzel', serif; font-size: clamp(32px, 8vw, 48px); font-weight: 700; color: #fff; line-height: 1;">00</div>
                 <div style="font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: #444; margin-top: 10px;">Mins</div>
             </div>
-            <div style="font-family: 'Cinzel', serif; font-size: 40px; font-weight: 700; color: #222; line-height: 1;">:</div>
-            <div style="min-width: 70px;">
-                <div id="pl-seconds" style="font-family: 'Cinzel', serif; font-size: 48px; font-weight: 700; color: #fff; line-height: 1;">00</div>
+            <div style="font-family: 'Cinzel', serif; font-size: clamp(24px, 6vw, 40px); font-weight: 700; color: #222; line-height: 1;">:</div>
+            <div style="min-width: clamp(55px, 15vw, 70px);">
+                <div id="pl-seconds" style="font-family: 'Cinzel', serif; font-size: clamp(32px, 8vw, 48px); font-weight: 700; color: #fff; line-height: 1;">00</div>
                 <div style="font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: #444; margin-top: 10px;">Secs</div>
             </div>
         </div>
@@ -139,12 +141,77 @@
 <main class="collection-container" id="collection">
     <div class="section-header scroll-reveal">
         <h2 data-t="universe_within">The Universe Within</h2>
+        <p data-t="universe_tagline" class="collection-tagline">Drop 01 &mdash; 100% heavyweight cotton. Screen-printed in Cairo. Ships across all of Egypt.</p>
         <span data-t="tap_explore">Tap any piece to explore · Hover to see the back</span>
     </div>
     <div class="grid">
         <!-- Dynamic products grid will be loaded here -->
     </div>
 </main>
+
+<!-- Drop 2 Teaser Section with 2 Blurred Products & Countdown -->
+<section id="drop2TeaserSection" class="teaser-section scroll-reveal" style="display: none;">
+    <div class="teaser-container">
+        <div class="teaser-header-content">
+            <span class="teaser-badge" id="teaserBadge">TEASER / DROP 02</span>
+            <h2 class="teaser-title" id="teaserTitle">ECLIPSE COLLECTION</h2>
+            <p class="teaser-desc" id="teaserDesc">The next evolution of identity architecture. Pre-register to secure access.</p>
+        </div>
+        
+        <!-- Live Countdown Timer -->
+        <div id="teaserCountdown" class="teaser-countdown-grid">
+            <div class="countdown-unit">
+                <div id="teaser-days" class="countdown-number">00</div>
+                <div class="countdown-label" data-t="days_label">DAYS</div>
+            </div>
+            <div class="countdown-divider">:</div>
+            <div class="countdown-unit">
+                <div id="teaser-hours" class="countdown-number">00</div>
+                <div class="countdown-label" data-t="hours_label">HOURS</div>
+            </div>
+            <div class="countdown-divider">:</div>
+            <div class="countdown-unit">
+                <div id="teaser-minutes" class="countdown-number">00</div>
+                <div class="countdown-label" data-t="mins_label">MINS</div>
+            </div>
+            <div class="countdown-divider">:</div>
+            <div class="countdown-unit">
+                <div id="teaser-seconds" class="countdown-number">00</div>
+                <div class="countdown-label" data-t="secs_label">SECS</div>
+            </div>
+        </div>
+        
+        <!-- Blurred Product Grid -->
+        <div class="teaser-products-grid">
+            <!-- Product 1 -->
+            <div class="teaser-product-card">
+                <div class="teaser-img-wrapper">
+                    <img id="teaserImg1" class="teaser-img" src="" alt="Teaser Shirt">
+                    <div class="teaser-img-overlay">
+                        <span class="teaser-overlay-badge" id="teaserOverlayBadge1">CLASSIFIED</span>
+                    </div>
+                </div>
+                <div class="teaser-product-info">
+                    <h3 id="teaserName1">ECLIPSE SHIRT</h3>
+                    <p class="teaser-product-sub">DROP 02</p>
+                </div>
+            </div>
+            <!-- Product 2 -->
+            <div class="teaser-product-card">
+                <div class="teaser-img-wrapper">
+                    <img id="teaserImg2" class="teaser-img" src="" alt="Teaser Shorts">
+                    <div class="teaser-img-overlay">
+                        <span class="teaser-overlay-badge" id="teaserOverlayBadge2">CLASSIFIED</span>
+                    </div>
+                </div>
+                <div class="teaser-product-info">
+                    <h3 id="teaserName2">ECLIPSE SHORTS</h3>
+                    <p class="teaser-product-sub">DROP 02</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
 <!-- Cosmic Multi-Column Footer Directory -->
 <footer class="store-footer scroll-reveal">
@@ -500,9 +567,8 @@
     <div class="pp-inner">
         <div class="pp-images">
             <div class="pp-main"><img id="ppMainImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Product"></div>
-            <div class="pp-thumbs">
-                <div class="pp-thumb active" onclick="switchImg(0)" id="thumb0"><img id="thumbImg0" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Front"></div>
-                <div class="pp-thumb"        onclick="switchImg(1)" id="thumb1"><img id="thumbImg1" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Back"></div>
+            <div class="pp-thumbs" id="pp-thumbs">
+                <!-- dynamically populated by storefront.js -->
             </div>
         </div>
         <div class="pp-info">
