@@ -25,17 +25,24 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const sbUrl = process.env.SUPABASE_URL || 'https://nojnqefgbpyibuhduxdx.supabase.co';
-  const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vam5xZWZnYnB5aWJ1aGR1eGR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDE4MTIsImV4cCI6MjA5NjE3NzgxMn0.lguSZ6IU4jQmJYKXMf0vD7Qy14j-8cjcUgDWgK8TyoM';
+  const sbUrl = process.env.SUPABASE_URL;
+  const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!sbKey) {
-    res.status(500).json({ error: 'Supabase credentials are not configured on the server.' });
+  if (!sbUrl || !sbKey) {
+    console.error('Critical Error: Supabase environment variables (URL or Service Role Key) are not defined.');
+    res.status(500).json({ error: 'Server configuration error.' });
     return;
+  }
+
+  // Normalize URL to handle formats both with and without /rest/v1/
+  let normalizedUrl = sbUrl.replace(/\/+$/, '');
+  if (!normalizedUrl.endsWith('/rest/v1')) {
+    normalizedUrl += '/rest/v1';
   }
 
   try {
     // 1. Fetch current prelaunch_emails from settings
-    const getUrl = `${sbUrl.replace(/\/+$/, '')}/rest/v1/settings?key=eq.prelaunch_emails`;
+    const getUrl = `${normalizedUrl}/settings?key=eq.prelaunch_emails`;
     const getRes = await fetch(getUrl, {
       method: 'GET',
       headers: {
@@ -78,7 +85,7 @@ module.exports = async (req, res) => {
 
     if (hasRow) {
       // PATCH existing row
-      const patchUrl = `${sbUrl.replace(/\/+$/, '')}/rest/v1/settings?key=eq.prelaunch_emails`;
+      const patchUrl = `${normalizedUrl}/settings?key=eq.prelaunch_emails`;
       saveRes = await fetch(patchUrl, {
         method: 'PATCH',
         headers: {
@@ -91,7 +98,7 @@ module.exports = async (req, res) => {
       });
     } else {
       // POST new row
-      const postUrl = `${sbUrl.replace(/\/+$/, '')}/rest/v1/settings`;
+      const postUrl = `${normalizedUrl}/settings`;
       saveRes = await fetch(postUrl, {
         method: 'POST',
         headers: {

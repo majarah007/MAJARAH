@@ -119,30 +119,23 @@ if (fs.existsSync(srcAdminDir)) {
   console.warn('⚠ Admin Panel source directory not found.');
 }
 
-// 5. Copy static assets (Favicons, background images, sound effects)
+// 5. Copy static assets (Favicons, background images, sound effects, etc.)
 console.log('📋 Copying static assets...');
-const staticAssets = [
-  'ArabicBack.png',
-  'ArabicFront.png',
-  'Blackback.jpg',
-  'whiteback.jpg',
-  'whiteinfront.jpg',
-  'blackinfront.jpg',
-  'majarah.jpg',
-  'storefront_favicon.png',
-  'admin_favicon.png',
-  'Ding.wav'
-];
-
-staticAssets.forEach(asset => {
-  const srcPath = path.join(__dirname, asset);
-  const destPath = path.join(distDir, asset);
-  if (fs.existsSync(srcPath)) {
-    fs.copyFileSync(srcPath, destPath);
-    console.log(`  -> Copied ${asset}`);
-  } else {
-    console.warn(`  ⚠ Asset ${asset} not found in root.`);
-  }
-});
+const srcAssetsDir = path.join(__dirname, 'src', 'assets');
+if (fs.existsSync(srcAssetsDir)) {
+  const assets = fs.readdirSync(srcAssetsDir);
+  assets.forEach(asset => {
+    const srcPath = path.join(srcAssetsDir, asset);
+    const destPath = path.join(distDir, asset);
+    
+    // Only copy files (not directories)
+    if (fs.lstatSync(srcPath).isFile()) {
+      fs.copyFileSync(srcPath, destPath);
+      console.log(`  -> Copied ${asset}`);
+    }
+  });
+} else {
+  console.warn('⚠ src/assets directory not found.');
+}
 
 console.log('🎉 MAJARAH build completed successfully!');

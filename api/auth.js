@@ -26,9 +26,15 @@ module.exports = async (req, res) => {
 
   const { email, password } = req.body || {};
 
-  const expectedUser = process.env.ADMIN_USER || 'admin';
-  const expectedPass = process.env.ADMIN_PASSWORD || 'essamhatab999';
-  const jwtSecret = process.env.JWT_SECRET || 'majarah-jwt-super-secret-key-2026';
+  const expectedUser = process.env.ADMIN_USER;
+  const expectedPass = process.env.ADMIN_PASSWORD;
+  const jwtSecret = process.env.JWT_SECRET;
+
+  if (!expectedUser || !expectedPass || !jwtSecret) {
+    console.error('Critical Error: Auth environment variables (ADMIN_USER, ADMIN_PASSWORD, or JWT_SECRET) are not defined.');
+    res.status(500).json({ error: 'Server configuration error.' });
+    return;
+  }
 
   if (!email || !password) {
     res.status(400).json({ error: 'Email/Username and Password are required.' });

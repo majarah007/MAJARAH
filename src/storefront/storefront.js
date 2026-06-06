@@ -1,6 +1,10 @@
 // --- GLOBAL DATABASE FETCH INTERCEPTOR ---
 window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
-window.SB_KEY = "majarah-guest-dummy-key";
+// Normalize SB_URL: remove trailing slashes and /rest/v1 if present to avoid "Double REST" URL errors
+if (window.SB_URL) {
+    window.SB_URL = window.SB_URL.replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
+}
+window.SB_KEY = ""; // Removed dummy key
 
 // --- IMAGE SRC RESOLVER HELPER ---
 // Ensures product images always resolve to a valid src, never empty string
@@ -9,86 +13,53 @@ function resolveImgSrc(url, fallback) {
     return fallback || 'blackinfront.jpg';
 }
 
-// --- GLOBAL DATA & CONTROLS ---
-const productsData = {
-    black: {
-        title: "Onyx Graphic Tee",
-        sub: "Drop 01 · 2026",
-        price: 500,
-        desc: "<strong>Made from:</strong> 100% Heavyweight Cotton — 280 GSM, oversized cut with dropped shoulders. Screen-printed artwork on the front panel. Ribbed collar for structure.",
-        images: ["blackinfront.jpg", "Blackback.jpg"]
-    },
-    white: {
-        title: "Alabaster Graphic Tee",
-        sub: "Drop 01 · 2026",
-        price: 500,
-        desc: "<strong>Made from:</strong> 100% Heavyweight Cotton — 280 GSM, oversized cut with dropped shoulders. Screen-printed artwork on the front panel. Ribbed collar for structure.",
-        images: ["whiteinfront.jpg", "whiteback.jpg"]
-    }
-};
-
-const originalFetch = window.fetch;
-window.fetch = async function(url, options = {}) {
-    if (typeof url === 'string' && url.includes('/rest/v1/')) {
-        // Parse table and query from original REST call
-        // Correct regex to handle query strings properly
-        const match = url.match(/\/rest\/v1\/([^\?]+)(?:\?(.*))?$/);
-        if (match) {
-            const table = match[1];
-            const query = match[2] || '';
-            const connector = query ? '&' : '?';
-            const proxyUrl = `/api/proxy${query ? '?' + query : ''}${connector}table=${table}`;
-            
-            // Clone headers and remove private apikey parameters
-            const headers = { ...(options.headers || {}) };
-            delete headers['apikey'];
-            delete headers['Authorization'];
-            
-            return originalFetch(proxyUrl, {
-                ...options,
-                headers
-            });
-        }
-    }
-    return originalFetch(url, options);
-};
-
 // ── GLOBAL CONFIGURATION — loaded from Supabase site_config ──
 window.SITE_CONFIG = {};
 
+// CONFIG KEYS for sync
+const CONFIG_KEYS = [
+    'promoText', 'promoVisible', 'promoSpeed', 'promoRepeats',
+    'showPrelaunch', 'prelaunchDate', 'bypassPassword',
+    'drop2TeaserVisible', 'drop2TeaserDate', 'drop2TeaserTitle',
+    'drop2TeaserDesc', 'drop2TeaserBadge', 'drop2Product1Name',
+    'drop2Product1Image', 'drop2Product2Name', 'drop2Product2Image',
+    'showSignIn', 'instagramVisible', 'tiktokVisible', 'showSizeCalc',
+    'showStars', 'showCoupons', 'coupons', 'paymentCOD', 'paymentApplePay', 'paymentCard',
+    'shippingRates', 'translations'
+];
+
+// Initial load from local cache for instant UI response
+function loadLocalConfig() {
+    CONFIG_KEYS.forEach(k => {
+        const val = localStorage.getItem(`mjr_${k}`);
+        if (val !== null) {
+            try {
+                window.SITE_CONFIG[k] = JSON.parse(val);
+            } catch(e) {
+                window.SITE_CONFIG[k] = val;
+            }
+        }
+    });
+}
+loadLocalConfig();
+
 async function loadSiteConfig() {
     try {
-        const res = await fetch('/api/proxy?table=site_config&id=eq.1&select=config');
+        const res = await fetch(`/api/proxy?table=site_config&id=eq.1&select=config&t=${Date.now()}`);
         if (!res.ok) throw new Error('Config load failed');
         const data = await res.json();
-        // Proxy returns the direct JSONB array from Supabase
         if (Array.isArray(data) && data[0] && data[0].config) {
             window.SITE_CONFIG = data[0].config;
+            // Sync back to local storage for persistence across reloads
+            Object.keys(window.SITE_CONFIG).forEach(k => {
+                if (CONFIG_KEYS.includes(k)) {
+                    localStorage.setItem(`mjr_${k}`, JSON.stringify(window.SITE_CONFIG[k]));
+                }
+            });
         }
-        applyConfigToDOM();
     } catch (e) {
         console.warn("Using local cache for config:", e);
-        // Fallback to localStorage if DB is down
-        const keys = [
-            'promoText', 'promoVisible', 'promoSpeed', 'promoRepeats',
-            'showPrelaunch', 'prelaunchDate', 'bypassPassword',
-            'drop2TeaserVisible', 'drop2TeaserDate', 'drop2TeaserTitle',
-            'drop2TeaserDesc', 'drop2TeaserBadge', 'drop2Product1Name',
-            'drop2Product1Image', 'drop2Product2Name', 'drop2Product2Image',
-            'showSignIn', 'instagramVisible', 'tiktokVisible', 'showSizeCalc',
-            'showStars', 'coupons', 'paymentCOD', 'paymentApplePay', 'paymentCard',
-            'shippingRates', 'translations'
-        ];
-        keys.forEach(k => {
-            const val = localStorage.getItem(`mjr_${k}`);
-            if (val !== null) {
-                try {
-                    window.SITE_CONFIG[k] = JSON.parse(val);
-                } catch(err) {
-                    window.SITE_CONFIG[k] = val;
-                }
-            }
-        });
+    } finally {
         applyConfigToDOM();
     }
 }
@@ -100,13 +71,9 @@ function cfg(key, fallback = '') {
 }
 
 function applyConfigToDOM() {
-    // 1. Marquee
+    // 1. Marquee visibility
     const marquee = document.getElementById('storefrontPromoMarquee');
     if (marquee) marquee.style.display = cfg('promoVisible', true) ? 'block' : 'none';
-    const pText = document.getElementById('promoText');
-    const pTextDup = document.getElementById('promoTextDup');
-    if (pText) pText.textContent = cfg('promoText', '🔥 MAJARAH DROP 01 OUT NOW 🔥');
-    if (pTextDup) pTextDup.textContent = cfg('promoText', '🔥 MAJARAH DROP 01 OUT NOW 🔥');
     
     // 2. Prelaunch
     const isPrelaunch = cfg('showPrelaunch', false);
@@ -148,8 +115,7 @@ function applyConfigToDOM() {
     // 5. Checkout
     const couponWrap = document.getElementById('chkCouponWrapper');
     if (couponWrap) {
-        const coupons = cfg('coupons', {});
-        couponWrap.style.display = (Object.keys(coupons).length > 0) ? 'flex' : 'none';
+        couponWrap.style.display = cfg('showCoupons', true) ? 'flex' : 'none';
     }
     const payCOD = document.getElementById('checkoutPayRowCOD');
     if (payCOD) payCOD.style.display = cfg('paymentCOD', true) ? 'flex' : 'none';
@@ -692,11 +658,12 @@ async function initApp() {
 
     // Load announcement, speed, and repeats
     window.updateMarqueeDisplay = () => {
-        let text = cfg('promo_text', '🔥 MAJARAH DROP 01 OUT NOW 🔥');
-        const speed = parseFloat(cfg('promo_speed', '25'));
-        const dbRepeats = parseInt(cfg('promo_repeats', '1'));
-        
+        let text = cfg('promoText', '🔥 MAJARAH 01DROP 🔥');
+        const speed = parseFloat(cfg('promoSpeed', '80'));
+        const dbRepeats = parseInt(cfg('promoRepeats', '1'));
+
         const charWidthEst = 8;
+
         const textWidthEst = text.length * charWidthEst;
         const minRepeats = Math.max(12, Math.ceil((window.innerWidth * 2.5) / textWidthEst));
         const repeats = Math.max(dbRepeats, minRepeats);
@@ -1531,27 +1498,23 @@ async function trackOrdersByPhone() {
 }
 
 function validateCoupon(code) {
-    const codesStr = cfg('coupon_codes', '');
-    if (!codesStr) return null;
-    const pairs = codesStr.split(',').map(p => p.trim().split(':'));
-    const match = pairs.find(p => p[0].toUpperCase() === code.toUpperCase());
-    if (!match) return null;
-    return match[1]; // e.g. "10%" or "50"
+    const coupons = cfg('coupons', {});
+    const match = coupons[code.toUpperCase()];
+    return match || null;
 }
 
 function getShippingRate(cityName) {
-    const ratesStr = cfg('shipping_rates', '[]');
-    let rates = [];
-    try {
-        rates = typeof ratesStr === 'string' ? JSON.parse(ratesStr) : ratesStr;
-    } catch(e) { 
-        rates = bostaDefaultTiers; 
+    const rates = cfg('shippingRates', {});
+    if (rates && rates[cityName] !== undefined) {
+        return Number(rates[cityName]);
     }
-    if (!Array.isArray(rates)) rates = bostaDefaultTiers;
-    const match = rates.find(r => r.name === cityName);
-    return match ? Number(match.price) : 0;
+    // Fallback to bostaDefaultTiers if available
+    if (window.bostaDefaultTiers) {
+        const match = window.bostaDefaultTiers.find(r => r.name === cityName);
+        return match ? Number(match.price) : 0;
+    }
+    return 0;
 }
-
 // Dynamic Price Calculation
 function calculateTotals() {
     let p = fetchedProducts.find(prod => String(prod.id) === String(activeProductId));
@@ -1724,16 +1687,19 @@ async function submitShopifyCheckout() {
                     if (checkRes.ok) {
                         const invData = await checkRes.json();
                         if (invData && invData.length > 0) {
-                            const newStock = Math.max(0, Number(invData[0].stock) - 1);
-                            await fetch(`${baseUrl}/rest/v1/inventory?id=eq.${invData[0].id}`, {
-                                method: 'PATCH',
-                                headers: {
-                                    'apikey': window.SB_KEY,
-                                    'Authorization': `Bearer ${window.SB_KEY}`,
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({ stock: newStock })
-                            });
+                            const currentStock = Number(invData[0].stock);
+                            if (currentStock > 0) {
+                                const newStock = currentStock - 1;
+                                await fetch(`${baseUrl}/rest/v1/inventory?id=eq.${invData[0].id}&stock=eq.${currentStock}`, {
+                                    method: 'PATCH',
+                                    headers: {
+                                        'apikey': window.SB_KEY,
+                                        'Authorization': `Bearer ${window.SB_KEY}`,
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ stock: newStock })
+                                });
+                            }
                         }
                     }
                 } catch (err) {
@@ -2658,7 +2624,7 @@ function handlePrelaunchBypass(e) {
     const passInput = document.getElementById('prelaunchBypassPass');
     if (!passInput) return;
     const enteredPass = passInput.value.trim();
-    const correctPass = siteConfig.prelaunchPassword || 'majarah2026';
+    const correctPass = cfg('bypassPassword', 'majarah2026');
     
     if (enteredPass === correctPass) {
         localStorage.setItem('mjr_bypass_prelaunch', 'true');

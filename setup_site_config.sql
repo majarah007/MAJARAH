@@ -150,3 +150,8 @@ INSERT INTO public.site_config (id, config) VALUES (1, '{
   }
 }'::JSONB)
 ON CONFLICT (id) DO UPDATE SET config = EXCLUDED.config;
+
+-- Explicitly grant permissions to roles to resolve 42501 permission denied errors
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.site_config TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.site_config TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.site_config TO service_role;

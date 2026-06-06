@@ -57,7 +57,13 @@ module.exports = async (req, res) => {
   const method = req.method;
   const authHeader = req.headers.authorization || '';
   const token = authHeader.replace(/^Bearer\s+/, '').trim();
-  const jwtSecret = 'majarah-jwt-super-secret-key-2026';
+  const jwtSecret = process.env.JWT_SECRET;
+
+  if (!jwtSecret) {
+    console.error('Critical Error: JWT_SECRET environment variable is not defined.');
+    res.status(500).json({ error: 'Server configuration error.' });
+    return;
+  }
 
   let isAuthorized = false;
   const isPublicGet = method === 'GET' && ['products', 'inventory', 'settings', 'site_config'].includes(table);
@@ -75,15 +81,23 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // WHATWG URL API (Fixes Deprecation Warning)
-  // FALLBACK: Hardcoded for MAJARAH to bypass Vercel Env Var injection failure
-  const baseUrl = 'https://nojnqefgbpyibuhduxdx.supabase.co';
-  const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vam5xZWZnYnB5aWJ1aGR1eGR4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDYwMTgxMiwiZXhwIjoyMDk2MTc3ODEyfQ.Yfv4U59RuTsGcpb4Mo5FKGzrr4YlF9S5xwH7fqG3kck';
+  // Use environment variables for Supabase connection
+  const baseUrl = process.env.SUPABASE_URL;
+  const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  // Debugging log to confirm it's using the hardcoded keys
-  console.log('DEBUG: Using hardcoded Supabase keys');
+  if (!baseUrl || !sbKey) {
+    console.error('Critical Error: Supabase environment variables (URL or Service Role Key) are not defined.');
+    res.status(500).json({ error: 'Server configuration error.' });
+    return;
+  }
 
-  const targetUrl = new URL(`${baseUrl.replace(/\/+$/, '')}/rest/v1/${table}`);
+  // Normalize URL to handle formats both with and without /rest/v1/
+  let normalizedUrl = baseUrl.replace(/\/+$/, '');
+  if (!normalizedUrl.endsWith('/rest/v1')) {
+    normalizedUrl += '/rest/v1';
+  }
+
+  const targetUrl = new URL(`${normalizedUrl}/${table}`);
   
   // Copy all query params except 'table' and 't'
   Object.keys(req.query).forEach(key => {
@@ -98,9 +112,6 @@ module.exports = async (req, res) => {
     'Content-Type': 'application/json',
     'Prefer': req.headers['prefer'] || 'return=representation'
   };
-
-  console.log('DEBUG: Target URL:', targetUrl.toString());
-  console.log('DEBUG: Headers being sent to Supabase:', { ...headers, apikey: '***', Authorization: 'Bearer ***' });
 
   try {
     const sbResponse = await fetch(targetUrl.toString(), {

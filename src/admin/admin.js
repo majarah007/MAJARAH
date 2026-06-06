@@ -1,51 +1,106 @@
 window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
-window.SB_KEY = "majarah-guest-dummy-key";
+// Normalize SB_URL: remove trailing slashes and /rest/v1 if present to avoid "Double REST" URL errors
+if (window.SB_URL) {
+    window.SB_URL = window.SB_URL.replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
+}
+window.SB_KEY = ""; // Removed dummy key to prevent accidental overwrites
 
 // ── GLOBAL CONFIGURATION — sync with Supabase ──
 window.ADMIN_CONFIG = {};
 
+const CONFIG_KEYS = [
+    'promoText', 'promoVisible', 'promoSpeed', 'promoRepeats',
+    'showPrelaunch', 'prelaunchDate', 'bypassPassword',
+    'drop2TeaserVisible', 'drop2TeaserDate', 'drop2TeaserTitle',
+    'drop2TeaserDesc', 'drop2TeaserBadge', 'drop2Product1Name',
+    'drop2Product1Image', 'drop2Product2Name', 'drop2Product2Image',
+    'showSignIn', 'instagramVisible', 'tiktokVisible', 'showSizeCalc',
+    'showStars', 'showCoupons', 'coupons', 'paymentCOD', 'paymentApplePay', 'paymentCard',
+    'shippingRates', 'translations'
+];
+
+function loadLocalAdminConfig() {
+    CONFIG_KEYS.forEach(k => {
+        const val = localStorage.getItem(`mjr_${k}`);
+        if (val !== null) {
+            try {
+                window.ADMIN_CONFIG[k] = JSON.parse(val);
+            } catch(e) {
+                window.ADMIN_CONFIG[k] = val;
+            }
+        }
+    });
+}
+loadLocalAdminConfig();
+
 async function loadAdminConfig() {
     try {
-        const res = await fetch(`/api/proxy?table=site_config&id=eq.1&select=config`, {
+        const res = await fetch(`/api/proxy?table=site_config&id=eq.1&select=config&t=${Date.now()}`, {
             headers: { 'Content-Type': 'application/json' }
         });
         if (res.ok) {
             const data = await res.json();
             if (data && data[0] && data[0].config) {
-                window.ADMIN_CONFIG = data[0].config;
+                // Merge database config into local config to prevent data loss
+                window.ADMIN_CONFIG = { ...window.ADMIN_CONFIG, ...data[0].config };
+                
+                // Sync back to localStorage for persistence
+                Object.keys(window.ADMIN_CONFIG).forEach(k => {
+                    if (CONFIG_KEYS.includes(k)) {
+                        localStorage.setItem(`mjr_${k}`, JSON.stringify(window.ADMIN_CONFIG[k]));
+                    }
+                });
             }
         }
     } catch (e) { console.error("Config fetch failed:", e); }
 }
 
-async function saveConfigToSupabase(partialConfig) {
+async function saveConfigToSupabase(partialConfig, secondArg) {
   if (!SB_URL || !SB_KEY) {
     showToast('Supabase not connected. Check credentials.', 'error');
     return;
   }
   
   const token = localStorage.getItem('mjr_admin_token') || '';
+
+  // Support both (partialObj) and (key, value) signatures
+  let updateObj = partialConfig;
+  if (typeof partialConfig === 'string') {
+      updateObj = { [partialConfig]: secondArg };
+  }
   
   try {
-      // Fetch via Proxy
-      const getRes = await fetch(`/api/proxy?table=site_config&id=eq.1&select=config`, {
+      // 1. Fetch current full config from proxy
+      const getRes = await fetch(`/api/proxy?table=site_config&id=eq.1&select=config&t=${Date.now()}`, {
         headers: { 
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         }
       });
       
-      const current = await getRes.json();
-      const existing = current?.[0]?.config || {};
-      const merged = { ...existing, ...partialConfig };
+      let existing = {};
+      let hasRow = false;
+      if (getRes.ok) {
+          const data = await getRes.json();
+          if (Array.isArray(data) && data.length > 0) {
+              existing = data[0].config || {};
+              hasRow = true;
+          }
+      } else {
+          // If we can't even GET the current config, STOP to prevent data loss!
+          throw new Error('Could not verify current configuration status.');
+      }
       
-      // Upsert via Proxy
-      const upsertRes = await fetch(`/api/proxy?table=site_config&on_conflict=id`, {
+      // 2. Merge existing config with partial changes
+      const merged = { ...existing, ...updateObj };
+      
+      // 3. Upsert the row (POST with resolution=merge-duplicates)
+      // This is safer than PATCH because it handles the row-not-found case
+      const upsertRes = await fetch(`/api/proxy?table=site_config`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Prefer': 'resolution=merge-duplicates',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Prefer': 'resolution=merge-duplicates'
         },
         body: JSON.stringify({ id: 1, config: merged, updated_at: new Date().toISOString() })
       });
@@ -58,6 +113,7 @@ async function saveConfigToSupabase(partialConfig) {
         showToast('Save failed: ' + err, 'error');
       }
   } catch(e) {
+      console.error('Configuration Sync Error:', e);
       showToast('Sync failed: ' + e.message, 'error');
   }
 }
@@ -536,7 +592,7 @@ function getCredentials() {
   const c = getConfig();
   return { 
     user: c.adminUser || 'admin', 
-    pass: c.adminPass || 'essamhatab999' 
+    pass: c.adminPass || '' 
   };
 }
 
@@ -551,15 +607,15 @@ let SB_URL = '', SB_KEY = '';
 async function initSupabase() {
   const c = getConfig();
   
-  // Auto-update localStorage keys if window.SB_URL has been updated
-  if (window.SB_URL && window.SB_URL.indexOf("PLACEHOLDER") === -1 && window.SB_URL !== c.sbUrl) {
+  // Only use hardcoded defaults if no user-saved configuration exists
+  if (!c.sbUrl && window.SB_URL && window.SB_URL.indexOf("PLACEHOLDER") === -1) {
     c.sbUrl = window.SB_URL;
     c.sbKey = window.SB_KEY;
     setConfig({ sbUrl: c.sbUrl, sbKey: c.sbKey });
   }
 
-  SB_URL = c.sbUrl || (window.SB_URL && window.SB_URL.indexOf("PLACEHOLDER") === -1 ? window.SB_URL : '');
-  SB_KEY = c.sbKey || (window.SB_KEY && window.SB_KEY.indexOf("PLACEHOLDER") === -1 ? window.SB_KEY : '');
+  SB_URL = c.sbUrl || '';
+  SB_KEY = c.sbKey || '';
   
   document.getElementById('setupBanner').style.display = 'none';
 
@@ -581,47 +637,50 @@ async function initSupabase() {
   
   const cfg = (key, fallback) => window.ADMIN_CONFIG[key] !== undefined ? window.ADMIN_CONFIG[key] : fallback;
 
-  if (promoInput) promoInput.value = cfg('promo_text', '');
-  if (speedInput) speedInput.value = cfg('promo_speed', '25');
-  if (repeatsInput) repeatsInput.value = cfg('promo_repeats', '1');
-  if (showMarqueeSelect) showMarqueeSelect.value = cfg('show_marquee', 'true');
-  if (signInSelect) signInSelect.value = cfg('show_signin', 'true');
-  if (showStarsSelect) showStarsSelect.value = cfg('show_stars', 'true');
-  if (showSizeCalcSelect) showSizeCalcSelect.value = cfg('show_size_calc', 'true');
-  if (showInstagramSelect) showInstagramSelect.value = cfg('show_instagram', 'true');
-  if (showTiktokSelect) showTiktokSelect.value = cfg('show_tiktok', 'true');
-  if (showCouponsSelect) showCouponsSelect.value = cfg('show_coupons', 'false');
-  if (couponCodesInput) couponCodesInput.value = cfg('coupon_codes', 'SAVE10:10%,OFF50:50');
+  if (promoInput) promoInput.value = cfg('promoText', '🔥 MAJARAH 01DROP 🔥');
+  if (speedInput) speedInput.value = cfg('promoSpeed', '80');
+  if (repeatsInput) repeatsInput.value = cfg('promoRepeats', '12');
+  if (showMarqueeSelect) showMarqueeSelect.value = String(cfg('promoVisible', true));
+  if (signInSelect) signInSelect.value = String(cfg('showSignIn', true));
+  if (showStarsSelect) showStarsSelect.value = String(cfg('showStars', true));
+  if (showSizeCalcSelect) showSizeCalcSelect.value = String(cfg('showSizeCalc', true));
+  if (showInstagramSelect) showInstagramSelect.value = String(cfg('instagramVisible', true));
+  if (showTiktokSelect) showTiktokSelect.value = String(cfg('tiktokVisible', true));
+  if (showCouponsSelect) {
+      showCouponsSelect.value = String(cfg('showCoupons', true));
+  }
+  
+  if (couponCodesInput) {
+      const coupons = cfg('coupons', {});
+      couponCodesInput.value = Object.entries(coupons).map(([k,v]) => `${k}:${v}`).join(',');
+  }
   
   // Payment methods
-  if (document.getElementById('tweakShowCOD')) document.getElementById('tweakShowCOD').value = cfg('show_cod', 'true');
-  if (document.getElementById('tweakShowApplePay')) document.getElementById('tweakShowApplePay').value = cfg('show_apple_pay', 'true');
-  if (document.getElementById('tweakShowCard')) document.getElementById('tweakShowCard').value = cfg('show_card', 'true');
+  if (document.getElementById('tweakShowCOD')) document.getElementById('tweakShowCOD').value = String(cfg('paymentCOD', true));
+  if (document.getElementById('tweakShowApplePay')) document.getElementById('tweakShowApplePay').value = String(cfg('paymentApplePay', false));
+  if (document.getElementById('tweakShowCard')) document.getElementById('tweakShowCard').value = String(cfg('paymentCard', false));
   
   // Prelaunch
-  if (document.getElementById('tweakShowPrelaunch')) document.getElementById('tweakShowPrelaunch').value = cfg('show_prelaunch', 'false');
-  if (document.getElementById('tweakPrelaunchDate')) document.getElementById('tweakPrelaunchDate').value = cfg('prelaunch_date', '2026-07-01T20:00:00');
-  if (document.getElementById('tweakPrelaunchPassword')) document.getElementById('tweakPrelaunchPassword').value = cfg('prelaunch_password', 'majarah2026');
+  if (document.getElementById('tweakShowPrelaunch')) document.getElementById('tweakShowPrelaunch').value = String(cfg('showPrelaunch', false));
+  if (document.getElementById('tweakPrelaunchDate')) document.getElementById('tweakPrelaunchDate').value = cfg('prelaunchDate', '2026-07-01T20:00:00');
+  if (document.getElementById('tweakPrelaunchPassword')) document.getElementById('tweakPrelaunchPassword').value = cfg('bypassPassword', 'majarah2026');
   
   // Teaser
-  if (document.getElementById('tweakShowTeaser')) document.getElementById('tweakShowTeaser').value = cfg('teaser_show', 'false');
-  if (document.getElementById('tweakTeaserDate')) document.getElementById('tweakTeaserDate').value = cfg('teaser_date', '2026-07-11T20:00:00');
-  if (document.getElementById('tweakTeaserBadge')) document.getElementById('tweakTeaserBadge').value = cfg('teaser_badge', 'TEASER / DROP 02');
-  if (document.getElementById('tweakTeaserTitle')) document.getElementById('tweakTeaserTitle').value = cfg('teaser_title', 'ECLIPSE COLLECTION');
-  if (document.getElementById('tweakTeaserDesc')) document.getElementById('tweakTeaserDesc').value = cfg('teaser_desc', '');
-  if (document.getElementById('tweakTeaserName1')) document.getElementById('tweakTeaserName1').value = cfg('teaser_name1', '');
-  if (document.getElementById('tweakTeaserImage1')) document.getElementById('tweakTeaserImage1').value = cfg('teaser_image1', '');
-  if (document.getElementById('tweakTeaserName2')) document.getElementById('tweakTeaserName2').value = cfg('teaser_name2', '');
-  if (document.getElementById('tweakTeaserImage2')) document.getElementById('tweakTeaserImage2').value = cfg('teaser_image2', '');
+  if (document.getElementById('tweakShowTeaser')) document.getElementById('tweakShowTeaser').value = String(cfg('drop2TeaserVisible', false));
+  if (document.getElementById('tweakTeaserDate')) document.getElementById('tweakTeaserDate').value = cfg('drop2TeaserDate', '2026-09-01T20:00:00');
+  if (document.getElementById('tweakTeaserBadge')) document.getElementById('tweakTeaserBadge').value = cfg('drop2TeaserBadge', 'TEASER / DROP 02');
+  if (document.getElementById('tweakTeaserTitle')) document.getElementById('tweakTeaserTitle').value = cfg('drop2TeaserTitle', 'ECLIPSE COLLECTION');
+  if (document.getElementById('tweakTeaserDesc')) document.getElementById('tweakTeaserDesc').value = cfg('drop2TeaserDesc', '');
+  if (document.getElementById('tweakTeaserName1')) document.getElementById('tweakTeaserName1').value = cfg('drop2Product1Name', '');
+  if (document.getElementById('tweakTeaserImage1')) document.getElementById('tweakTeaserImage1').value = cfg('drop2Product1Image', '');
+  if (document.getElementById('tweakTeaserName2')) document.getElementById('tweakTeaserName2').value = cfg('drop2Product2Name', '');
+  if (document.getElementById('tweakTeaserImage2')) document.getElementById('tweakTeaserImage2').value = cfg('drop2Product2Image', '');
 
   // Shipping
-  const ratesRaw = cfg('shipping_rates', '');
-  if (ratesRaw) {
-    try {
-        const rates = JSON.parse(ratesRaw);
-        localStorage.setItem('storeZones', JSON.stringify(rates));
-        renderShippingZones();
-    } catch(e) {}
+  const rates = cfg('shippingRates', {});
+  if (rates && Object.keys(rates).length > 0) {
+      localStorage.setItem('storeZones', JSON.stringify(Object.keys(rates).map(k => ({ name: k, price: rates[k] }))));
+      renderShippingZones();
   }
 
   updatePromoPreviewStats();
@@ -895,12 +954,15 @@ async function logout() {
   stopAutoSync();
 }
 
-function showDashboard() {
+async function showDashboard() {
   renderDashboard();
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
-  initSupabase();
-  syncDashboardData();
+  
+  showToast('Initializing dashboard...');
+  await initSupabase();
+  await syncDashboardData();
+  
   startAutoSync();
   requestNotificationPermission();
 }
@@ -1366,10 +1428,16 @@ async function saveTranslations() {
   await saveConfigToSupabase({ translations });
 }
 
-function showPage(pageId, element) {
+async function showPage(pageId, element) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const targetPage = document.getElementById(`page-${pageId}`);
   if(targetPage) targetPage.classList.add('active');
+  
+  // Refresh UI from latest config when switching to relevant pages
+  if (['tweaks', 'shipping', 'settings', 'translations'].includes(pageId)) {
+    showToast(`Syncing ${pageId}...`);
+    await initSupabase(); 
+  }
   
   if (pageId === 'translations') {
     loadTranslationsPanel();
@@ -1390,8 +1458,8 @@ function showPage(pageId, element) {
   });
 }
 
-function showMobilePage(pageId, element) {
-  showPage(pageId);
+async function showMobilePage(pageId, element) {
+  await showPage(pageId);
   document.querySelectorAll('.m-nav-item').forEach(item => item.classList.remove('active'));
   if (element) {
     element.classList.add('active');
@@ -1758,9 +1826,9 @@ function renderInventoryGrid() {
 // Save all inventory values in parallel
 async function saveInventory() {
   const inputs = document.querySelectorAll('.size-stock-input');
-  const promises = [];
+  const updates = [];
   
-  showToast("Saving inventory...");
+  showToast("Analyzing inventory changes...");
   
   for (let input of inputs) {
     const productId = Number(input.getAttribute('data-product-id'));
@@ -1769,16 +1837,27 @@ async function saveInventory() {
     
     const existing = storeInventory.find(i => Number(i.product_id) === productId && i.size === size);
     
+    // Skip if unchanged
+    if (existing && Number(existing.stock) === stock) continue;
+    if (!existing && stock === 0) continue;
+
     if (existing) {
-      promises.push(sbFetch('inventory', 'PATCH', { stock }, null, existing.id));
+      updates.push(sbFetch('inventory', 'PATCH', { stock }, null, existing.id));
     } else {
-      promises.push(sbFetch('inventory', 'POST', { product_id: productId, size, stock }));
+      updates.push(sbFetch('inventory', 'POST', { product_id: productId, size, stock }));
     }
   }
   
+  if (updates.length === 0) {
+    showToast("No changes detected.");
+    return;
+  }
+
+  showToast(`Saving ${updates.length} changes...`);
+  
   try {
-    await Promise.all(promises);
-    showToast("Inventory saved successfully!");
+    await Promise.all(updates);
+    showToast("Inventory updated successfully!");
   } catch (err) {
     console.error("Error saving inventory:", err);
     showToast("Failed to save some inventory items.");
@@ -1788,11 +1867,18 @@ async function saveInventory() {
 async function saveShipping() {
   const zoneInputs = document.querySelectorAll('.zone-price-input');
   const zones = JSON.parse(localStorage.getItem('storeZones')) || [];
+  const shippingRates = {};
+  
   zoneInputs.forEach((inp, i) => {
-    if (zones[i]) zones[i].price = Number(inp.value) || 0;
+    if (zones[i]) {
+        zones[i].price = Number(inp.value) || 0;
+        shippingRates[zones[i].name] = zones[i].price;
+    }
   });
+  
   localStorage.setItem('storeZones', JSON.stringify(zones));
-  await saveConfigToSupabase('shipping_rates', JSON.stringify(zones));
+  await saveConfigToSupabase('shippingRates', shippingRates);
+  showToast("Shipping rates updated!");
 }
 
 async function saveShippingRules() {
@@ -2197,7 +2283,8 @@ async function saveTweaks() {
     drop2Product1Name: document.getElementById('tweakTeaserName1').value.trim(),
     drop2Product1Image: document.getElementById('tweakTeaserImage1').value.trim(),
     drop2Product2Name: document.getElementById('tweakTeaserName2').value.trim(),
-    drop2Product2Image: document.getElementById('tweakTeaserImage2').value.trim()
+    drop2Product2Image: document.getElementById('tweakTeaserImage2').value.trim(),
+    showCoupons: document.getElementById('tweakShowCoupons').value === 'true'
   };
 
   const couponInput = document.getElementById('tweakCouponCodes').value.trim();
@@ -2212,7 +2299,15 @@ async function saveTweaks() {
   }
   partial.coupons = coupons;
 
+  // Sync to localStorage immediately for fallback and preview consistency
+  Object.keys(partial).forEach(k => {
+    localStorage.setItem(`mjr_${k}`, JSON.stringify(partial[k]));
+  });
+  // Special case for promo text preview
+  localStorage.setItem('mjr_promoText', partial.promoText);
+
   await saveConfigToSupabase(partial);
+  updatePromoPreviewStats();
 }
 
 function exportPrelaunchEmailsCSV() {
