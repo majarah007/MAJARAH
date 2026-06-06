@@ -636,6 +636,10 @@ async function sbFetch(table, method='GET', body=null, filters='', id=null) {
     if (!res.ok) {
       const errText = await res.text();
       console.error(`Proxy Database Error (${res.status}):`, errText);
+      if (res.status === 401) {
+          showToast('Session expired. Please log in again.', 'error');
+          logout();
+      }
       return null;
     }
     return await res.json();

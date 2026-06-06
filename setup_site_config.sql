@@ -12,9 +12,15 @@ CREATE POLICY "Public Read Access"
 ON public.site_config FOR SELECT
 TO anon USING (true);
 
-CREATE POLICY "Admin Full Access"
+CREATE POLICY "Service Role Full Access"
 ON public.site_config FOR ALL
-TO authenticated
+TO service_role
+USING (true)
+WITH CHECK (true);
+
+CREATE POLICY "Anon Full Access"
+ON public.site_config FOR ALL
+TO anon
 USING (true)
 WITH CHECK (true);
 
