@@ -18,7 +18,6 @@ function verifyToken(token, secret) {
 
     if (signature !== expectedSig) return false;
 
-    // Decode base64url payload manually
     let base64Payload = payload.replace(/-/g, '+').replace(/_/g, '/');
     while (base64Payload.length % 4) {
       base64Payload += '=';
@@ -33,14 +32,15 @@ function verifyToken(token, secret) {
 }
 
 module.exports = async (req, res) => {
-  // CORS Headers
+  // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, Prefer'
   );
+  // FORCE NO CACHE
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 
   if (req.method === 'OPTIONS') {
@@ -59,23 +59,15 @@ module.exports = async (req, res) => {
   const token = authHeader.replace(/^Bearer\s+/, '').trim();
   const jwtSecret = process.env.JWT_SECRET || 'majarah-jwt-super-secret-key-2026';
 
-  // Security Access Control Check
   let isAuthorized = false;
-
-  // 1. GET requests to products, inventory, settings, site_config are allowed publicly for the storefront
   const isPublicGet = method === 'GET' && ['products', 'inventory', 'settings', 'site_config'].includes(table);
-  
-  // 2. POST requests to orders are allowed publicly for storefront checkout
   const isPublicOrderCreate = method === 'POST' && table === 'orders';
 
   if (isPublicGet || isPublicOrderCreate) {
     isAuthorized = true;
   } else {
-    // Admin functions require valid JWT
     const decoded = verifyToken(token, jwtSecret);
-    if (decoded) {
-      isAuthorized = true;
-    }
+    if (decoded) isAuthorized = true;
   }
 
   if (!isAuthorized) {
@@ -83,59 +75,32 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // Proxy the request to Supabase
-  let sbUrl = process.env.SUPABASE_URL || 'https://nojnqefgbpyibuhduxdx.supabase.co';
-  if (sbUrl.includes('PLACEHOLDER') || sbUrl.includes('majarah-db')) {
-      sbUrl = 'https://nojnqefgbpyibuhduxdx.supabase.co';
-  }
-  
-  let sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
-  if (!sbKey || sbKey === 'majarah-guest-dummy-key' || sbKey.includes('PLACEHOLDER')) {
-      sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vam5xZWZnYnB5aWJ1aGR1eGR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDE4MTIsImV4cCI6MjA5NjE3NzgxMn0.lguSZ6IU4jQmJYKXMf0vD7Qy14j-8cjcUgDWgK8TyoM';
-  }
+  // WHATWG URL API (Fixes Deprecation Warning)
+  const baseUrl = process.env.SUPABASE_URL || 'https://nojnqefgbpyibuhduxdx.supabase.co';
+  const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vam5xZWZnYnB5aWJ1aGR1eGR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDE4MTIsImV4cCI6MjA5NjE3NzgxMn0.lguSZ6IU4jQmJYKXMf0vD7Qy14j-8cjcUgDWgK8TyoM';
 
-  if (!sbKey) {
-    res.status(500).json({ error: 'Supabase credentials are not configured on the server.' });
-    return;
-  }
-
-  // Re-assemble the query parameters (e.g. filters, orders, selections)
-  const queryParams = new URLSearchParams(req.query);
-  queryParams.delete('table'); // Remove proxy's own parameter
-  queryParams.delete('t'); // Remove cache-busting timestamp to prevent PGRST syntax errors
-  const queryString = queryParams.toString();
+  const targetUrl = new URL(`${baseUrl.replace(/\/+$/, '')}/rest/v1/${table}`);
   
-  const targetUrl = `${sbUrl.replace(/\/+$/, '')}/rest/v1/${table}${queryString ? '?' + queryString : ''}`;
+  // Copy all query params except 'table' and 't'
+  Object.keys(req.query).forEach(key => {
+      if (key !== 'table' && key !== 't') {
+          targetUrl.searchParams.append(key, req.query[key]);
+      }
+  });
 
   const headers = {
     'apikey': sbKey,
     'Authorization': `Bearer ${sbKey}`,
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Prefer': req.headers['prefer'] || 'return=representation'
   };
-
-  if (method === 'POST' || method === 'PATCH') {
-    // Preserve client's Prefer header (e.g. for resolution=merge-duplicates) or default to return=representation
-    headers['Prefer'] = req.headers['prefer'] || req.headers['Prefer'] || 'return=representation';
-  }
-
-  const fetchOpts = {
-    method,
-    headers
-  };
-
-  if (method !== 'GET' && method !== 'DELETE' && req.body) {
-    fetchOpts.body = JSON.stringify(req.body);
-  }
 
   try {
-    const sbResponse = await fetch(targetUrl, fetchOpts);
-    
-    if (!sbResponse.ok) {
-      const errText = await sbResponse.text();
-      console.error(`Supabase Proxy Error (${sbResponse.status}):`, errText);
-      res.status(sbResponse.status).send(errText);
-      return;
-    }
+    const sbResponse = await fetch(targetUrl.toString(), {
+      method: method,
+      headers: headers,
+      body: (method === 'POST' || method === 'PATCH') ? JSON.stringify(req.body) : undefined
+    });
 
     const rawText = await sbResponse.text();
     let data = {};
@@ -147,7 +112,6 @@ module.exports = async (req, res) => {
         }
     }
 
-    // Filter sensitive key/value pairs from settings table if client is a guest (no valid JWT)
     if (table === 'settings' && method === 'GET') {
       const decoded = verifyToken(token, jwtSecret);
       if (!decoded && Array.isArray(data)) {
