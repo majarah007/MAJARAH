@@ -123,7 +123,7 @@ INSERT INTO public.site_config (id, config) VALUES (1, '{
       "suggested_size_title": "Your Suggested Size",
       "apply_size_btn": "Apply & Select Size",
       "washing_title": "Washing Instructions",
-      "washing_sub": "Care guide to preserve your garment'\''s life",
+      "washing_sub": "Care guide to preserve your garment''s life",
       "garment_title": "Garment Care",
       "garment_sub": "How to dry, iron, and store your pieces",
       "badge_local": "Local",
@@ -139,5 +139,5 @@ INSERT INTO public.site_config (id, config) VALUES (1, '{
     },
     "ar": {}
   }
-}''::JSONB)
+}'::JSONB)
 ON CONFLICT (id) DO UPDATE SET config = EXCLUDED.config;
