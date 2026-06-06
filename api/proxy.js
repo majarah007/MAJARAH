@@ -113,7 +113,8 @@ module.exports = async (req, res) => {
   };
 
   if (method === 'POST' || method === 'PATCH') {
-    headers['Prefer'] = 'return=representation';
+    // Preserve client's Prefer header (e.g. for resolution=merge-duplicates) or default to return=representation
+    headers['Prefer'] = req.headers['prefer'] || req.headers['Prefer'] || 'return=representation';
   }
 
   const fetchOpts = {
