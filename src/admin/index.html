@@ -4,22 +4,27 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>MAJARAH · Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <title>MAJARAH · Command Room</title>
   <link rel="icon" type="image/png" id="adminIcon" href="../admin_favicon.png">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="admin.css">
 </head>
 <body>
 
 <div id="loginScreen">
+  <!-- Animated star-particle canvas -->
+  <canvas id="loginStars"></canvas>
   <div class="login-box">
+    <div class="login-system-tag" id="loginSystemTag">◈ SYSTEM ACCESS</div>
     <div class="login-logo">Majarah · مَجَرَّة</div>
-    <div class="login-title">Admin Panel</div>
-    <div class="login-subtitle">Drop 01 · Secure Access</div>
-    <input type="text" id="loginUser" placeholder="Username or Email">
-    <input type="password" id="loginPass" placeholder="Password">
+    <div class="login-title">Command Room</div>
+    <div class="login-subtitle">Drop 01 · Authorized Personnel Only</div>
+    <input type="text" id="loginUser" placeholder="Username or Email" autocomplete="username">
+    <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">Enter Dashboard</button>
     <div class="login-err" id="loginErr">Invalid credentials. Try again.</div>
+    <div class="login-footer-line">Auth verified server-side &middot; JWT session</div>
   </div>
 </div>
 
@@ -29,27 +34,35 @@
 
 <!-- Live Mobile Preview Simulator Modal -->
 <div class="modal-overlay" id="simulatorModal">
-  <div class="modal" style="max-width: 850px; padding: 24px; background: var(--bg);">
-    <button class="modal-x" onclick="closeModal('simulatorModal')">✕</button>
-    <h2 id="simulatorTitle">Mobile Preview Simulator</h2>
-    <div class="modal-sub">Simulate screen viewport sizes and orientations</div>
-    
-    <!-- Control Header -->
-    <div class="sim-controls">
+  <div class="modal" style="max-width: 880px; padding: 0; background: var(--bg); overflow: hidden; border-radius: 12px;">
+    <!-- Simulator toolbar — styled like an admin page header -->
+    <div class="sim-toolbar">
+      <div class="sim-toolbar-left">
+        <span class="sim-toolbar-icon">📱</span>
+        <div>
+          <div class="sim-toolbar-title">Mobile Preview Simulator</div>
+          <div class="sim-toolbar-sub">Live storefront viewport testing</div>
+        </div>
+      </div>
+      <button class="modal-x sim-toolbar-close" onclick="closeModal('simulatorModal')">✕</button>
+    </div>
+
+    <!-- Control Bar -->
+    <div class="sim-controls" style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none;">
       <div class="sim-control-group">
         <label>Page:</label>
-        <button class="btn btn-sm btn-ghost sim-btn-active" id="simPageStorefront" onclick="switchSimulatorPage('../index.html')">Storefront (index.html)</button>
-        <button class="btn btn-sm btn-ghost" id="simPageAdmin" onclick="switchSimulatorPage('./index.html')">Admin Panel (admin)</button>
+        <button class="btn btn-sm btn-ghost sim-btn-active" id="simPageStorefront" onclick="switchSimulatorPage('../index.html')">Storefront</button>
+        <button class="btn btn-sm btn-ghost" id="simPageAdmin" onclick="switchSimulatorPage('./index.html')">Admin</button>
       </div>
-      
+
       <div class="sim-control-group">
         <label>Orientation:</label>
         <button class="btn btn-sm btn-ghost sim-btn-active" id="simOrientPortrait" onclick="setSimulatorOrientation('portrait')">📱 Portrait</button>
         <button class="btn btn-sm btn-ghost" id="simOrientLandscape" onclick="setSimulatorOrientation('landscape')">🔄 Landscape</button>
       </div>
-      
+
       <div class="sim-control-group">
-        <label>Device Size:</label>
+        <label>Device:</label>
         <select id="simDeviceSelect" onchange="setSimulatorDevice(this.value)" class="search-bar" style="width: auto; padding: 6px 12px; font-size: 11px;">
           <option value="iphone12">Medium Phone (390px)</option>
           <option value="small">Small Phone (360px)</option>
@@ -58,27 +71,86 @@
       </div>
 
       <div class="sim-control-group">
-        <button class="btn btn-sm btn-ghost" onclick="reloadSimulatorFrame()" style="padding: 6px 10px; font-size:11px;">🔄 Reload</button>
+        <button class="btn btn-sm btn-ghost" onclick="reloadSimulatorFrame()" style="padding: 6px 10px; font-size:11px;">⟳ Reload</button>
       </div>
     </div>
-    
-    <!-- Phone Mockup Container -->
-    <div class="sim-phone-wrapper" id="simPhoneWrapper">
-      <div class="sim-speaker"></div>
-      <div class="sim-status-bar">
-        <span id="simTime">09:41</span>
-        <span style="display:flex; gap: 4px; align-items:center;">
-          <span>📶</span>
-          <span>🔋 100%</span>
-        </span>
+
+    <!-- Phone Mockup -->
+    <div style="padding: 20px 24px 24px; display: flex; justify-content: center;">
+      <div class="sim-phone-wrapper" id="simPhoneWrapper">
+        <div class="sim-speaker"></div>
+        <div class="sim-status-bar">
+          <span id="simTime">09:41</span>
+          <span style="display:flex; gap: 4px; align-items:center;">
+            <span style="font-size:9px; letter-spacing:1px;">▲▲▲</span>
+            <span>🔋</span>
+          </span>
+        </div>
+        <iframe class="sim-iframe" id="simIframe" src=""></iframe>
       </div>
-      <iframe class="sim-iframe" id="simIframe" src=""></iframe>
     </div>
-    
+
   </div>
 </div>
 
 <!-- Deployment trigger with verified email -->
 <script src="admin.js"></script>
+<script>
+  // ── Star-field animation behind login box ──
+  (function() {
+    const canvas = document.getElementById('loginStars');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    function initStars() {
+      stars = [];
+      const count = Math.min(180, Math.floor((canvas.width * canvas.height) / 7000));
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.1 + 0.15,
+          o: Math.random() * 0.45 + 0.08,
+          speed: Math.random() * 0.4 + 0.05,
+          pulse: Math.random() * Math.PI * 2
+        });
+      }
+    }
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        s.pulse += s.speed * 0.018;
+        const opacity = s.o * (0.45 + 0.55 * Math.sin(s.pulse));
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200,255,0,${opacity.toFixed(3)})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(draw);
+    }
+    resize();
+    initStars();
+    requestAnimationFrame(draw);
+    window.addEventListener('resize', () => { resize(); initStars(); });
+
+    // Typewriter effect for system tag
+    const tag = document.getElementById('loginSystemTag');
+    if (tag) {
+      const full = tag.textContent;
+      tag.textContent = '';
+      let i = 0;
+      const type = () => {
+        if (i < full.length) { tag.textContent += full[i++]; setTimeout(type, 55); }
+        else { tag.classList.add('typed'); }
+      };
+      setTimeout(type, 500);
+    }
+  })();
+</script>
 </body>
 </html>

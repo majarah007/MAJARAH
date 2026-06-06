@@ -53,8 +53,8 @@ module.exports = async (req, res) => {
   // Security Access Control Check
   let isAuthorized = false;
 
-  // 1. GET requests to products, inventory, settings are allowed publicly for the storefront
-  const isPublicGet = method === 'GET' && ['products', 'inventory', 'settings'].includes(table);
+  // 1. GET requests to products, inventory, settings, site_config are allowed publicly for the storefront
+  const isPublicGet = method === 'GET' && ['products', 'inventory', 'settings', 'site_config'].includes(table);
   
   // 2. POST requests to orders are allowed publicly for storefront checkout
   const isPublicOrderCreate = method === 'POST' && table === 'orders';

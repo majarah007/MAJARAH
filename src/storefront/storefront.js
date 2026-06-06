@@ -1,11 +1,30 @@
 // --- GLOBAL DATABASE FETCH INTERCEPTOR ---
-window.SB_URL = "https://majarah-db.co";
+window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
 window.SB_KEY = "majarah-guest-dummy-key";
+
+// --- GLOBAL DATA & CONTROLS ---
+const productsData = {
+    black: {
+        title: "Onyx Graphic Tee",
+        sub: "Drop 01 · 2026",
+        price: 500,
+        desc: "<strong>Made from:</strong> 100% Heavyweight Cotton — 280 GSM, oversized cut with dropped shoulders. Screen-printed artwork on the front panel. Ribbed collar for structure.",
+        images: ["blackinfront.jpg", "Blackback.jpg"]
+    },
+    white: {
+        title: "Alabaster Graphic Tee",
+        sub: "Drop 01 · 2026",
+        price: 500,
+        desc: "<strong>Made from:</strong> 100% Heavyweight Cotton — 280 GSM, oversized cut with dropped shoulders. Screen-printed artwork on the front panel. Ribbed collar for structure.",
+        images: ["whiteinfront.jpg", "whiteback.jpg"]
+    }
+};
 
 const originalFetch = window.fetch;
 window.fetch = async function(url, options = {}) {
     if (typeof url === 'string' && url.includes('/rest/v1/')) {
         // Parse table and query from original REST call
+        // Correct regex to handle query strings properly
         const match = url.match(/\/rest\/v1\/([^\?]+)(?:\?(.*))?$/);
         if (match) {
             const table = match[1];
@@ -35,8 +54,9 @@ async function loadSiteConfig() {
         const res = await fetch('/api/proxy?table=site_config&id=eq.1&select=config');
         if (!res.ok) throw new Error('Config load failed');
         const data = await res.json();
-        if (Array.isArray(data) && data[0]) {
-            window.SITE_CONFIG = data[0].config || {};
+        // Proxy returns the direct JSONB array from Supabase
+        if (Array.isArray(data) && data[0] && data[0].config) {
+            window.SITE_CONFIG = data[0].config;
         }
         applyConfigToDOM();
     } catch (e) {

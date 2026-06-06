@@ -1,4 +1,4 @@
-window.SB_URL = "https://majarah-db.co";
+window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
 window.SB_KEY = "majarah-guest-dummy-key";
 
 // ── GLOBAL CONFIGURATION — sync with Supabase ──
@@ -6,13 +6,13 @@ window.ADMIN_CONFIG = {};
 
 async function loadAdminConfig() {
     try {
-        const res = await fetch(`${SB_URL}/rest/v1/site_config?id=eq.1&select=config`, {
-            headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+        const res = await fetch(`/api/proxy?table=site_config&id=eq.1&select=config`, {
+            headers: { 'Content-Type': 'application/json' }
         });
         if (res.ok) {
             const data = await res.json();
-            if (data && data[0]) {
-                window.ADMIN_CONFIG = data[0].config || {};
+            if (data && data[0] && data[0].config) {
+                window.ADMIN_CONFIG = data[0].config;
             }
         }
     } catch (e) { console.error("Config fetch failed:", e); }
@@ -24,12 +24,14 @@ async function saveConfigToSupabase(partialConfig) {
     return;
   }
   
+  const token = localStorage.getItem('mjr_admin_token') || '';
+  
   try {
-      const getRes = await fetch(`${SB_URL}/rest/v1/site_config?id=eq.1&select=config`, {
-        headers: {
-          'apikey': SB_KEY,
-          'Authorization': `Bearer ${SB_KEY}`,
-          'Content-Type': 'application/json'
+      // Fetch via Proxy
+      const getRes = await fetch(`/api/proxy?table=site_config&id=eq.1&select=config`, {
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         }
       });
       
@@ -37,13 +39,13 @@ async function saveConfigToSupabase(partialConfig) {
       const existing = current?.[0]?.config || {};
       const merged = { ...existing, ...partialConfig };
       
-      const upsertRes = await fetch(`${SB_URL}/rest/v1/site_config`, {
+      // Upsert via Proxy
+      const upsertRes = await fetch(`/api/proxy?table=site_config`, {
         method: 'POST',
         headers: {
-          'apikey': SB_KEY,
-          'Authorization': `Bearer ${SB_KEY}`,
           'Content-Type': 'application/json',
-          'Prefer': 'resolution=merge-duplicates'
+          'Prefer': 'resolution=merge-duplicates',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ id: 1, config: merged, updated_at: new Date().toISOString() })
       });
@@ -303,6 +305,23 @@ function renderDashboard() {
             <button class="btn btn-accent btn-sm" onclick="openMobileSimulator('../index.html')">📱 Simulate Storefront (index.html)</button>
             <button class="btn btn-ghost btn-sm" onclick="openMobileSimulator('./index.html')">⚙️ Simulate Admin Dashboard</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-translations">
+      <div class="page-header"><h1>Translations</h1><p>Edit English and Arabic labels</p></div>
+      <div class="table-card" style="padding: 20px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-weight: bold; padding-bottom: 10px; border-bottom: 1px solid var(--border);">
+          <div>Key</div>
+          <div>English</div>
+          <div>Arabic</div>
+        </div>
+        <div id="translationsList" style="max-height: 600px; overflow-y: auto; padding-top: 10px;">
+          <!-- dynamically populated -->
+        </div>
+        <div style="margin-top: 20px;">
+          <button class="btn btn-accent" onclick="saveTranslations()">💾 Save All Translations</button>
         </div>
       </div>
     </div>
