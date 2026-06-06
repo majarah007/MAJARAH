@@ -2,6 +2,13 @@
 window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
 window.SB_KEY = "majarah-guest-dummy-key";
 
+// --- IMAGE SRC RESOLVER HELPER ---
+// Ensures product images always resolve to a valid src, never empty string
+function resolveImgSrc(url, fallback) {
+    if (url && url.trim() !== '') return url.trim();
+    return fallback || 'blackinfront.jpg';
+}
+
 // --- GLOBAL DATA & CONTROLS ---
 const productsData = {
     black: {
