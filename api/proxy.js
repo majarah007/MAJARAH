@@ -102,6 +102,7 @@ module.exports = async (req, res) => {
   // Re-assemble the query parameters (e.g. filters, orders, selections)
   const queryParams = new URLSearchParams(req.query);
   queryParams.delete('table'); // Remove proxy's own parameter
+  queryParams.delete('t'); // Remove cache-busting timestamp to prevent PGRST syntax errors
   const queryString = queryParams.toString();
   
   const targetUrl = `${sbUrl.replace(/\/+$/, '')}/rest/v1/${table}${queryString ? '?' + queryString : ''}`;
