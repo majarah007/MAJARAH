@@ -286,14 +286,36 @@ function renderDashboard() {
             <h4 style="font-size:12px;color:#fff;margin-bottom:10px;">👕 Teaser Product 1 (Shirt)</h4>
             <div class="field-row">
               <div class="field-group"><label>Product 1 Name</label><input type="text" id="tweakTeaserName1" placeholder="e.g. ECLIPSE SHIRT" style="width:100%;"></div>
-              <div class="field-group" style="flex:2;"><label>Product 1 Image URL</label><input type="text" id="tweakTeaserImage1" placeholder="e.g. blackinfront.jpg" style="width:100%;"></div>
+              <div class="field-group" style="flex:2;">
+                <label>Product 1 Image URL</label>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <input type="text" id="tweakTeaserImage1" placeholder="e.g. blackinfront.jpg" style="flex:1;" onchange="updateImagePreview('tweakTeaserImage1','tweakTeaserImage1Preview')">
+                  <button class="btn btn-sm btn-ghost" onclick="triggerFileUpload('tweakTeaserImage1File')" style="padding:0 10px;font-size:11px;height:38px;">Upload</button>
+                </div>
+                <input type="file" id="tweakTeaserImage1File" accept="image/*" style="display:none;" onchange="handleFileSelect(this,'tweakTeaserImage1','tweakTeaserImage1Preview')">
+                <div id="tweakTeaserImage1Preview" style="margin-top:6px;display:none;align-items:center;gap:8px;">
+                  <img src="" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid var(--border);">
+                  <span style="font-size:11px;color:var(--muted);">Preview</span>
+                </div>
+              </div>
             </div>
           </div>
           <div style="border-top:1px solid #1a1a1a;margin-top:15px;padding-top:15px;">
             <h4 style="font-size:12px;color:#fff;margin-bottom:10px;">🩳 Teaser Product 2 (Shorts)</h4>
             <div class="field-row">
               <div class="field-group"><label>Product 2 Name</label><input type="text" id="tweakTeaserName2" placeholder="e.g. ECLIPSE SHORTS" style="width:100%;"></div>
-              <div class="field-group" style="flex:2;"><label>Product 2 Image URL</label><input type="text" id="tweakTeaserImage2" placeholder="e.g. whiteinfront.jpg" style="width:100%;"></div>
+              <div class="field-group" style="flex:2;">
+                <label>Product 2 Image URL</label>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <input type="text" id="tweakTeaserImage2" placeholder="e.g. whiteinfront.jpg" style="flex:1;" onchange="updateImagePreview('tweakTeaserImage2','tweakTeaserImage2Preview')">
+                  <button class="btn btn-sm btn-ghost" onclick="triggerFileUpload('tweakTeaserImage2File')" style="padding:0 10px;font-size:11px;height:38px;">Upload</button>
+                </div>
+                <input type="file" id="tweakTeaserImage2File" accept="image/*" style="display:none;" onchange="handleFileSelect(this,'tweakTeaserImage2','tweakTeaserImage2Preview')">
+                <div id="tweakTeaserImage2Preview" style="margin-top:6px;display:none;align-items:center;gap:8px;">
+                  <img src="" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid var(--border);">
+                  <span style="font-size:11px;color:var(--muted);">Preview</span>
+                </div>
+              </div>
             </div>
           </div>
           <button class="btn btn-accent btn-sm" onclick="saveTweaks()" style="margin-top:20px;width:100%;padding:12px;">Save Teaser Configuration</button>
