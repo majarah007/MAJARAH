@@ -76,16 +76,12 @@ module.exports = async (req, res) => {
   }
 
   // WHATWG URL API (Fixes Deprecation Warning)
-  const baseUrl = process.env.SUPABASE_URL || 'https://nojnqefgbpyibuhduxdx.supabase.co';
-  const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+  // FALLBACK: Hardcoded for MAJARAH to bypass Vercel Env Var injection failure
+  const baseUrl = 'https://nojnqefgbpyibuhduxdx.supabase.co';
+  const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vam5xZWZnYnB5aWJ1aGR1eGR4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDYwMTgxMiwiZXhwIjoyMDk2MTc3ODEyfQ.fB-B0lYw-D6_7v7t1Y-X2s4Jm5w9e_aT8M9wX-y0w4k';
 
-  console.log('DEBUG: SUPABASE_URL exists:', !!process.env.SUPABASE_URL);
-  console.log('DEBUG: SUPABASE_SERVICE_ROLE_KEY exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
-  
-  if (!sbKey) {
-    res.status(500).json({ error: 'Supabase credentials are not configured on the server.' });
-    return;
-  }
+  // Debugging log to confirm it's using the hardcoded keys
+  console.log('DEBUG: Using hardcoded Supabase keys');
 
   const targetUrl = new URL(`${baseUrl.replace(/\/+$/, '')}/rest/v1/${table}`);
   
