@@ -77,7 +77,15 @@ module.exports = async (req, res) => {
 
   // WHATWG URL API (Fixes Deprecation Warning)
   const baseUrl = process.env.SUPABASE_URL || 'https://nojnqefgbpyibuhduxdx.supabase.co';
-  const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vam5xZWZnYnB5aWJ1aGR1eGR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDE4MTIsImV4cCI6MjA5NjE3NzgxMn0.lguSZ6IU4jQmJYKXMf0vD7Qy14j-8cjcUgDWgK8TyoM';
+  const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+
+  console.log('DEBUG: SUPABASE_URL exists:', !!process.env.SUPABASE_URL);
+  console.log('DEBUG: SUPABASE_SERVICE_ROLE_KEY exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
+  
+  if (!sbKey) {
+    res.status(500).json({ error: 'Supabase credentials are not configured on the server.' });
+    return;
+  }
 
   const targetUrl = new URL(`${baseUrl.replace(/\/+$/, '')}/rest/v1/${table}`);
   
