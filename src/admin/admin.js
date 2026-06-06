@@ -1550,7 +1550,7 @@ function handleFileSelect(input, targetId, previewId) {
   const originalPlaceholder = targetInput.placeholder;
   
   targetInput.value = '';
-  targetInput.placeholder = 'Compressing image (Optimized HD)...';
+  targetInput.placeholder = 'Optimizing for 4K Quality...';
   
   const reader = new FileReader();
   reader.onload = function(e) {
@@ -1560,7 +1560,7 @@ function handleFileSelect(input, targetId, previewId) {
       let width = img.width;
       let height = img.height;
       
-      const maxDim = 1200; // Optimized HD Limit: 1200px max dimension
+      const maxDim = 2000; // Increased to 2000px for better quality
       if (width > maxDim || height > maxDim) {
         if (width > height) {
           height = Math.round((height * maxDim) / width);
@@ -1574,17 +1574,20 @@ function handleFileSelect(input, targetId, previewId) {
       canvas.width = width;
       canvas.height = height;
       const ctx = canvas.getContext('2d');
+      
+      // Safety: Clear canvas and ensure entire image is drawn
+      ctx.clearRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
       
-      // Compress to JPEG at 0.85 quality
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      // Higher quality JPEG compression (0.92)
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
       
       targetInput.value = dataUrl;
       targetInput.placeholder = originalPlaceholder;
       updateImagePreview(targetId, previewId);
       
-      showToast('Image optimized successfully!');
-      input.value = ''; // Reset file input
+      showToast('High-quality image ready!');
+      input.value = ''; 
     };
     img.src = e.target.result;
   };
@@ -1598,7 +1601,13 @@ function updateImagePreview(inputId, previewId) {
   
   if (val) {
     const imgSrc = (val.startsWith('http') || val.startsWith('data:')) ? val : `./${val}`;
-    previewDiv.querySelector('img').src = imgSrc;
+    const imgEl = previewDiv.querySelector('img');
+    if (imgEl) {
+        imgEl.src = imgSrc;
+        // Use contain to avoid "cutting" the photo in the admin UI
+        imgEl.style.objectFit = 'contain';
+        imgEl.style.background = '#0a0a0a';
+    }
     previewDiv.style.display = 'flex';
   } else {
     previewDiv.style.display = 'none';
