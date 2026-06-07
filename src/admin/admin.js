@@ -727,11 +727,18 @@ async function logout() {
 }
 
 async function showDashboard() {
+  const loginScreen = document.getElementById('loginScreen');
+  const appEl = document.getElementById('app');
+  if (loginScreen) loginScreen.style.display = 'none';
+  if (appEl) appEl.style.display = 'block';
+
   renderDashboard();
   await initSupabase();
-  syncDashboardData();
-  // Start background sync
-  setInterval(() => syncDashboardData(true), 30000);
+  await initializeTweaks();
+  await syncDashboardData();
+  
+  startAutoSync();
+  requestNotificationPermission();
 }
 
 
