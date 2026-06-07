@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "outputDirectory": "dist",
   "cleanUrls": true,
   "routes": [
     { "src": "/fien", "status": 308, "headers": { "Location": "/fien/" } },
