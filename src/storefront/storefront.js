@@ -14,6 +14,32 @@ function resolveImgSrc(url, fallback) {
     return fallback || 'blackinfront.jpg';
 }
 
+// --- PERFORMANCE UTILITIES ---
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    }
+}
+
 // ── GLOBAL CONFIGURATION — loaded from Supabase site_config ──
 window.SITE_CONFIG = {};
 
