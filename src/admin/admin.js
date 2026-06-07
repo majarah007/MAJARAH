@@ -659,18 +659,24 @@ function renderDashboard() {
 }
 
 async function doLogin() {
-  const userEl = document.getElementById('loginUser');
-  const passEl = document.getElementById('loginPass');
+  const userEl = document.getElementById('mjrLoginUser');
+  const passEl = document.getElementById('mjrLoginPass');
   const btn = document.querySelector('.login-btn');
   const errEl = document.getElementById('loginErr');
   
-  if (!userEl || !passEl) return;
+  if (!userEl || !passEl) {
+      console.error("Critical: Login elements mjrLoginUser or mjrLoginPass not found in DOM.");
+      return;
+  }
   if (errEl) errEl.style.display = 'none';
   
   const email = userEl.value.trim();
   const password = passEl.value.trim();
   
+  console.log(`[Auth] Attempting login for identifier: "${email}" (length: ${email.length})`);
+  
   if (!email || !password) {
+    console.warn("[Auth] Validation failed: Email or password field is empty.");
     showToast('Please enter both username and password.', 'error');
     return;
   }
@@ -689,11 +695,13 @@ async function doLogin() {
       const data = await res.json();
       localStorage.setItem('mjr_admin_token', data.token);
       localStorage.setItem('mjr_admin_user', email);
+      console.log("[Auth] Success. Token received.");
       showDashboard();
       showToast('Welcome back, ' + email);
     } else {
-      const data = await res.json();
+      const data = await res.json().catch(() => ({ error: 'Unknown server error' }));
       const errMsg = data.error || 'Login failed.';
+      console.error(`[Auth] Failed: ${errMsg}`);
       if (errEl) {
           errEl.textContent = errMsg;
           errEl.style.display = 'block';
@@ -701,7 +709,7 @@ async function doLogin() {
       showToast(errMsg, 'error');
     }
   } catch (e) {
-    console.error("Auth error:", e);
+    console.error("[Auth] Exception during fetch:", e);
     showToast('Connection error. Try again.', 'error');
   } finally {
     btn.disabled = false;

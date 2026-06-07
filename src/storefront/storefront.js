@@ -5,16 +5,12 @@ if (window.SB_URL) {
     window.SB_URL = window.SB_URL.replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
 }
 
-// Standard productsData for storefront fallback
-const productsData = {
-    black: { title: 'Onyx Graphic Tee', sub: 'Onyx Black', price: 520, desc: 'Heavyweight cotton...', images: ['blackinfront.jpg', 'Blackback.jpg'] },
-    white: { title: 'Alabaster Graphic Tee', sub: 'Alabaster White', price: 520, desc: 'Heavyweight cotton...', images: ['whiteinfront.jpg', 'whiteback.jpg'] }
-};
-
 // --- IMAGE SRC RESOLVER HELPER ---
 // Ensures product images always resolve to a valid src, never empty string
 function resolveImgSrc(url, fallback) {
-    if (url && url.trim() !== '') return url.trim();
+    if (url && typeof url === 'string' && url.trim() !== '') return url.trim();
+    // If it's a relative path in assets, prefix with assets/ if necessary or just return it
+    // The user mentioned removing images from files, so we should prioritize full URLs or specific assets
     return fallback || 'blackinfront.jpg';
 }
 
@@ -163,26 +159,12 @@ let currentLoadedShippingRates = [];
 let fetchedProducts = [];
 let fetchedInventory = [];
 
-// Load products from Supabase with static fallback
+// Load products from Supabase with dynamic empty state
 async function loadProducts() {
     const grid = document.querySelector('.grid');
     if (!grid) return;
 
-    // Default static products array formatted like the database schema
-    let products = Object.keys(productsData).map(key => ({
-        id: key,
-        name: productsData[key].title,
-        color: productsData[key].sub,
-        price: productsData[key].price,
-        description: productsData[key].desc,
-        images: productsData[key].images || [],
-        front_image_url: productsData[key].images ? productsData[key].images[0] : '',
-        back_image_url: productsData[key].images ? productsData[key].images[1] : '',
-        fabric: "Heavyweight Cotton",
-        fit: "Premium Oversized",
-        status: 'active'
-    }));
-
+    let products = [];
     let allInventory = [];
 
     if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY") {
@@ -223,12 +205,19 @@ async function loadProducts() {
                 allInventory = await invRes.json();
             }
         } catch (e) {
-            console.error("Failed to load products from database, using static fallback:", e);
+            console.error("Failed to load products from database:", e);
         }
     }
 
     fetchedProducts = products;
     fetchedInventory = allInventory;
+
+    if (products.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1/-1; padding: 100px 20px; text-align: center; color: #444; text-transform: uppercase; letter-spacing: 2px; font-size: 11px;">
+            ${currentLang === 'ar' ? 'لا يوجد منتجات حالياً. ترقبوا الإطلاق!' : 'No products found. Stay tuned for the launch!'}
+        </div>`;
+        return;
+    }
 
     renderProductsGrid(products, allInventory);
 }
@@ -240,21 +229,14 @@ function renderProductsGrid(products, inventory) {
 
     grid.innerHTML = products.filter(p => p.status === 'active').map((p, idx) => {
         // Calculate total stock across S, M, L, XL sizes
-        let totalStock = 40; // Default offline fallback
-        if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY" && inventory.length > 0) {
+        let totalStock = 0;
+        if (inventory.length > 0) {
             const productInv = inventory.filter(item => Number(item.product_id) === Number(p.id));
             totalStock = productInv.reduce((sum, item) => sum + (Number(item.stock) || 0), 0);
         }
 
-        let defaultFront = 'blackinfront.jpg';
-        let defaultBack = 'Blackback.jpg';
-        const searchStr = (p.name + ' ' + (p.color || '')).toLowerCase();
-        if (searchStr.includes('white') || searchStr.includes('alabaster')) {
-            defaultFront = 'whiteinfront.jpg';
-            defaultBack = 'whiteback.jpg';
-        }
-        const frontImg = resolveImgSrc(p.front_image_url, defaultFront);
-        const backImg = resolveImgSrc(p.back_image_url, defaultBack);
+        const frontImg = resolveImgSrc(p.front_image_url, 'blackinfront.jpg');
+        const backImg = resolveImgSrc(p.back_image_url, 'Blackback.jpg');
         
         const isSoldOut = totalStock <= 0;
         let badgeHTML = p.badge ? `<div class="badge">${p.badge}</div>` : '';
@@ -299,7 +281,6 @@ function renderProductsGrid(products, inventory) {
         `;
     }).join('');
 
-    // Re-initialize intersection observer for new reveal elements
     initScrollReveal();
 }
 
@@ -1207,12 +1188,8 @@ function openCheckout() {
     
     let p = fetchedProducts.find(prod => String(prod.id) === String(activeProductId));
     if (!p) {
-        const staticP = productsData[activeProductId] || productsData.black || { title: 'Onyx Graphic Tee', price: 520, imgFront: 'blackinfront.jpg' };
-        p = {
-            name: staticP.title,
-            price: staticP.price,
-            front_image_url: staticP.imgFront
-        };
+        showToast("Product data not synchronized. Please refresh the page.", "error");
+        return;
     }
     
     let defaultFront = 'blackinfront.jpg';
