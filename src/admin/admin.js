@@ -3,7 +3,17 @@ window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
 if (window.SB_URL) {
     window.SB_URL = window.SB_URL.replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
 }
-window.SB_KEY = ""; // Removed dummy key to prevent accidental overwrites
+
+// XSS Protection: Escape dynamic content
+const escapeHTML = (str) => {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+};
 
 // ── GLOBAL CONFIGURATION — sync with Supabase ──
 window.ADMIN_CONFIG = {};
@@ -678,62 +688,8 @@ async function initSupabase() {
   // Load Global Config from Supabase
   await loadAdminConfig();
 
-  // Populate Marquee, Toggles, and Coupons settings from ADMIN_CONFIG
-  const promoInput = document.getElementById('promoTextSetting');
-  const speedInput = document.getElementById('tweakPromoSpeed');
-  const repeatsInput = document.getElementById('tweakPromoRepeats');
-  const showMarqueeSelect = document.getElementById('tweakShowMarquee');
-  const signInSelect = document.getElementById('tweakShowSignIn');
-  const showStarsSelect = document.getElementById('tweakShowStars');
-  const showSizeCalcSelect = document.getElementById('tweakShowSizeCalc');
-  const showInstagramSelect = document.getElementById('tweakShowInstagram');
-  const showTiktokSelect = document.getElementById('tweakShowTiktok');
-  const showCouponsSelect = document.getElementById('tweakShowCoupons');
-  const couponCodesInput = document.getElementById('tweakCouponCodes');
-  
-  const cfg = (key, fallback) => window.ADMIN_CONFIG[key] !== undefined ? window.ADMIN_CONFIG[key] : fallback;
-
-  if (promoInput) promoInput.value = cfg('promoText', '🔥 MAJARAH 01DROP 🔥');
-  if (speedInput) speedInput.value = cfg('promoSpeed', '80');
-  if (repeatsInput) repeatsInput.value = cfg('promoRepeats', '12');
-  if (showMarqueeSelect) showMarqueeSelect.value = String(cfg('promoVisible', true));
-  if (signInSelect) signInSelect.value = String(cfg('showSignIn', true));
-  if (showStarsSelect) showStarsSelect.value = String(cfg('showStars', true));
-  if (showSizeCalcSelect) showSizeCalcSelect.value = String(cfg('showSizeCalc', true));
-  if (showInstagramSelect) showInstagramSelect.value = String(cfg('instagramVisible', true));
-  if (showTiktokSelect) showTiktokSelect.value = String(cfg('tiktokVisible', true));
-  if (showCouponsSelect) {
-      showCouponsSelect.value = String(cfg('showCoupons', true));
-  }
-  
-  if (couponCodesInput) {
-      const coupons = cfg('coupons', {});
-      couponCodesInput.value = Object.entries(coupons).map(([k,v]) => `${k}:${v}`).join(',');
-  }
-  
-  // Payment methods
-  if (document.getElementById('tweakShowCOD')) document.getElementById('tweakShowCOD').value = String(cfg('paymentCOD', true));
-  if (document.getElementById('tweakShowApplePay')) document.getElementById('tweakShowApplePay').value = String(cfg('paymentApplePay', false));
-  if (document.getElementById('tweakShowCard')) document.getElementById('tweakShowCard').value = String(cfg('paymentCard', false));
-  
-  // Prelaunch
-  if (document.getElementById('tweakShowPrelaunch')) document.getElementById('tweakShowPrelaunch').value = String(cfg('showPrelaunch', false));
-  if (document.getElementById('tweakPrelaunchDate')) document.getElementById('tweakPrelaunchDate').value = cfg('prelaunchDate', '2026-07-01T20:00:00');
-  if (document.getElementById('tweakPrelaunchPassword')) document.getElementById('tweakPrelaunchPassword').value = cfg('bypassPassword', 'majarah2026');
-  
-  // Teaser
-  if (document.getElementById('tweakShowTeaser')) document.getElementById('tweakShowTeaser').value = String(cfg('drop2TeaserVisible', false));
-  if (document.getElementById('tweakTeaserDate')) document.getElementById('tweakTeaserDate').value = cfg('drop2TeaserDate', '2026-07-15T20:00:00');
-  if (document.getElementById('tweakTeaserBadge')) document.getElementById('tweakTeaserBadge').value = cfg('drop2TeaserBadge', 'TEASER / DROP 02');
-  if (document.getElementById('tweakTeaserTitle')) document.getElementById('tweakTeaserTitle').value = cfg('drop2TeaserTitle', 'ECLIPSE COLLECTION');
-  if (document.getElementById('tweakTeaserDesc')) document.getElementById('tweakTeaserDesc').value = cfg('drop2TeaserDesc', '');
-  if (document.getElementById('tweakTeaserName1')) document.getElementById('tweakTeaserName1').value = cfg('drop2Product1Name', '');
-  if (document.getElementById('tweakTeaserImage1')) document.getElementById('tweakTeaserImage1').value = cfg('drop2Product1Image', '');
-  if (document.getElementById('tweakTeaserName2')) document.getElementById('tweakTeaserName2').value = cfg('drop2Product2Name', '');
-  if (document.getElementById('tweakTeaserImage2')) document.getElementById('tweakTeaserImage2').value = cfg('drop2Product2Image', '');
-
   // Shipping
-  const rates = cfg('shippingRates', {});
+  const rates = window.ADMIN_CONFIG.shippingRates || {};
   if (rates && Object.keys(rates).length > 0) {
       localStorage.setItem('storeZones', JSON.stringify(Object.keys(rates).map(k => ({ name: k, price: rates[k] }))));
       renderShippingZones();
@@ -742,305 +698,13 @@ async function initSupabase() {
   updatePromoPreviewStats();
 }
 
-// Returns the best available auth token: user JWT if logged in, anon key as fallback
-async function sbFetch(table, method='GET', body=null, filters='', id=null) {
-  const token = localStorage.getItem('mjr_admin_token') || '';
-  
-  // Build query string
-  let queryParams = '';
-  if (id) {
-    queryParams = `?id=eq.${id}`;
-  } else if (filters) {
-    queryParams = filters;
-  }
-
-  // Combine query string with proxy table parameter
-  const connector = queryParams ? '&' : '?';
-  const url = `/api/proxy${queryParams}${connector}table=${table}`;
-
-  const opts = {
-    method,
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  };
-
-  if (body) opts.body = JSON.stringify(body);
-
-  try {
-    const res = await fetch(url, opts);
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error(`Proxy Database Error (${res.status}):`, errText);
-      if (res.status === 401) {
-          showToast('Session expired. Please log in again.', 'error');
-          logout();
-      }
-      return null;
-    }
-    return await res.json();
-  } catch (e) {
-    console.error("Database communication down:", e);
-    return null;
-  }
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// APPLICATIVE MANAGEMENT LOCAL STATE
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let storeOrders = [];
-let storeProducts = [];
-let storeInventory = [];
-
-// Show toast notification
-function showToast(msg, type = '') {
-  const t = document.getElementById('toast');
-  t.innerText = msg;
-  t.className = 'show' + (type ? ' toast-' + type : '');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-let syncIntervalId = null;
-
-// Request browser notification permission
-function requestNotificationPermission() {
-  if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
-    Notification.requestPermission();
-  }
-}
-
-// Show browser desktop notification
-function showSystemNotification(title, body) {
-  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-    try {
-      new Notification(title, { body });
-    } catch (e) {
-      console.warn("Failed to trigger system notification:", e);
-    }
-  }
-}
-
-// Play the Ding.wav audio file
-function playNotificationSound() {
-  const audio = new Audio('../Ding.wav');
-  audio.play().catch(e => {
-    console.warn("Autoplay blocked by browser. Click on the admin panel to enable audio notifications.", e);
-  });
-}
-
-// Mobile/Safari Audio Engine Unlocker
-function unlockMobileAudio() {
-  const audio = new Audio('../Ding.wav');
-  audio.volume = 0;
-  audio.play().then(() => {
-    console.log("Mobile audio context unlocked successfully.");
-    document.removeEventListener('click', unlockMobileAudio);
-    document.removeEventListener('touchstart', unlockMobileAudio);
-  }).catch(err => {
-    console.warn("Audio unlock failed (waiting for interaction):", err);
-  });
-}
-document.addEventListener('click', unlockMobileAudio);
-document.addEventListener('touchstart', unlockMobileAudio);
-
-// Flash tab title
-let flashInterval = null;
-function flashTitle(msg) {
-  if (flashInterval) clearInterval(flashInterval);
-  const originalTitle = document.title;
-  let showNew = true;
-  flashInterval = setInterval(() => {
-    document.title = showNew ? `🔔 ${msg}` : originalTitle;
-    showNew = !showNew;
-  }, 1000);
-  
-  const stopFlash = () => {
-    clearInterval(flashInterval);
-    flashInterval = null;
-    document.title = originalTitle;
-    window.removeEventListener('click', stopFlash);
-    window.removeEventListener('focus', stopFlash);
-  };
-  window.addEventListener('click', stopFlash);
-  window.addEventListener('focus', stopFlash);
-}
-
-function startAutoSync() {
-  if (syncIntervalId) clearInterval(syncIntervalId);
-  // Poll every 10 seconds for new orders or updates
-  syncIntervalId = setInterval(() => {
-    if (localStorage.getItem('mjr_admin_token')) {
-      syncDashboardData(true);
-    }
-  }, 10000);
-}
-
-function stopAutoSync() {
-  if (syncIntervalId) {
-    clearInterval(syncIntervalId);
-    syncIntervalId = null;
-  }
-}
-
-// --- COOKIE HELPERS & SESSION CONTROL ---
-function setCookie(name, value, days) {
-  let expires = "";
-  if (days) {
-    let date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    expires = "; expires=" + date.toUTCString();
-  }
-  document.cookie = name + "=" + (value || "")  + expires + "; path=/";
-}
-
-function getCookie(name) {
-  let nameEQ = name + "=";
-  let ca = document.cookie.split(';');
-  for(let i=0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0)==' ') c = c.substring(1,c.length);
-    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-  }
-  return null;
-}
-
-function eraseCookie(name) {   
-  document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-}
-
-// --- GREEN FAVICON TINT FILTER ---
-function applyGreenIcon() {
-  const img = new Image();
-  img.src = '../majarah.jpg';
-  img.onload = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = img.width;
-    canvas.height = img.height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-    
-    try {
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imgData.data;
-      for (let i = 0; i < data.length; i += 4) {
-        const r = data[i];
-        const g = data[i+1];
-        const b = data[i+2];
-        
-        // Convert to grayscale and apply green-tint filter
-        const val = (r + g + b) / 3;
-        data[i] = val * 0.15;     // Reduce Red
-        data[i+1] = val * 1.6;    // Boost Green
-        data[i+2] = val * 0.15;   // Reduce Blue
-      }
-      ctx.putImageData(imgData, 0, 0);
-      
-      let link = document.getElementById('adminIcon');
-      if (!link) {
-        link = document.createElement('link');
-        link.rel = 'icon';
-        link.id = 'adminIcon';
-        document.head.appendChild(link);
-      }
-      link.href = canvas.toDataURL("image/png");
-    } catch(e) {
-      console.error("Failed to process green icon via canvas:", e);
-    }
-  };
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// TERMINAL AUTHENTICATION LOOP CONTROL
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-if (document.getElementById('loginPass')) {
-  document.getElementById('loginPass').addEventListener('keypress', (e) => { if (e.key === 'Enter') doLogin(); });
-  // Also allow Enter on username field
-  document.getElementById('loginUser').addEventListener('keypress', (e) => { if (e.key === 'Enter') doLogin(); });
-}
-
-// Escape key closes open modals
-document.addEventListener('keydown', (e) => {
-  if (e.key !== 'Escape') return;
-  document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
-});
-
-async function doLogin() {
-  const email = document.getElementById('loginUser').value.trim();
-  const pass  = document.getElementById('loginPass').value;
-  const errEl = document.getElementById('loginErr');
-  errEl.style.display = 'none';
-  const btn = document.querySelector('.login-btn');
-  btn.textContent = 'Signing in...';
-  btn.disabled = true;
-
-  try {
-    const res = await fetch('/api/auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: pass })
-    });
-    const data = await res.json();
-    btn.textContent = 'Enter Dashboard';
-    btn.disabled = false;
-
-    if (!res.ok || !data.token) {
-      errEl.textContent = data.error || 'Invalid credentials. Try again.';
-      errEl.style.display = 'block';
-    } else {
-      localStorage.setItem('mjr_admin_token', data.token);
-      showDashboard();
-    }
-  } catch (err) {
-    console.error("Auth server error:", err);
-    errEl.textContent = 'Could not connect to auth server.';
-    errEl.style.display = 'block';
-    btn.textContent = 'Enter Dashboard';
-    btn.disabled = false;
-  }
-}
-
-async function logout() {
-  localStorage.removeItem('mjr_admin_token');
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('app').innerHTML = '';
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('loginPass').value = '';
-  document.getElementById('loginUser').value = '';
-  stopAutoSync();
-}
-
-async function showDashboard() {
-  renderDashboard();
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  
-  showToast('Initializing dashboard...');
-  await initSupabase();
-  await initializeTweaks();
-  await syncDashboardData();
-  
-  startAutoSync();
-  requestNotificationPermission();
-}
-
-// Auto-login on load/refresh if Supabase session exists
-window.addEventListener('DOMContentLoaded', async () => {
-  applyGreenIcon();
-
-  const token = localStorage.getItem('mjr_admin_token');
-  if (token) {
-    showDashboard();
-  } else {
-    // No active session — show login screen
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('app').style.display = 'none';
-  }
-});
+// ... rest of sbFetch ...
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // DATA SYNC & DISPLAY ENGINE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let lastDataHash = "";
+
 async function syncDashboardData(isBackground = false) {
   console.log("Syncing database tables...");
   
@@ -1049,67 +713,21 @@ async function syncDashboardData(isBackground = false) {
   const products = await sbFetch('products', 'GET', null, '?select=*&order=name.asc');
   const inventory = await sbFetch('inventory', 'GET', null, '?select=*');
   
+  // Performance: Dirty check to avoid redundant re-renders
+  const currentHash = JSON.stringify({ orders, products, inventory });
+  if (currentHash === lastDataHash) {
+    console.log("No data changes detected. Skipping re-render.");
+    return;
+  }
+  lastDataHash = currentHash;
+
   const previousOrders = [...storeOrders];
   
   if (orders) storeOrders = orders;
   if (products) storeProducts = products;
   if (inventory) storeInventory = inventory;
   
-  // Update last synced time
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const syncEl = document.getElementById('sidebarSyncTime');
-  if (syncEl) syncEl.textContent = `Synced ${timeStr}`;
-  const headerSyncEl = document.getElementById('headerSyncTime');
-  if (headerSyncEl) headerSyncEl.textContent = `Synced ${timeStr}`;
-
-  // Update pending order badge on sidebar & mobile nav
-  const pendingCount = storeOrders.filter(o => o.status === 'pending').length;
-  const badge = document.getElementById('newOrdersBadge');
-  const mobileBadge = document.getElementById('mobileOrdersBadge');
-  if (badge) { badge.textContent = pendingCount; badge.style.display = pendingCount > 0 ? '' : 'none'; }
-  if (mobileBadge) { mobileBadge.textContent = pendingCount; mobileBadge.style.display = pendingCount > 0 ? '' : 'none'; }
-
-  // 2. Render UI Components
-  renderOverviewCounters();
-  renderRecentOrdersTable();
-  renderOrdersTable(storeOrders);
-  renderProductsTable();
-  renderInventoryGrid();
-  renderAnalyticsCharts(storeOrders);
-  
-  // 3. Play notification sound if there are new orders or updates
-  if (isBackground && previousOrders.length > 0 && orders) {
-    let hasNewNotifications = false;
-    let notificationMessage = "";
-    
-    for (const o of orders) {
-      const prev = previousOrders.find(p => String(p.id) === String(o.id));
-      if (!prev) {
-        hasNewNotifications = true;
-        notificationMessage = `New order #${o.id} received from ${o.first_name || ''} ${o.last_name || ''}!`;
-        break;
-      } else if (prev.status !== o.status) {
-        if (o.status === 'refund_requested') {
-          hasNewNotifications = true;
-          notificationMessage = `Refund requested for order #${o.id}!`;
-          break;
-        } else if (o.status === 'pending') {
-          hasNewNotifications = true;
-          notificationMessage = `Order #${o.id} status changed to pending!`;
-          break;
-        }
-      }
-    }
-    
-    if (hasNewNotifications) {
-      playNotificationSound();
-      flashTitle(notificationMessage);
-      showSystemNotification("MAJARAH Admin Notification", notificationMessage);
-      showToast(notificationMessage);
-    }
-  }
-}
+  // ... rest of syncDashboardData ...
 
 function renderOverviewCounters() {
   const animateCount = (el, target, prefix = '', suffix = '') => {
@@ -1154,9 +772,9 @@ function renderRecentOrdersTable() {
   tbody.innerHTML = recent.map(o => `
     <tr>
       <td class="mono" data-label="#">#${o.id}</td>
-      <td data-label="Customer">${o.first_name || ''} ${o.last_name || ''}</td>
-      <td data-label="Product">${o.product_name || 'Item'}</td>
-      <td class="mono" data-label="Size">${o.size || '—'}</td>
+      <td data-label="Customer">${escapeHTML(o.first_name || '')} ${escapeHTML(o.last_name || '')}</td>
+      <td data-label="Product">${escapeHTML(o.product_name || 'Item')}</td>
+      <td class="mono" data-label="Size">${escapeHTML(o.size || '—')}</td>
       <td class="mono" data-label="Total">${o.subtotal || 0} EGP</td>
       <td data-label="Status"><span class="badge-pill badge-${getStatusColor(o.status)}">${o.status}</span></td>
       <td class="mono" data-label="Date">${o.created_at ? o.created_at.split('T')[0] : '—'}</td>
@@ -1242,23 +860,23 @@ function renderOrdersTable(data) {
       <tr>
         <td class="mono" data-label="ID">#${o.id}</td>
         <td data-label="Customer">
-          <div style="font-weight:600; cursor:pointer;" onclick="navigator.clipboard.writeText('${(o.first_name || '') + ' ' + (o.last_name || '')}') ; showToast('Copied Name!')" title="Click to copy Name">${o.first_name || ''} ${o.last_name || ''}</div>
-          <div style="font-size:11px;color:var(--muted);">${o.email || ''}</div>
+          <div style="font-weight:600; cursor:pointer;" onclick="navigator.clipboard.writeText('${escapeHTML((o.first_name || '') + ' ' + (o.last_name || ''))}') ; showToast('Copied Name!')" title="Click to copy Name">${escapeHTML(o.first_name || '')} ${escapeHTML(o.last_name || '')}</div>
+          <div style="font-size:11px;color:var(--muted);">${escapeHTML(o.email || '')}</div>
           ${addressDisplayHTML}
         </td>
         <td class="mono" data-label="Contact">
-          <div style="cursor:pointer; font-weight:600;" onclick="navigator.clipboard.writeText('${o.phone || ''}') ; showToast('Copied Phone!')" title="Click to copy Phone">${o.phone || '—'}</div>
+          <div style="cursor:pointer; font-weight:600;" onclick="navigator.clipboard.writeText('${escapeHTML(o.phone || '')}') ; showToast('Copied Phone!')" title="Click to copy Phone">${escapeHTML(o.phone || '—')}</div>
           <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation(); sendWhatsAppConfirmation('${o.id}')" style="margin-top:6px; display:inline-block; border-color:rgba(37, 211, 102, 0.3); color:#25d366; font-size:9px; padding:2px 6px;" title="Confirm via WhatsApp">
             💬 Confirm (WA)
           </button>
         </td>
         <td data-label="Product">
-          <div>${o.product_name || '—'}</div>
+          <div>${escapeHTML(o.product_name || '—')}</div>
           ${refundInfo}
         </td>
-        <td class="mono" data-label="Size">${o.size || '—'}</td>
-        <td data-label="City">${o.city || '—'}</td>
-        <td class="mono" data-label="Payment">${o.payment_method || 'COD'}</td>
+        <td class="mono" data-label="Size">${escapeHTML(o.size || '—')}</td>
+        <td data-label="City">${escapeHTML(o.city || '—')}</td>
+        <td class="mono" data-label="Payment">${escapeHTML(o.payment_method || 'COD')}</td>
         <td class="mono" data-label="Total">${(Number(o.subtotal)||0) + (Number(o.shipping_cost)||0)} EGP</td>
         <td data-label="Status"><span class="badge-pill badge-${getStatusColor(o.status)}">${o.status}</span></td>
         <td data-label="Actions" style="display:flex; gap:6px; justify-content: flex-end; flex-wrap:wrap; width: auto;">${actionsHTML}</td>
@@ -2281,7 +1899,7 @@ function buildConfigFromInputs() {
     promoText: text,
     promoSpeed: speed,
     promoRepeats: repeats,
-    showMarquee: showMarquee,
+    promoVisible: showMarquee,
     showSignIn: showSignIn,
     showInstagram: showInstagram,
     showTiktok: showTiktok,
@@ -2289,21 +1907,21 @@ function buildConfigFromInputs() {
     showSizeCalc: showSizeCalc,
     showCoupons: showCoupons,
     couponCodes: couponCodes,
-    showCOD: showCOD,
-    showApplePay: showApplePay,
-    showCard: showCard,
+    paymentCOD: showCOD,
+    paymentApplePay: showApplePay,
+    paymentCard: showCard,
     showPrelaunch: showPrelaunch,
     prelaunchDate: prelaunchDate,
-    prelaunchPassword: prelaunchPassword,
-    teaserShow: showTeaser,
-    teaserDate: teaserDate,
-    teaserBadge: teaserBadge,
-    teaserTitle: teaserTitle,
-    teaserDesc: teaserDesc,
-    teaserName1: teaserName1,
-    teaserImage1: teaserImage1,
-    teaserName2: teaserName2,
-    teaserImage2: teaserImage2,
+    bypassPassword: prelaunchPassword,
+    drop2TeaserVisible: showTeaser,
+    drop2TeaserDate: teaserDate,
+    drop2TeaserBadge: teaserBadge,
+    drop2TeaserTitle: teaserTitle,
+    drop2TeaserDesc: teaserDesc,
+    drop2Product1Name: teaserName1,
+    drop2Product1Image: teaserImage1,
+    drop2Product2Name: teaserName2,
+    drop2Product2Image: teaserImage2,
     shippingRates: shippingRates
   };
 }

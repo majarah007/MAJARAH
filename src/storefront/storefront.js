@@ -4,7 +4,6 @@ window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
 if (window.SB_URL) {
     window.SB_URL = window.SB_URL.replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
 }
-window.SB_KEY = ""; // Removed dummy key
 
 // --- IMAGE SRC RESOLVER HELPER ---
 // Ensures product images always resolve to a valid src, never empty string
@@ -279,8 +278,8 @@ function renderProductsGrid(products, inventory) {
                 <div class="image-container">
                     ${badgeHTML}
                     ${overlayHTML}
-                    <img src="${frontImg}" alt="${nameTranslated} Front" class="product-img front-print">
-                    <img src="${backImg}"    alt="${nameTranslated} Back"   class="product-img back-print">
+                    <img src="${frontImg}" alt="${nameTranslated} Front" class="product-img front-print" loading="lazy">
+                    <img src="${backImg}"    alt="${nameTranslated} Back"   class="product-img back-print" loading="lazy">
                 </div>
                 <div class="product-meta">
                     <div class="details">
