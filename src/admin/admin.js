@@ -319,7 +319,7 @@ function renderDashboard() {
 
       <!-- Relocated Teaser Section -->
       <div class="settings-card" style="margin-top: 32px;">
-          <h3>👀 Drop 2 Teaser Section</h3>
+          <h3>👀 Drop Teaser</h3>
           <p style="font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.6;">Configure a blurred/blacked-out teaser grid with two products and a countdown release timer.</p>
           <div class="field-row">
             <div class="field-group">
@@ -334,6 +334,23 @@ function renderDashboard() {
               <input type="text" id="tweakTeaserDate" placeholder="e.g. 2026-07-15T20:00:00" style="width:100%;">
             </div>
           </div>
+          
+          <div class="field-row" style="margin-top:15px; background: rgba(200,255,0,0.02); padding: 15px; border-radius: 6px; border: 1px solid rgba(200,255,0,0.05);">
+            <div class="field-group">
+              <label>Blur Intensity (px)</label>
+              <input type="number" id="tweakTeaserBlur" value="12" min="0" max="40" style="width:100%;">
+              <p style="font-size:9px; color:var(--muted); margin-top:4px;">Recommended: 8-16px</p>
+            </div>
+            <div class="field-group" style="flex:2;">
+              <label>Blackness Level (Brightness)</label>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <input type="range" id="tweakTeaserBrightness" min="0" max="1" step="0.05" value="0.15" style="flex:1; accent-color: var(--accent);">
+                <span id="brightnessVal" style="font-family: 'DM Mono', monospace; font-size:11px; min-width:30px;">0.15</span>
+              </div>
+              <p style="font-size:9px; color:var(--muted); margin-top:4px;">0 = Total Black, 1 = Full Visibility</p>
+            </div>
+          </div>
+
           <div class="field-row" style="margin-top:10px;">
             <div class="field-group">
               <label>Header Badge / Tag</label>
@@ -2428,6 +2445,13 @@ async function clearPrelaunchEmails() {
   }
 }
 
+window.addEventListener('input', (e) => {
+    if (e.target.id === 'tweakTeaserBrightness') {
+        const valEl = document.getElementById('brightnessVal');
+        if (valEl) valEl.innerText = e.target.value;
+    }
+});
+
 // Consolidated initialization and authentication logic
 window.addEventListener('DOMContentLoaded', async () => {
   const token = localStorage.getItem('mjr_admin_token');
@@ -2641,4 +2665,6 @@ window.requestNotificationPermission = requestNotificationPermission;
 window.showSystemNotification = showSystemNotification;
 window.playNotificationSound = playNotificationSound;
 window.unlockMobileAudio = unlockMobileAudio;
+window.flashTitle = flashTitle;
+ileAudio = unlockMobileAudio;
 window.flashTitle = flashTitle;

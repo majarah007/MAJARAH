@@ -3343,3 +3343,55 @@ document.addEventListener('touchstart', (e) => {
 
 // Run Application Bootstrap Setup Loop
 initApp();
+
+// ── GLOBAL EXPORTS (for obfuscated environment) ──
+window.resolveImgSrc = resolveImgSrc;
+window.startTeaserCountdown = startTeaserCountdown;
+window.openProduct = openProduct;
+window.closeProduct = closeProduct;
+window.switchImg = switchImg;
+window.pickSize = pickSize;
+window.openCheckout = openCheckout;
+window.closeCheckout = closeCheckout;
+window.selectCheckoutPayment = selectCheckoutPayment;
+window.applyCheckoutCoupon = applyCheckoutCoupon;
+window.openWashingModal = openWashingModal;
+window.closeWashingModal = closeWashingModal;
+window.openGarmentModal = openGarmentModal;
+window.closeGarmentModal = closeGarmentModal;
+window.openOrderTrackerModal = openOrderTrackerModal;
+window.closeOrderTrackerModal = closeOrderTrackerModal;
+window.backToTrackerSearch = backToTrackerSearch;
+window.trackOrdersByPhone = trackOrdersByPhone;
+window.calculateTotals = calculateTotals;
+window.submitShopifyCheckout = submitShopifyCheckout;
+window.showOrderConfirmationModal = showOrderConfirmationModal;
+window.closeOrderConfirmModal = closeOrderConfirmModal;
+window.sendEmailReceipt = sendEmailReceipt;
+window.openSizeRecommender = openSizeRecommender;
+window.closeSizeRecommender = closeSizeRecommender;
+window.updateRecommenderLabels = updateRecommenderLabels;
+window.calculateRecommendedSize = calculateRecommendedSize;
+window.applyRecommendedSize = applyRecommendedSize;
+window.openRefundModal = openRefundModal;
+window.closeRefundModal = closeRefundModal;
+window.backToRefundLookup = backToRefundLookup;
+window.lookupOrderForRefund = lookupOrderForRefund;
+window.displayRefundOrderDetails = displayRefundOrderDetails;
+window.submitRefundRequest = submitRefundRequest;
+window.submitNewsletter = submitNewsletter;
+window.toggleChatWidget = toggleChatWidget;
+window.triggerFooterContact = triggerFooterContact;
+window.toggleTheme = toggleTheme;
+window.toggleLanguage = toggleLanguage;
+window.openHow = openHow;
+window.closeHow = closeHow;
+window.openSize = openSize;
+window.closeSize = closeSize;
+window.openBrand = openBrand;
+window.closeBrand = closeBrand;
+window.initCosmicCanvas = initCosmicCanvas;
+window.initScrollReveal = initScrollReveal;
+window.applyConfigToDOM = applyConfigToDOM;
+window.loadSiteConfig = loadSiteConfig;
+window.initApp = initApp;
