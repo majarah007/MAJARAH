@@ -662,13 +662,15 @@ async function doLogin() {
   const userEl = document.getElementById('loginUser');
   const passEl = document.getElementById('loginPass');
   const btn = document.querySelector('.login-btn');
+  const errEl = document.getElementById('loginErr');
   
   if (!userEl || !passEl) return;
+  if (errEl) errEl.style.display = 'none';
   
-  const user = userEl.value.trim();
-  const pass = passEl.value.trim();
+  const email = userEl.value.trim();
+  const password = passEl.value.trim();
   
-  if (!user || !pass) {
+  if (!email || !password) {
     showToast('Please enter both username and password.', 'error');
     return;
   }
@@ -680,32 +682,48 @@ async function doLogin() {
     const res = await fetch('/api/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user, pass })
+      body: JSON.stringify({ email, password })
     });
     
     if (res.ok) {
       const data = await res.json();
       localStorage.setItem('mjr_admin_token', data.token);
-      localStorage.setItem('mjr_admin_user', user);
+      localStorage.setItem('mjr_admin_user', email);
       showDashboard();
-      showToast('Welcome back, ' + user);
+      showToast('Welcome back, ' + email);
     } else {
-      const err = await res.text();
-      showToast('Login failed: ' + err, 'error');
+      const data = await res.json();
+      const errMsg = data.error || 'Login failed.';
+      if (errEl) {
+          errEl.textContent = errMsg;
+          errEl.style.display = 'block';
+      }
+      showToast(errMsg, 'error');
     }
   } catch (e) {
     console.error("Auth error:", e);
     showToast('Connection error. Try again.', 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Login to Dashboard';
+    btn.textContent = 'Enter Dashboard';
   }
 }
 
-function logout() {
+async function logout() {
   localStorage.removeItem('mjr_admin_token');
-  localStorage.removeItem('mjr_admin_user');
-  location.reload();
+  const app = document.getElementById('app');
+  if (app) {
+    app.style.display = 'none';
+    app.innerHTML = '';
+  }
+  const loginScreen = document.getElementById('loginScreen');
+  if (loginScreen) loginScreen.style.display = 'flex';
+  
+  const passInp = document.getElementById('loginPass');
+  const userInp = document.getElementById('loginUser');
+  if (passInp) passInp.value = '';
+  if (userInp) userInp.value = '';
+  stopAutoSync();
 }
 
 async function showDashboard() {
