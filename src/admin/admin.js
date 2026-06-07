@@ -18,6 +18,23 @@ const escapeHTML = (str) => {
 // ── GLOBAL CONFIGURATION — sync with Supabase ──
 window.ADMIN_CONFIG = {};
 
+// ── GLOBAL STATE ──
+window.storeOrders = [];
+window.storeProducts = [];
+window.storeInventory = [];
+
+// Show toast notification
+window.showToast = function(msg, type = '') {
+  const t = document.getElementById('toast');
+  if (!t) {
+    console.log(`[Toast] ${type.toUpperCase()}: ${msg}`);
+    return;
+  }
+  t.innerText = msg;
+  t.className = 'show' + (type ? ' toast-' + type : '');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
 const CONFIG_KEYS = [
     'promoText', 'promoVisible', 'promoSpeed', 'promoRepeats',
     'showPrelaunch', 'prelaunchDate', 'bypassPassword',
@@ -1728,6 +1745,13 @@ async function saveShippingRules() {
   await saveConfigToSupabase('shipping_days', days);
 }
 
+function addZone() {
+  const zones = JSON.parse(localStorage.getItem('storeZones')) || [];
+  zones.push({ name: 'New Zone', price: 0 });
+  localStorage.setItem('storeZones', JSON.stringify(zones));
+  renderShippingZones();
+}
+
 function renderShippingZones() {
   const container = document.getElementById('zonesContainer');
   if (!container) return;
@@ -2408,3 +2432,69 @@ function updateSimulatorControlsUI() {
 
 // Initialise clock updater
 setInterval(updateSimulatorClock, 30000);
+
+// ── GLOBAL EXPORTS (for obfuscated environment) ──
+window.doLogin = doLogin;
+window.logout = logout;
+window.showDashboard = showDashboard;
+window.saveSupabaseConfig = saveSupabaseConfig;
+window.showPage = showPage;
+window.filterOrders = filterOrders;
+window.searchOrders = searchOrders;
+window.exportOrdersCSV = exportOrdersCSV;
+window.openAddOrder = openAddOrder;
+window.changeOrderStatus = changeOrderStatus;
+window.deleteOrder = deleteOrder;
+window.openAddProduct = openAddProduct;
+window.saveProduct = saveProduct;
+window.openEditProduct = openEditProduct;
+window.deleteProduct = deleteProduct;
+window.saveInventory = saveInventory;
+window.saveShipping = saveShipping;
+window.addZone = addZone;
+window.saveShippingRules = saveShippingRules;
+window.saveTweaks = saveTweaks;
+window.exportPrelaunchEmailsCSV = exportPrelaunchEmailsCSV;
+window.clearPrelaunchEmails = clearPrelaunchEmails;
+window.openMobileSimulator = openMobileSimulator;
+window.saveTranslations = saveTranslations;
+window.changePassword = changePassword;
+window.saveWaNumber = saveWaNumber;
+window.saveEmailJSConfig = saveEmailJSConfig;
+window.copyConfigJS = copyConfigJS;
+window.copyConfigJsonText = copyConfigJsonText;
+window.closeModal = closeModal;
+window.triggerFileUpload = triggerFileUpload;
+window.handleFileSelect = handleFileSelect;
+window.updateImagePreview = updateImagePreview;
+window.syncDashboardData = syncDashboardData;
+window.initSupabase = initSupabase;
+window.initializeTweaks = initializeTweaks;
+window.loadAdminConfig = loadAdminConfig;
+window.populateTweaksFromConfig = populateTweaksFromConfig;
+window.saveConfigToSupabase = saveConfigToSupabase;
+window.renderDashboard = renderDashboard;
+window.adminConfirm = adminConfirm;
+window.updatePromoPreviewStats = updatePromoPreviewStats;
+window.buildConfigFromInputs = buildConfigFromInputs;
+window.openModal = openModal;
+window.reloadSimulatorFrame = reloadSimulatorFrame;
+window.updateSimulatorControlsUI = updateSimulatorControlsUI;
+window.setSimulatorOrientation = setSimulatorOrientation;
+window.setSimulatorDevice = setSimulatorDevice;
+window.switchSimulatorPage = switchSimulatorPage;
+window.updateSimulatorClock = updateSimulatorClock;
+window.formatWhatsAppPhone = formatWhatsAppPhone;
+window.sendWhatsAppConfirmation = sendWhatsAppConfirmation;
+window.renderOrdersTable = renderOrdersTable;
+window.renderProductsTable = renderProductsTable;
+window.renderOverviewCounters = renderOverviewCounters;
+window.renderRecentOrdersTable = renderRecentOrdersTable;
+window.renderInventoryGrid = renderInventoryGrid;
+window.renderShippingZones = renderShippingZones;
+window.renderAnalyticsCharts = renderAnalyticsCharts;
+window.getStatusColor = getStatusColor;
+window.escapeCSV = escapeCSV;
+window.downloadCSV = downloadCSV;
+window.getActiveFilteredOrders = getActiveFilteredOrders;
+window.loadTranslationsPanel = loadTranslationsPanel;
