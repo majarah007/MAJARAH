@@ -159,18 +159,33 @@ let currentLoadedShippingRates = [];
 let fetchedProducts = [];
 let fetchedInventory = [];
 
-// Load products from Supabase with dynamic empty state
+// ── PRODUCT TRANSLATIONS ──
+const PRODUCT_TRANSLATIONS = {
+    ar: {
+        'Onyx Graphic Tee': 'تيشرت أونيكس جرافيك',
+        'Alabaster Graphic Tee': 'تيشرت ألباستر جرافيك',
+        'Onyx Black': 'أسود أونيكس',
+        'Alabaster White': 'أبيض ألباستر',
+        'Heavyweight Cotton': 'قطن ثقيل ممتاز',
+        'Premium Oversized': 'أوفرسايز بريميوم'
+    }
+};
+
+// Load products from Supabase via Proxy
 async function loadProducts() {
-    const grid = document.querySelector('.grid');
+    if (!DOM.grid) initDOMCache();
+    const grid = DOM.grid;
     if (!grid) return;
 
     let products = [];
     let allInventory = [];
 
     try {
+        console.log("[Storefront] Fetching products via proxy...");
         const res = await fetch(`/api/proxy?table=products&select=*`);
         if (res.ok) {
             const dbProducts = await res.json();
+            console.log(`[Storefront] Successfully fetched ${dbProducts ? dbProducts.length : 0} products.`);
             if (dbProducts && dbProducts.length > 0) {
                 products = dbProducts.map(p => {
                     if (!p.images) {
@@ -185,15 +200,18 @@ async function loadProducts() {
                     return p;
                 });
             }
+        } else {
+            console.error("[Storefront] Proxy products fetch failed:", res.status, await res.text());
         }
 
-        // Fetch all inventory in parallel
+        console.log("[Storefront] Fetching inventory via proxy...");
         const invRes = await fetch(`/api/proxy?table=inventory&select=*`);
         if (invRes.ok) {
             allInventory = await invRes.json();
+            console.log(`[Storefront] Successfully fetched ${allInventory ? allInventory.length : 0} inventory items.`);
         }
     } catch (e) {
-        console.error("Failed to load products from database:", e);
+        console.error("[Storefront] Exception in loadProducts:", e);
     }
 
     fetchedProducts = products;
@@ -210,18 +228,20 @@ async function loadProducts() {
 }
 
 function renderProductsGrid(products, inventory) {
-    const grid = document.querySelector('.grid');
-    if (!grid) return;
+    if (!DOM.grid) initDOMCache();
+    if (!DOM.grid) return;
     const isAr = (currentLang === 'ar');
 
-    grid.innerHTML = products.filter(p => p.status === 'active').map((p, idx) => {
-        // Calculate total stock across S, M, L, XL sizes
-        let totalStock = 0;
-        if (inventory.length > 0) {
-            const productInv = inventory.filter(item => Number(item.product_id) === Number(p.id));
-            totalStock = productInv.reduce((sum, item) => sum + (Number(item.stock) || 0), 0);
-        }
+    // Optimization: Group inventory by product ID once
+    const inventoryMap = {};
+    inventory.forEach(item => {
+        const pid = Number(item.product_id);
+        if (!inventoryMap[pid]) inventoryMap[pid] = 0;
+        inventoryMap[pid] += (Number(item.stock) || 0);
+    });
 
+    DOM.grid.innerHTML = products.filter(p => p.status === 'active').map((p, idx) => {
+        const totalStock = inventoryMap[p.id] || 0;
         const frontImg = resolveImgSrc(p.front_image_url, 'blackinfront.jpg');
         const backImg = resolveImgSrc(p.back_image_url, 'Blackback.jpg');
         
@@ -399,6 +419,7 @@ const TRANSLATIONS = {
   ar: {
     collection: "القطع",
     signin: "دخول",
+    hero_sub: "دروب 01",
     explore: "اكتشف دروب 01",
     universe_within: "الكون جوّانا",
     universe_tagline: "دروب 01 &mdash; قطن ثقيل 100٪. طباعة يدوية في القاهرة. شحن لكل مصر.",
@@ -1070,14 +1091,17 @@ async function openProduct(id) {
             buyBtn.innerText = isAr ? "نفذت الكمية" : "SOLD OUT";
             buyBtn.style.opacity = "0.5";
         } else {
-            buyBtn.disabled = false;
+            buyBtn.disabled = fality = "0.5";
+        } else {
+�شتريه دلtn.disabled = false;
             buyBtn.innerText = isAr ? 'اشتريه دلوقتي' : 'Buy It Now';
             buyBtn.style.opacity = "1";
         }
     }
 
     // 3. Stock indicator
-    const stockIndicator = document.getElementById('ppStockIndicator');
+    const stock= document.getElment.getElementBckText');
+    ccator');
     const stockText = document.getElementById('ppStockText');
     const stockTag = document.getElementById('ppStockTag');
     const stockPulse = document.getElementById('ppStockPulse');
@@ -1162,7 +1186,7 @@ function openCheckout() {
     }
 
     if(!activeSelectedSize) {
-        showToast("Please select a size variant configuration before proceeding to checkout.", "info");
+        showTo to checkout.", "info");
         return;
     }
     
@@ -1174,6 +1198,7 @@ function openCheckout() {
     
     let defaultFront = 'blackinfront.jpg';
     const searchStr = (p.name + ' ' + (p.color || '')).toLowerCase();
+    if (searchStr.includ+ ' ' + (p.color || '')).toLowerCase();
     if (searchStr.includes('white') || searchStr.includes('alabaster')) {
         defaultFront = 'whiteinfront.jpg';
     }
@@ -1190,8 +1215,9 @@ function openCheckout() {
     document.getElementById('chkItemPrice').innerText = "EGP " + Number(p.price).toFixed(2);
     
     // Reset shipping fields
-    document.getElementById('chkCity').value = "";
-    document.getElementById('chkShipping').innerText = currentLang === 'ar' ? "اختار المحافظة" : "Select city";
+    document.getElementById('chkCity').value = ""Lang === 'ar' ? "اختار المحافظة" : "Select city";
+    
+    // Pre-populate fields from activeCustomerSession and 
     
     // Pre-populate fields from activeCustomerSession and saved address
     if (typeof activeCustomerSession !== 'undefined' && activeCustomerSession) {
@@ -1206,7 +1232,7 @@ function openCheckout() {
 
         if (activeCustomerSession.email) {
             try {
-                const savedAddr = JSON.parse(localStorage.getItem(`mjr_address_${activeCustomerSession.email.toLowerCase()}`));
+                const savedAddression.email.toLowerCase()}`));
                 if (savedAddr) {
                     if (firstEl && savedAddr.first) firstEl.value = savedAddr.first;
                     if (lastEl && savedAddr.last) lastEl.value = savedAddr.last;
@@ -1244,7 +1270,9 @@ function openCheckout() {
 }
 
 function closeCheckout() {
-    document.getElementById('checkoutPage').classList.remove('open');
+    document.getElemeoutPage').classList.remove('open');
+    unlockBodyScroll();
+}entById('checkoutPage').classList.remove('open');
     unlockBodyScroll();
 }
 
@@ -1440,9 +1468,8 @@ async function trackOrdersByPhone() {
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
                 <div>
                     <h3 style="font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0 0 4px 0; color: #fff;">${isAr ? 'طلب' : 'Order'} #${order.id}</h3>
-                    <p style="font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin: 0;">${isAr ? 'التاريخ' : 'Date'}: ${dateStr}</p>
-                </div>
-                <span class="status-badge ${badgeClass}" style="font-size: 10px; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; font-weight: 600;">${order.status}</span>
+                    <p style="font-size: 10px; color: #555; text-transforte'}: ${dateStr}tter-spacing: 1p      </div>
+                <span class="status-badge ${badgeClass}" style="font-size: 10px; p            <spa border-radius: badge ${badgeClass}" style="font-size: 10px; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; font-weight: 600;">${order.status}</span>
             </div>
             
             ${stepperHTML ? stepperHTML : `
@@ -1517,10 +1544,14 @@ function calculateTotals() {
     if (selectedCity) {
         document.getElementById('chkShipping').innerText = "EGP " + Number(shippingFeeValue).toFixed(2);
         document.getElementById('chkTotal').innerHTML = `<span class="chk-currency-code">EGP </span>${computedTotalSum.toFixed(2)}`;
-    } else {
-        document.getElementById('chkShipping').innerText = currentLang === 'ar' ? "اختار المحافظة" : "Select city";
+    ng === 'ar' ? "اختار المحافظة" : "Select city";
+        // Show subtotal as total estimate until city is selectedect city";
         // Show subtotal as total estimate until city is selected
-        document.getElementById('chkTotal').innerHTML = `<span class="chk-currency-code">EGP </span>${finalSubtotal.toFixed(2)}`;
+        document.getElementById('chkTotal').inner`;
+    }
+}
+
+ass="chk-currenc Order to Storagan>${finalSubtotal.toFixed(2)}`;
     }
 }
 
@@ -1548,17 +1579,14 @@ async function submitShopifyCheckout() {
     
     let p = fetchedProducts.find(prod => String(prod.id) === String(activeProductId));
     if (!p) {
-        showToast("Product synchronization error. Please refresh the page and try again.", "error");
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = currentLang === 'ar' ? 'أكد الطلب دلوقتي' : 'Complete Order';
+        showToast("Product synchronization error. Please refresh the page and try again.", "error")    submitBtn.innerHTML = currentLang === 'ar' ? 'أكد الطلب دلوقتي' : 'Complete Order';
         }
         return;
     }
     const targetZoneObj = currentLoadedShippingRates.find(z => z.name === cityInput);
     const shippingFeeValue = targetZoneObj ? targetZoneObj.price : 0;
 
-    let basePrice = Number(p.price) || 0;
+    let basePrice = NugFeeValue = targ 0;
     let discountAmount = 0;
     if (activeDiscountCode && activeDiscountValue > 0) {
         if (activeDiscountType === 'percent') {
@@ -1599,6 +1627,7 @@ async function submitShopifyCheckout() {
         if (checkRes.ok) {
             const invData = await checkRes.json();
             if (invData && invData.length > 0) {
+     > 0) {
                 const currentStock = Number(invData[0].stock);
                 if (currentStock <= 0) {
                     showToast(`Sorry! Size ${activeSelectedSize} for this product has just sold out.`, "error");
@@ -1754,7 +1783,7 @@ function showOrderConfirmationModal(orderId, firstName, productName, size, subto
                 }
             </p>
             <div style="background:#0d0d0d;border:1px solid #151515;border-radius:6px;padding:16px;margin-bottom:24px;text-align:left;">
-                <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:8px;"><span>${isAr ? 'المنتج' : 'Product'}</span><span style="color:#ccc;">${productName} (${size})</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:8px;"><span>${isAr ? 'المنتج' : 'Product'}</span    <div style="lor:#ccc;">${productName} (${size})</span></div>
                 <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:8px;"><span>${isAr ? 'المحافظة' : 'City'}</span><span style="color:#ccc;">${city}</span></div>
                 <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:8px;"><span>${isAr ? 'المنتج' : 'Subtotal'}</span><span style="color:#ccc;">EGP ${subtotal.toFixed(2)}</span></div>
                 <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:10px;"><span>${isAr ? 'الشحن' : 'Shipping'}</span><span style="color:#ccc;">EGP ${shipping.toFixed(2)}</span></div>
@@ -1840,10 +1869,9 @@ function sendEmailReceipt(orderId, email, first, last, product, size, payment, s
                         shipping_cost: shipping + ' EGP',
                         total: total + ' EGP'
                     };
-                    
-                    emailjs.send(adminConfig.emailjsServiceId, adminConfig.emailjsTemplateId, templateParams)
+            Config.emailjsTemplateId, templateParams)
                         .then(() => {
-                            console.log("Email receipt sent successfully via EmailJS!");
+                            console.log("Emaille.log("Email receipt sent successfully via EmailJS!");
                         })
                         .catch(err => {
                             console.error("EmailJS dispatch failed:", err);
@@ -1912,6 +1940,7 @@ function calculateRecommendedSize() {
     let finalSize = baseSize;
     if (fit === 'snug') {
         if (baseSize === 'M') finalSize = 'S';
+        else if (baseSize === 'L') fe === 'M') finalSize = 'S';
         else if (baseSize === 'L') finalSize = 'M';
         else if (baseSize === 'XL') finalSize = 'L';
     } else if (fit === 'oversized') {
@@ -1931,13 +1960,10 @@ function calculateRecommendedSize() {
     } else if (fit === 'regular') {
         desc = isAr
             ? `المقاس المقترح <strong>${finalSize}</strong> هيكون مريح بس أقرب للمقاسات العادية ومش واسع أوي.`
-            : `Suggested size <strong>${finalSize}</strong> fits loose but sits closer to standard sizing dimensions.`;
-    } else {
-        desc = isAr
+            : `Suggested size <strong>${finalSize}</strong> fits loose        desc = isAr
             ? `المقاس المقترح <strong>${finalSize}</strong> هيكون مظبوط ودايق شوية على الجسم (صغرنا مقاس عن الواسع المعتاد).`
-            : `Suggested size <strong>${finalSize}</strong> fits snuggier to the body (sizing down from default shape).`;
-    }
-    document.getElementById('recommenderFitDesc').innerHTML = desc;
+            : `Suggested size <strong>${fina� المعتاد).`
+            : `Suggested size <strong>${finalSize}</strong> fits snuggier to the body (sizing down from deftDesc').innerHTML = desc;
 }
 
 function applyRecommendedSize() {
@@ -2110,6 +2136,8 @@ function displayRefundOrderDetails(order) {
                 <h3 style="font-size: 16px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Order #${order.id}</h3>
                 <p style="font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 1px;">${isAr ? 'العميل' : 'Customer'}: ${order.first_name || ''} ${order.last_name || ''}</p>
             </div>
+            <span class="status-b|| ''}</p>
+            </div>
             <span class="status-badge ${badgeClass}">${order.status}</span>
         </div>
         ${stepperHTML}
@@ -2171,7 +2199,7 @@ function displayRefundOrderDetails(order) {
                 <div style="display: flex; flex-direction: column; gap: 15px;">
                     <h4 style="font-size: 12px; color: #fff; text-transform: uppercase; letter-spacing: 1.5px;">Request a Refund</h4>
                     <div>
-                        <label style="display: block; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: #555; margin-bottom: 6px; font-weight: 700;">Reason for Refund *</label>
+                        <label style="display: block; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color:</label>
                         <div class="chk-select-wrap">
                             <select id="refundReasonSelect" class="chk-input-field select-box" style="background: #111; border-color: #222;" required>
                                 <option value="" disabled selected>Select Reason</option>
@@ -2428,11 +2456,11 @@ function initCosmicCanvas() {
     // Performance friendly window state change hooks
     window.addEventListener('resize', resizeCanvas);
     
-    window.addEventListener('mousemove', (e) => {
+    window.addEventListener('mousemove', throttle((e) => {
         mouse.x = e.clientX;
         mouse.y = e.clientY;
         mouse.active = true;
-    });
+    }, 50));
     
     window.addEventListener('mouseleave', () => {
         mouse.active = false;
@@ -2531,14 +2559,14 @@ function initTeaserCountdown() {
             const minsEl = document.getElementById('teaser-minutes');
             const secsEl = document.getElementById('teaser-seconds');
             if (daysEl) daysEl.innerText = '00';
-            if (hoursEl) hoursEl.innerText = '00';
+            hoursEl.innerText = '00';
             if (minsEl) minsEl.innerText = '00';
             if (secsEl) secsEl.innerText = '00';
             return;
         }
 
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const hours = Math.floor((diff % (1000diff / (1000 * 6) / (1000 * 60 *        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
@@ -2656,7 +2684,8 @@ async function handlePrelaunchNotify(e) {
 }
 
 function toggleTheme() {
-    const body = document.body;
+    if (!DOM.body) initDOMCache();
+    const body = DOM.body;
     body.classList.remove('theme-rippling');
     void body.offsetWidth; // trigger reflow
     
@@ -2755,8 +2784,9 @@ function openAuthModal() {
     }
 }
 
-function closeAuthModal(e) {
-    if (!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) {
+functio e.target.classL(e) {
+    if (!dal-x')) {
+    assList.contains('overlay') || e.target.classList.contains('modal-x')) {
         document.getElementById('authModal').classList.remove('open');
         unlockBodyScroll();
     }
@@ -2817,9 +2847,7 @@ async function submitAuthSignup() {
         return;
     }
     
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        if (errEl) {
+    const emailRegex = /^[^\s@]{
             errEl.innerText = "Please enter a valid email address.";
             errEl.style.display = 'block';
         }
@@ -2845,8 +2873,8 @@ async function submitAuthSignup() {
     
     if (password.length < 6) {
         if (errEl) {
-            errEl.innerText = "Password must be at least 6 characters.";
-            errEl.style.display = 'block';
+            errEl.innerText = "Password must be at least 6 characte(errEl) {
+            errEl.innisplay = 'block';
         }
         return;
     }
@@ -2860,10 +2888,10 @@ async function submitAuthSignup() {
         
         if (checkRes.ok) {
             const existing = await checkRes.json();
+            if (existing && ex       const existing = await checkRes.json();
             if (existing && existing.length > 0) {
                 if (errEl) {
-                    errEl.innerText = "Username or Email already registered.";
-                    errEl.style.display = 'block';
+                      errEl.strText = "Usernamlock';
                 }
                 return;
             }
@@ -2871,6 +2899,9 @@ async function submitAuthSignup() {
         
         // Insert new user
         const createRes = await fetch(`/api/proxy?table=users`, {
+            method: 'POST',
+            headers: {
+    oxy?table=users`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -2916,8 +2947,7 @@ async function submitAuthSignup() {
         // Clear fields
         document.getElementById('authSignupUser').value = '';
         document.getElementById('authSignupEmail').value = '';
-        document.getElementById('authSignupPass').value = '';
-        document.getElementById('authSignupConfirm').value = '';
+        document.getElementById('au').value = '';
     } else {
         if (errEl) {
             errEl.innerText = "Signup failed. Please try again.";
@@ -2969,6 +2999,9 @@ async function submitAuthLogin() {
             loggedUser = { username: found.username, email: found.email };
         }
     }
+    
+    if (loggedUser) {
+        const sessionVal = encodeURIComponent(JS
     
     if (loggedUser) {
         const sessionVal = encodeURIComponent(JSON.stringify(loggedUser));
@@ -3082,10 +3115,7 @@ async function submitAuthForgot() {
 
 function submitAuthLogout() {
     eraseCookie('mjr_customer_session');
-    showToast("Signed out successfully.");
-    initUserSession();
-    
-    // Reset modal tabs display
+    showToast("Signed oodal tabs display
     document.getElementById('tabLoginBtn').style.display = 'block';
     document.getElementById('tabSignupBtn').style.display = 'block';
     document.getElementById('tabProfileBtn').style.display = 'none';

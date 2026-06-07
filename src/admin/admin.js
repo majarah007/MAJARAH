@@ -18,10 +18,26 @@ const escapeHTML = (str) => {
 // ── GLOBAL CONFIGURATION — sync with Supabase ──
 window.ADMIN_CONFIG = {};
 
+// --- PERFORMANCE UTILITIES ---
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
 // ── GLOBAL STATE ──
 window.storeOrders = [];
 window.storeProducts = [];
 window.storeInventory = [];
+let lastOrdersHash = "";
+let lastProductsHash = "";
+let lastInventoryHash = "";
 
 // Show toast notification
 window.showToast = function(msg, type = '') {
@@ -300,6 +316,76 @@ function renderDashboard() {
         <table class="tbl"><thead><tr><th>Name</th><th>Color</th><th>Price</th><th>Fabric</th><th>Fit</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody id="productsTableBody"><tr class="loading-row"><td colspan="7">Loading...</td></tr></tbody></table>
       </div>
+
+      <!-- Relocated Teaser Section -->
+      <div class="settings-card" style="margin-top: 32px;">
+          <h3>👀 Drop 2 Teaser Section</h3>
+          <p style="font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.6;">Configure a blurred/blacked-out teaser grid with two products and a countdown release timer.</p>
+          <div class="field-row">
+            <div class="field-group">
+              <label>Teaser Section Status</label>
+              <select id="tweakShowTeaser" style="width:100%;">
+                <option value="true">Active (Visible on Storefront)</option>
+                <option value="false" selected>Hidden (Disabled)</option>
+              </select>
+            </div>
+            <div class="field-group" style="flex:2;">
+              <label>Target Release Date &amp; Time (ISO Format)</label>
+              <input type="text" id="tweakTeaserDate" placeholder="e.g. 2026-07-15T20:00:00" style="width:100%;">
+            </div>
+          </div>
+          <div class="field-row" style="margin-top:10px;">
+            <div class="field-group">
+              <label>Header Badge / Tag</label>
+              <input type="text" id="tweakTeaserBadge" placeholder="e.g. TEASER / DROP 02" style="width:100%;">
+            </div>
+            <div class="field-group" style="flex:2;">
+              <label>Header Title</label>
+              <input type="text" id="tweakTeaserTitle" placeholder="e.g. ECLIPSE COLLECTION" style="width:100%;">
+            </div>
+          </div>
+          <div class="field-group" style="margin-top:10px;">
+            <label>Header Description</label>
+            <input type="text" id="tweakTeaserDesc" placeholder="e.g. The next evolution of identity architecture. Pre-register to secure access." style="width:100%;">
+          </div>
+          <div style="border-top:1px solid #1a1a1a;margin-top:15px;padding-top:15px;">
+            <h4 style="font-size:12px;color:#fff;margin-bottom:10px;">👕 Teaser Product 1 (Shirt)</h4>
+            <div class="field-row">
+              <div class="field-group"><label>Product 1 Name</label><input type="text" id="tweakTeaserName1" placeholder="e.g. ECLIPSE SHIRT" style="width:100%;"></div>
+              <div class="field-group" style="flex:2;">
+                <label>Product 1 Image URL</label>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <input type="text" id="tweakTeaserImage1" placeholder="e.g. blackinfront.jpg" style="flex:1;" onchange="updateImagePreview('tweakTeaserImage1','tweakTeaserImage1Preview')">
+                  <button class="btn btn-sm btn-ghost" onclick="triggerFileUpload('tweakTeaserImage1File')" style="padding:0 10px;font-size:11px;height:38px;">Upload</button>
+                </div>
+                <input type="file" id="tweakTeaserImage1File" accept="image/*" style="display:none;" onchange="handleFileSelect(this,'tweakTeaserImage1','tweakTeaserImage1Preview')">
+                <div id="tweakTeaserImage1Preview" style="margin-top:6px;display:none;align-items:center;gap:8px;">
+                  <img src="" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid var(--border);">
+                  <span style="font-size:11px;color:var(--muted);">Preview</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="border-top:1px solid #1a1a1a;margin-top:15px;padding-top:15px;">
+            <h4 style="font-size:12px;color:#fff;margin-bottom:10px;">🩳 Teaser Product 2 (Shorts)</h4>
+            <div class="field-row">
+              <div class="field-group"><label>Product 2 Name</label><input type="text" id="tweakTeaserName2" placeholder="e.g. ECLIPSE SHORTS" style="width:100%;"></div>
+              <div class="field-group" style="flex:2;">
+                <label>Product 2 Image URL</label>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <input type="text" id="tweakTeaserImage2" placeholder="e.g. whiteinfront.jpg" style="flex:1;" onchange="updateImagePreview('tweakTeaserImage2','tweakTeaserImage2Preview')">
+                  <button class="btn btn-sm btn-ghost" onclick="triggerFileUpload('tweakTeaserImage2File')" style="padding:0 10px;font-size:11px;height:38px;">Upload</button>
+                </div>
+                <input type="file" id="tweakTeaserImage2File" accept="image/*" style="display:none;" onchange="handleFileSelect(this,'tweakTeaserImage2','tweakTeaserImage2Preview')">
+                <div id="tweakTeaserImage2Preview" style="margin-top:6px;display:none;align-items:center;gap:8px;">
+                  <img src="" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid var(--border);">
+                  <span style="font-size:11px;color:var(--muted);">Preview</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-accent btn-sm" onclick="saveTweaks()" style="margin-top:20px;width:100%;padding:12px;">Save Teaser Configuration</button>
+      </div>
     </div>
 
     <div class="page" id="page-inventory">
@@ -390,74 +476,6 @@ function renderDashboard() {
             </div>
           </div>
           <button class="btn btn-accent btn-sm" onclick="saveTweaks()" style="margin-top:20px;width:100%;padding:12px;">Save Pre-Launch Configuration</button>
-        </div>
-        <div class="settings-card" style="grid-column:span 2;">
-          <h3>👀 Drop 2 Teaser Section</h3>
-          <p style="font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.6;">Configure a blurred/blacked-out teaser grid with two products and a countdown release timer.</p>
-          <div class="field-row">
-            <div class="field-group">
-              <label>Teaser Section Status</label>
-              <select id="tweakShowTeaser" style="width:100%;">
-                <option value="true">Active (Visible on Storefront)</option>
-                <option value="false" selected>Hidden (Disabled)</option>
-              </select>
-            </div>
-            <div class="field-group" style="flex:2;">
-              <label>Target Release Date &amp; Time (ISO Format)</label>
-              <input type="text" id="tweakTeaserDate" placeholder="e.g. 2026-07-15T20:00:00" style="width:100%;">
-            </div>
-          </div>
-          <div class="field-row" style="margin-top:10px;">
-            <div class="field-group">
-              <label>Header Badge / Tag</label>
-              <input type="text" id="tweakTeaserBadge" placeholder="e.g. TEASER / DROP 02" style="width:100%;">
-            </div>
-            <div class="field-group" style="flex:2;">
-              <label>Header Title</label>
-              <input type="text" id="tweakTeaserTitle" placeholder="e.g. ECLIPSE COLLECTION" style="width:100%;">
-            </div>
-          </div>
-          <div class="field-group" style="margin-top:10px;">
-            <label>Header Description</label>
-            <input type="text" id="tweakTeaserDesc" placeholder="e.g. The next evolution of identity architecture. Pre-register to secure access." style="width:100%;">
-          </div>
-          <div style="border-top:1px solid #1a1a1a;margin-top:15px;padding-top:15px;">
-            <h4 style="font-size:12px;color:#fff;margin-bottom:10px;">👕 Teaser Product 1 (Shirt)</h4>
-            <div class="field-row">
-              <div class="field-group"><label>Product 1 Name</label><input type="text" id="tweakTeaserName1" placeholder="e.g. ECLIPSE SHIRT" style="width:100%;"></div>
-              <div class="field-group" style="flex:2;">
-                <label>Product 1 Image URL</label>
-                <div style="display:flex;gap:6px;align-items:center;">
-                  <input type="text" id="tweakTeaserImage1" placeholder="e.g. blackinfront.jpg" style="flex:1;" onchange="updateImagePreview('tweakTeaserImage1','tweakTeaserImage1Preview')">
-                  <button class="btn btn-sm btn-ghost" onclick="triggerFileUpload('tweakTeaserImage1File')" style="padding:0 10px;font-size:11px;height:38px;">Upload</button>
-                </div>
-                <input type="file" id="tweakTeaserImage1File" accept="image/*" style="display:none;" onchange="handleFileSelect(this,'tweakTeaserImage1','tweakTeaserImage1Preview')">
-                <div id="tweakTeaserImage1Preview" style="margin-top:6px;display:none;align-items:center;gap:8px;">
-                  <img src="" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid var(--border);">
-                  <span style="font-size:11px;color:var(--muted);">Preview</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div style="border-top:1px solid #1a1a1a;margin-top:15px;padding-top:15px;">
-            <h4 style="font-size:12px;color:#fff;margin-bottom:10px;">🩳 Teaser Product 2 (Shorts)</h4>
-            <div class="field-row">
-              <div class="field-group"><label>Product 2 Name</label><input type="text" id="tweakTeaserName2" placeholder="e.g. ECLIPSE SHORTS" style="width:100%;"></div>
-              <div class="field-group" style="flex:2;">
-                <label>Product 2 Image URL</label>
-                <div style="display:flex;gap:6px;align-items:center;">
-                  <input type="text" id="tweakTeaserImage2" placeholder="e.g. whiteinfront.jpg" style="flex:1;" onchange="updateImagePreview('tweakTeaserImage2','tweakTeaserImage2Preview')">
-                  <button class="btn btn-sm btn-ghost" onclick="triggerFileUpload('tweakTeaserImage2File')" style="padding:0 10px;font-size:11px;height:38px;">Upload</button>
-                </div>
-                <input type="file" id="tweakTeaserImage2File" accept="image/*" style="display:none;" onchange="handleFileSelect(this,'tweakTeaserImage2','tweakTeaserImage2Preview')">
-                <div id="tweakTeaserImage2Preview" style="margin-top:6px;display:none;align-items:center;gap:8px;">
-                  <img src="" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid var(--border);">
-                  <span style="font-size:11px;color:var(--muted);">Preview</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <button class="btn btn-accent btn-sm" onclick="saveTweaks()" style="margin-top:20px;width:100%;padding:12px;">Save Teaser Configuration</button>
         </div>
         <div class="settings-card" style="grid-column:span 2;">
           <h3>📱 Live Mobile Preview Simulator</h3>
@@ -1568,27 +1586,27 @@ function openEditProduct(id) {
   document.getElementById('productModal').classList.add('open');
 }
 
-function filterOrders(status, el) {
+window.filterOrders = debounce(function(status, el) {
   document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
   if (el) el.classList.add('active');
   
   if (status === 'all') {
-    renderOrdersTable(storeOrders);
+    renderOrdersTable(window.storeOrders);
   } else {
-    const filtered = storeOrders.filter(o => o.status === status);
+    const filtered = window.storeOrders.filter(o => o.status === status);
     renderOrdersTable(filtered);
   }
-}
+}, 150);
 
-function searchOrders(val) {
+window.searchOrders = debounce(function(val) {
   const term = val.toLowerCase().trim();
-  const filtered = storeOrders.filter(o => 
+  const filtered = window.storeOrders.filter(o => 
     (o.first_name && o.first_name.toLowerCase().includes(term)) ||
     (o.last_name && o.last_name.toLowerCase().includes(term)) ||
     (o.phone && o.phone.includes(term))
   );
   renderOrdersTable(filtered);
-}
+}, 300);
 
 async function changeOrderStatus(id, newStatus) {
   const statusLabels = {
