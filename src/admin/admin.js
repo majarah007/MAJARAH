@@ -91,24 +91,24 @@ async function loadAdminConfig() {
 function populateTweaksFromConfig() {
     const cfg = (key, fallback) => window.ADMIN_CONFIG[key] !== undefined ? window.ADMIN_CONFIG[key] : fallback;
     
+    const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val;
+    };
+
     // Marquee
-    const promoInput = document.getElementById('promoTextSetting');
-    const speedInput = document.getElementById('tweakPromoSpeed');
-    const repeatsInput = document.getElementById('tweakPromoRepeats');
-    const showMarqueeSelect = document.getElementById('tweakShowMarquee');
-    
-    if (promoInput) promoInput.value = cfg('promoText', '🔥 MAJARAH 01DROP 🔥');
-    if (speedInput) speedInput.value = cfg('promoSpeed', '80');
-    if (repeatsInput) repeatsInput.value = cfg('promoRepeats', '12');
-    if (showMarqueeSelect) showMarqueeSelect.value = String(cfg('promoVisible', true));
+    setVal('promoTextSetting', cfg('promoText', '🔥 MAJARAH 01DROP 🔥'));
+    setVal('tweakPromoSpeed', cfg('promoSpeed', '80'));
+    setVal('tweakPromoRepeats', cfg('promoRepeats', '12'));
+    setVal('tweakShowMarquee', String(cfg('promoVisible', true)));
     
     // Feature Toggles
-    if (document.getElementById('tweakShowSignIn')) document.getElementById('tweakShowSignIn').value = String(cfg('showSignIn', true));
-    if (document.getElementById('tweakShowStars')) document.getElementById('tweakShowStars').value = String(cfg('showStars', true));
-    if (document.getElementById('tweakShowSizeCalc')) document.getElementById('tweakShowSizeCalc').value = String(cfg('showSizeCalc', true));
-    if (document.getElementById('tweakShowInstagram')) document.getElementById('tweakShowInstagram').value = String(cfg('instagramVisible', true));
-    if (document.getElementById('tweakShowTiktok')) document.getElementById('tweakShowTiktok').value = String(cfg('tiktokVisible', true));
-    if (document.getElementById('tweakShowCoupons')) document.getElementById('tweakShowCoupons').value = String(cfg('showCoupons', true));
+    setVal('tweakShowSignIn', String(cfg('showSignIn', true)));
+    setVal('tweakShowStars', String(cfg('showStars', true)));
+    setVal('tweakShowSizeCalc', String(cfg('showSizeCalc', true)));
+    setVal('tweakShowInstagram', String(cfg('instagramVisible', true)));
+    setVal('tweakShowTiktok', String(cfg('tiktokVisible', true)));
+    setVal('tweakShowCoupons', String(cfg('showCoupons', true)));
     
     const couponCodesInput = document.getElementById('tweakCouponCodes');
     if (couponCodesInput) {
@@ -117,25 +117,25 @@ function populateTweaksFromConfig() {
     }
     
     // Payment
-    if (document.getElementById('tweakShowCOD')) document.getElementById('tweakShowCOD').value = String(cfg('paymentCOD', true));
-    if (document.getElementById('tweakShowApplePay')) document.getElementById('tweakShowApplePay').value = String(cfg('paymentApplePay', false));
-    if (document.getElementById('tweakShowCard')) document.getElementById('tweakShowCard').value = String(cfg('paymentCard', false));
+    setVal('tweakShowCOD', String(cfg('paymentCOD', true)));
+    setVal('tweakShowApplePay', String(cfg('paymentApplePay', false)));
+    setVal('tweakShowCard', String(cfg('paymentCard', false)));
     
     // Prelaunch
-    if (document.getElementById('tweakShowPrelaunch')) document.getElementById('tweakShowPrelaunch').value = String(cfg('showPrelaunch', false));
-    if (document.getElementById('tweakPrelaunchDate')) document.getElementById('tweakPrelaunchDate').value = cfg('prelaunchDate', '2026-07-01T20:00:00');
-    if (document.getElementById('tweakPrelaunchPassword')) document.getElementById('tweakPrelaunchPassword').value = cfg('bypassPassword', 'majarah2026');
+    setVal('tweakShowPrelaunch', String(cfg('showPrelaunch', false)));
+    setVal('tweakPrelaunchDate', cfg('prelaunchDate', '2026-07-01T20:00:00'));
+    setVal('tweakPrelaunchPassword', cfg('bypassPassword', 'majarah2026'));
     
     // Teaser
-    if (document.getElementById('tweakShowTeaser')) document.getElementById('tweakShowTeaser').value = String(cfg('drop2TeaserVisible', false));
-    if (document.getElementById('tweakTeaserDate')) document.getElementById('tweakTeaserDate').value = cfg('drop2TeaserDate', '2026-07-15T20:00:00');
-    if (document.getElementById('tweakTeaserBadge')) document.getElementById('tweakTeaserBadge').value = cfg('drop2TeaserBadge', 'TEASER / DROP 02');
-    if (document.getElementById('tweakTeaserTitle')) document.getElementById('tweakTeaserTitle').value = cfg('drop2TeaserTitle', 'ECLIPSE COLLECTION');
-    if (document.getElementById('tweakTeaserDesc')) document.getElementById('tweakTeaserDesc').value = cfg('drop2TeaserDesc', '');
-    if (document.getElementById('tweakTeaserName1')) document.getElementById('tweakTeaserName1').value = cfg('drop2Product1Name', '');
-    if (document.getElementById('tweakTeaserImage1')) document.getElementById('tweakTeaserImage1').value = cfg('drop2Product1Image', '');
-    if (document.getElementById('tweakTeaserName2')) document.getElementById('tweakTeaserName2').value = cfg('drop2Product2Name', '');
-    if (document.getElementById('tweakTeaserImage2')) document.getElementById('tweakTeaserImage2').value = cfg('drop2Product2Image', '');
+    setVal('tweakShowTeaser', String(cfg('drop2TeaserVisible', false)));
+    setVal('tweakTeaserDate', cfg('drop2TeaserDate', '2026-07-15T20:00:00'));
+    setVal('tweakTeaserBadge', cfg('drop2TeaserBadge', 'TEASER / DROP 02'));
+    setVal('tweakTeaserTitle', cfg('drop2TeaserTitle', 'ECLIPSE COLLECTION'));
+    setVal('tweakTeaserDesc', cfg('drop2TeaserDesc', ''));
+    setVal('tweakTeaserName1', cfg('drop2Product1Name', ''));
+    setVal('tweakTeaserImage1', cfg('drop2Product1Image', ''));
+    setVal('tweakTeaserName2', cfg('drop2Product2Name', ''));
+    setVal('tweakTeaserImage2', cfg('drop2Product2Image', ''));
 }
 
 async function saveConfigToSupabase(partialConfig, secondArg) {
@@ -848,6 +848,69 @@ async function sbFetch(table, method='GET', body=null, filters='', id=null) {
     console.error("Database communication down:", e);
     return null;
   }
+}
+
+// Request browser notification permission
+function requestNotificationPermission() {
+  if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+// Show browser desktop notification
+function showSystemNotification(title, body) {
+  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+    try {
+      new Notification(title, { body });
+    } catch (e) {
+      console.warn("Failed to trigger system notification:", e);
+    }
+  }
+}
+
+// Play the Ding.wav audio file
+function playNotificationSound() {
+  const audio = new Audio('../Ding.wav');
+  audio.play().catch(e => {
+    console.warn("Autoplay blocked by browser. Click on the admin panel to enable audio notifications.", e);
+  });
+}
+
+// Mobile/Safari Audio Engine Unlocker
+function unlockMobileAudio() {
+  const audio = new Audio('../Ding.wav');
+  audio.volume = 0;
+  audio.play().then(() => {
+    console.log("Mobile audio context unlocked successfully.");
+    document.removeEventListener('click', unlockMobileAudio);
+    document.removeEventListener('touchstart', unlockMobileAudio);
+  }).catch(err => {
+    console.warn("Audio unlock failed (waiting for interaction):", err);
+  });
+}
+document.addEventListener('click', unlockMobileAudio);
+document.addEventListener('touchstart', unlockMobileAudio);
+
+// Flash tab title
+let flashInterval = null;
+function flashTitle(msg) {
+  if (flashInterval) clearInterval(flashInterval);
+  const originalTitle = document.title;
+  let showNew = true;
+  flashInterval = setInterval(() => {
+    document.title = showNew ? `🔔 ${msg}` : originalTitle;
+    showNew = !showNew;
+  }, 1000);
+  
+  const stopFlash = () => {
+    clearInterval(flashInterval);
+    flashInterval = null;
+    document.title = originalTitle;
+    window.removeEventListener('click', stopFlash);
+    window.removeEventListener('focus', stopFlash);
+  };
+  window.addEventListener('click', stopFlash);
+  window.addEventListener('focus', stopFlash);
 }
 
 let syncIntervalId = null;
@@ -2090,35 +2153,48 @@ function updatePromoPreviewStats() {
 }
 
 function buildConfigFromInputs() {
-  const text = document.getElementById('promoTextSetting').value.trim();
-  const speed = parseFloat(document.getElementById('tweakPromoSpeed').value) || 25;
-  const repeats = parseInt(document.getElementById('tweakPromoRepeats').value) || 1;
-  const showMarquee = document.getElementById('tweakShowMarquee').value === 'true';
-  const showSignIn = document.getElementById('tweakShowSignIn').value === 'true';
-  const showStars = document.getElementById('tweakShowStars').value === 'true';
-  const showSizeCalc = document.getElementById('tweakShowSizeCalc').value === 'true';
-  const showInstagram = document.getElementById('tweakShowInstagram').value === 'true';
-  const showTiktok = document.getElementById('tweakShowTiktok').value === 'true';
-  const showCoupons = document.getElementById('tweakShowCoupons').value === 'true';
-  const couponCodes = document.getElementById('tweakCouponCodes').value.trim();
+  const getVal = (id, fallback = '') => {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : fallback;
+  };
+  const getBool = (id, fallback = false) => {
+    const el = document.getElementById(id);
+    return el ? el.value === 'true' : fallback;
+  };
+  const getNum = (id, fallback = 0) => {
+    const el = document.getElementById(id);
+    return el ? parseFloat(el.value) : fallback;
+  };
+
+  const text = getVal('promoTextSetting');
+  const speed = getNum('tweakPromoSpeed', 25);
+  const repeats = parseInt(getVal('tweakPromoRepeats', '1')) || 1;
+  const showMarquee = getBool('tweakShowMarquee', true);
+  const showSignIn = getBool('tweakShowSignIn', true);
+  const showStars = getBool('tweakShowStars', true);
+  const showSizeCalc = getBool('tweakShowSizeCalc', true);
+  const showInstagram = getBool('tweakShowInstagram', true);
+  const showTiktok = getBool('tweakShowTiktok', true);
+  const showCoupons = getBool('tweakShowCoupons', true);
+  const couponCodes = getVal('tweakCouponCodes');
   
-  const showCOD = document.getElementById('tweakShowCOD') ? (document.getElementById('tweakShowCOD').value === 'true') : true;
-  const showApplePay = document.getElementById('tweakShowApplePay') ? (document.getElementById('tweakShowApplePay').value === 'true') : true;
-  const showCard = document.getElementById('tweakShowCard') ? (document.getElementById('tweakShowCard').value === 'true') : true;
+  const showCOD = getBool('tweakShowCOD', true);
+  const showApplePay = getBool('tweakShowApplePay', true);
+  const showCard = getBool('tweakShowCard', true);
   
-  const showPrelaunch = document.getElementById('tweakShowPrelaunch') ? (document.getElementById('tweakShowPrelaunch').value === 'true') : false;
-  const prelaunchDate = document.getElementById('tweakPrelaunchDate') ? document.getElementById('tweakPrelaunchDate').value.trim() : '2026-07-01T20:00:00';
-  const prelaunchPassword = document.getElementById('tweakPrelaunchPassword') ? document.getElementById('tweakPrelaunchPassword').value.trim() : 'majarah2026';
+  const showPrelaunch = getBool('tweakShowPrelaunch', false);
+  const prelaunchDate = getVal('tweakPrelaunchDate', '2026-07-01T20:00:00');
+  const prelaunchPassword = getVal('tweakPrelaunchPassword', 'majarah2026');
   
-  const showTeaser = document.getElementById('tweakShowTeaser') ? (document.getElementById('tweakShowTeaser').value === 'true') : false;
-  const teaserDate = document.getElementById('tweakTeaserDate') ? document.getElementById('tweakTeaserDate').value.trim() : '2026-07-15T20:00:00';
-  const teaserBadge = document.getElementById('tweakTeaserBadge') ? document.getElementById('tweakTeaserBadge').value.trim() : 'TEASER / DROP 02';
-  const teaserTitle = document.getElementById('tweakTeaserTitle') ? document.getElementById('tweakTeaserTitle').value.trim() : 'ECLIPSE COLLECTION';
-  const teaserDesc = document.getElementById('tweakTeaserDesc') ? document.getElementById('tweakTeaserDesc').value.trim() : 'The next evolution of identity architecture. Pre-register to secure access.';
-  const teaserName1 = document.getElementById('tweakTeaserName1') ? document.getElementById('tweakTeaserName1').value.trim() : 'ECLIPSE SHIRT';
-  const teaserImage1 = document.getElementById('tweakTeaserImage1') ? document.getElementById('tweakTeaserImage1').value.trim() : 'blackinfront.jpg';
-  const teaserName2 = document.getElementById('tweakTeaserName2') ? document.getElementById('tweakTeaserName2').value.trim() : 'ECLIPSE SHORTS';
-  const teaserImage2 = document.getElementById('tweakTeaserImage2') ? document.getElementById('tweakTeaserImage2').value.trim() : 'whiteinfront.jpg';
+  const showTeaser = getBool('tweakShowTeaser', false);
+  const teaserDate = getVal('tweakTeaserDate', '2026-07-15T20:00:00');
+  const teaserBadge = getVal('tweakTeaserBadge', 'TEASER / DROP 02');
+  const teaserTitle = getVal('tweakTeaserTitle', 'ECLIPSE COLLECTION');
+  const teaserDesc = getVal('tweakTeaserDesc', 'The next evolution of identity architecture. Pre-register to secure access.');
+  const teaserName1 = getVal('tweakTeaserName1', 'ECLIPSE SHIRT');
+  const teaserImage1 = getVal('tweakTeaserImage1', 'blackinfront.jpg');
+  const teaserName2 = getVal('tweakTeaserName2', 'ECLIPSE SHORTS');
+  const teaserImage2 = getVal('tweakTeaserImage2', 'whiteinfront.jpg');
 
   // Shipping rates
   const zones = JSON.parse(localStorage.getItem('storeZones')) || [];
@@ -2543,3 +2619,8 @@ window.escapeCSV = escapeCSV;
 window.downloadCSV = downloadCSV;
 window.getActiveFilteredOrders = getActiveFilteredOrders;
 window.loadTranslationsPanel = loadTranslationsPanel;
+window.requestNotificationPermission = requestNotificationPermission;
+window.showSystemNotification = showSystemNotification;
+window.playNotificationSound = playNotificationSound;
+window.unlockMobileAudio = unlockMobileAudio;
+window.flashTitle = flashTitle;
