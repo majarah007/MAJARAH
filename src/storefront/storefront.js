@@ -5,6 +5,12 @@ if (window.SB_URL) {
     window.SB_URL = window.SB_URL.replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
 }
 
+// Standard productsData for storefront fallback
+const productsData = {
+    black: { title: 'Onyx Graphic Tee', sub: 'Onyx Black', price: 520, desc: 'Heavyweight cotton...', images: ['blackinfront.jpg', 'Blackback.jpg'] },
+    white: { title: 'Alabaster Graphic Tee', sub: 'Alabaster White', price: 520, desc: 'Heavyweight cotton...', images: ['whiteinfront.jpg', 'whiteback.jpg'] }
+};
+
 // --- IMAGE SRC RESOLVER HELPER ---
 // Ensures product images always resolve to a valid src, never empty string
 function resolveImgSrc(url, fallback) {

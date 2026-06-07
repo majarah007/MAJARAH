@@ -641,6 +641,64 @@ function renderDashboard() {
 `;
 }
 
+async function doLogin() {
+  const userEl = document.getElementById('loginUser');
+  const passEl = document.getElementById('loginPass');
+  const btn = document.querySelector('.login-btn');
+  
+  if (!userEl || !passEl) return;
+  
+  const user = userEl.value.trim();
+  const pass = passEl.value.trim();
+  
+  if (!user || !pass) {
+    showToast('Please enter both username and password.', 'error');
+    return;
+  }
+  
+  btn.disabled = true;
+  btn.textContent = 'Authenticating...';
+  
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user, pass })
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      localStorage.setItem('mjr_admin_token', data.token);
+      localStorage.setItem('mjr_admin_user', user);
+      showDashboard();
+      showToast('Welcome back, ' + user);
+    } else {
+      const err = await res.text();
+      showToast('Login failed: ' + err, 'error');
+    }
+  } catch (e) {
+    console.error("Auth error:", e);
+    showToast('Connection error. Try again.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Login to Dashboard';
+  }
+}
+
+function logout() {
+  localStorage.removeItem('mjr_admin_token');
+  localStorage.removeItem('mjr_admin_user');
+  location.reload();
+}
+
+async function showDashboard() {
+  renderDashboard();
+  await initSupabase();
+  syncDashboardData();
+  // Start background sync
+  setInterval(() => syncDashboardData(true), 30000);
+}
+
 
 // CONFIG — stored in localStorage
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1310,7 +1368,9 @@ function handleFileSelect(input, targetId, previewId) {
 }
 
 function updateImagePreview(inputId, previewId) {
-  const val = document.getElementById(inputId).value.trim();
+  const inputEl = document.getElementById(inputId);
+  if (!inputEl) return;
+  const val = inputEl.value.trim();
   const previewDiv = document.getElementById(previewId);
   if (!previewDiv) return;
   
@@ -2198,17 +2258,49 @@ async function clearPrelaunchEmails() {
   }
 }
 
-// Initialise shipping zones panel on page load when relevant
-document.addEventListener('DOMContentLoaded', () => {
-  // Render shipping zones if localStorage has them already
-  setTimeout(renderShippingZones, 500);
-  // Load shipping rules
-  const rules = JSON.parse(localStorage.getItem('storeShippingRules')) || {};
-  if (rules.freeShipThreshold !== undefined && document.getElementById('freeShipThreshold')) {
-    document.getElementById('freeShipThreshold').value = rules.freeShipThreshold;
-  }
-  if (rules.deliveryDays && document.getElementById('deliveryDays')) {
-    document.getElementById('deliveryDays').value = rules.deliveryDays;
+// Consolidated initialization and authentication logic
+window.addEventListener('DOMContentLoaded', async () => {
+  const token = localStorage.getItem('mjr_admin_token');
+  if (token) {
+    await showDashboard();
+    
+    // Initialise shipping zones panel
+    setTimeout(renderShippingZones, 500);
+    // Load shipping rules
+    const rules = JSON.parse(localStorage.getItem('storeShippingRules')) || {};
+    if (rules.freeShipThreshold !== undefined && document.getElementById('freeShipThreshold')) {
+      const el = document.getElementById('freeShipThreshold');
+      if (el) el.value = rules.freeShipThreshold;
+    }
+    if (rules.deliveryDays) {
+      const el = document.getElementById('deliveryDays');
+      if (el) el.value = rules.deliveryDays;
+    }
+    
+    // Initialize tweaks
+    setTimeout(initializeTweaks, 800);
+  } else {
+    // Show login screen
+    const appEl = document.getElementById('app');
+    if (appEl) {
+      appEl.innerHTML = `
+        <div class="login-wrap">
+          <div class="login-card">
+            <div class="login-logo">MAJARAH</div>
+            <div class="login-title">Admin Terminal</div>
+            <div class="field-group">
+              <label>Username</label>
+              <input type="text" id="loginUser" placeholder="admin">
+            </div>
+            <div class="field-group">
+              <label>Password</label>
+              <input type="password" id="loginPass" placeholder="••••••••">
+            </div>
+            <button class="login-btn" onclick="doLogin()">Login to Dashboard</button>
+          </div>
+        </div>
+      `;
+    }
   }
 });
 
@@ -2316,9 +2408,3 @@ function updateSimulatorControlsUI() {
 
 // Initialise clock updater
 setInterval(updateSimulatorClock, 30000);
-
-// Initialize tweaks from Supabase on page load or refresh
-document.addEventListener('DOMContentLoaded', () => {
-    // Small delay to ensure renderDashboard() has finished if auto-logged in
-    setTimeout(initializeTweaks, 800);
-});
