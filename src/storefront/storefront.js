@@ -291,6 +291,7 @@ const TRANSLATIONS = {
   en: {
     collection: "Collection",
     signin: "Sign In",
+    hero_sub: "Drop 01",
     explore: "Explore Drop 01",
     universe_within: "The Universe Within",
     universe_tagline: "Drop 01 &mdash; 100% heavyweight cotton. Screen-printed in Cairo. Ships across all of Egypt.",
@@ -3376,4 +3377,4 @@ document.addEventListener('touchstart', (e) => {
 })();
 
 // Run Application Bootstrap Setup Loop
-initApp();
+initApp();p();

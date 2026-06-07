@@ -850,6 +850,25 @@ async function sbFetch(table, method='GET', body=null, filters='', id=null) {
   }
 }
 
+let syncIntervalId = null;
+
+function startAutoSync() {
+  if (syncIntervalId) clearInterval(syncIntervalId);
+  // Poll every 10 seconds for new orders or updates
+  syncIntervalId = setInterval(() => {
+    if (localStorage.getItem('mjr_admin_token')) {
+      syncDashboardData(true);
+    }
+  }, 10000);
+}
+
+function stopAutoSync() {
+  if (syncIntervalId) {
+    clearInterval(syncIntervalId);
+    syncIntervalId = null;
+  }
+}
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // DATA SYNC & DISPLAY ENGINE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2491,6 +2510,8 @@ window.closeModal = closeModal;
 window.triggerFileUpload = triggerFileUpload;
 window.handleFileSelect = handleFileSelect;
 window.updateImagePreview = updateImagePreview;
+window.startAutoSync = startAutoSync;
+window.stopAutoSync = stopAutoSync;
 window.syncDashboardData = syncDashboardData;
 window.initSupabase = initSupabase;
 window.initializeTweaks = initializeTweaks;
