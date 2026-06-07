@@ -41,7 +41,7 @@ function throttle(func, limit) {
 }
 
 // ── DOM ELEMENT CACHE ──
-const DOM = {
+window.DOM = {
     grid: null,
     promoText: null,
     promoTextDup: null,
@@ -52,15 +52,15 @@ const DOM = {
     html: null
 };
 
-function initDOMCache() {
-    DOM.grid = document.querySelector('.grid');
-    DOM.promoText = document.getElementById('promoText');
-    DOM.promoTextDup = document.getElementById('promoTextDup');
-    DOM.marqueeTrack = document.querySelector('.promo-scroller-track');
-    DOM.themeToggle = document.getElementById('themeToggle');
-    DOM.navAuthLink = document.getElementById('navAuthLink');
-    DOM.body = document.body;
-    DOM.html = document.documentElement;
+window.initDOMCache = function() {
+    window.DOM.grid = document.querySelector('.grid');
+    window.DOM.promoText = document.getElementById('promoText');
+    window.DOM.promoTextDup = document.getElementById('promoTextDup');
+    window.DOM.marqueeTrack = document.querySelector('.promo-scroller-track');
+    window.DOM.themeToggle = document.getElementById('themeToggle');
+    window.DOM.navAuthLink = document.getElementById('navAuthLink');
+    window.DOM.body = document.body;
+    window.DOM.html = document.documentElement;
 }
 
 // ── GLOBAL CONFIGURATION — loaded from Supabase site_config ──
