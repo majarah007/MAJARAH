@@ -167,46 +167,33 @@ async function loadProducts() {
     let products = [];
     let allInventory = [];
 
-    if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY") {
-        try {
-            const baseUrl = window.SB_URL.replace(/\/+$/, "");
-            const res = await fetch(`${baseUrl}/rest/v1/products?select=*`, {
-                headers: {
-                    'apikey': window.SB_KEY,
-                    'Authorization': `Bearer ${window.SB_KEY}`
-                }
-            });
-            if (res.ok) {
-                const dbProducts = await res.json();
-                if (dbProducts && dbProducts.length > 0) {
-                    products = dbProducts.map(p => {
-                        if (!p.images) {
+    try {
+        const res = await fetch(`/api/proxy?table=products&select=*`);
+        if (res.ok) {
+            const dbProducts = await res.json();
+            if (dbProducts && dbProducts.length > 0) {
+                products = dbProducts.map(p => {
+                    if (!p.images) {
+                        p.images = [p.front_image_url, p.back_image_url].filter(Boolean);
+                    } else if (typeof p.images === 'string') {
+                        try {
+                            p.images = JSON.parse(p.images);
+                        } catch(e) {
                             p.images = [p.front_image_url, p.back_image_url].filter(Boolean);
-                        } else if (typeof p.images === 'string') {
-                            try {
-                                p.images = JSON.parse(p.images);
-                            } catch(e) {
-                                p.images = [p.front_image_url, p.back_image_url].filter(Boolean);
-                            }
                         }
-                        return p;
-                    });
-                }
+                    }
+                    return p;
+                });
             }
-
-            // Fetch all inventory in parallel
-            const invRes = await fetch(`${baseUrl}/rest/v1/inventory?select=*`, {
-                headers: {
-                    'apikey': window.SB_KEY,
-                    'Authorization': `Bearer ${window.SB_KEY}`
-                }
-            });
-            if (invRes.ok) {
-                allInventory = await invRes.json();
-            }
-        } catch (e) {
-            console.error("Failed to load products from database:", e);
         }
+
+        // Fetch all inventory in parallel
+        const invRes = await fetch(`/api/proxy?table=inventory&select=*`);
+        if (invRes.ok) {
+            allInventory = await invRes.json();
+        }
+    } catch (e) {
+        console.error("Failed to load products from database:", e);
     }
 
     fetchedProducts = products;
@@ -998,21 +985,13 @@ let activeProductInventory = [];
 
 async function loadActiveProductInventory(productId) {
     activeProductInventory = [];
-    if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY") {
-        try {
-            const baseUrl = window.SB_URL.replace(/\/+$/, "");
-            const res = await fetch(`${baseUrl}/rest/v1/inventory?product_id=eq.${productId}`, {
-                headers: {
-                    'apikey': window.SB_KEY,
-                    'Authorization': `Bearer ${window.SB_KEY}`
-                }
-            });
-            if (res.ok) {
-                activeProductInventory = await res.json();
-            }
-        } catch (e) {
-            console.error("Failed to load inventory for product:", e);
+    try {
+        const res = await fetch(`/api/proxy?table=inventory&product_id=eq.${productId}`);
+        if (res.ok) {
+            activeProductInventory = await res.json();
         }
+    } catch (e) {
+        console.error("Failed to load inventory for product:", e);
     }
 }
 
@@ -1397,22 +1376,14 @@ async function trackOrdersByPhone() {
     
     let ordersList = [];
     
-    // 1. Fetch from Supabase
-    if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY") {
-        try {
-            const baseUrl = window.SB_URL.replace(/\/+$/, "");
-            const res = await fetch(`${baseUrl}/rest/v1/orders?phone=eq.${encodeURIComponent(phoneInput)}&order=id.desc`, {
-                headers: {
-                    'apikey': window.SB_KEY,
-                    'Authorization': `Bearer ${window.SB_KEY}`
-                }
-            });
-            if (res.ok) {
-                ordersList = await res.json();
-            }
-        } catch(e) {
-            console.error("Database tracker lookup failed:", e);
+    // 1. Fetch from Proxy
+    try {
+        const res = await fetch(`/api/proxy?table=orders&phone=eq.${encodeURIComponent(phoneInput)}&order=id.desc`);
+        if (res.ok) {
+            ordersList = await res.json();
         }
+    } catch(e) {
+        console.error("Database tracker lookup failed:", e);
     }
     
     // 2. Fetch from Local Storage Fallback
@@ -1622,95 +1593,74 @@ async function submitShopifyCheckout() {
         submitBtn.innerHTML = `<span class="chk-spinner"></span>${currentLang === 'ar' ? 'جارٍ المعالجة...' : 'Processing...'}`;
     }
 
-    // 1. Verify stock availability in Supabase
-    if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY") {
-        try {
-            const baseUrl = window.SB_URL.replace(/\/+$/, "");
-            const checkRes = await fetch(`${baseUrl}/rest/v1/inventory?product_id=eq.${activeProductId}&size=eq.${activeSelectedSize}`, {
-                headers: {
-                    'apikey': window.SB_KEY,
-                    'Authorization': `Bearer ${window.SB_KEY}`
-                }
-            });
-            if (checkRes.ok) {
-                const invData = await checkRes.json();
-                if (invData && invData.length > 0) {
-                    const currentStock = Number(invData[0].stock);
-                    if (currentStock <= 0) {
-                        showToast(`Sorry! Size ${activeSelectedSize} for this product has just sold out.`, "error");
-                        if (submitBtn) {
-                            submitBtn.disabled = false;
-                            submitBtn.innerText = "Complete Order";
-                        }
-                        return;
+    // 1. Verify stock availability via Proxy
+    try {
+        const checkRes = await fetch(`/api/proxy?table=inventory&product_id=eq.${activeProductId}&size=eq.${activeSelectedSize}`);
+        if (checkRes.ok) {
+            const invData = await checkRes.json();
+            if (invData && invData.length > 0) {
+                const currentStock = Number(invData[0].stock);
+                if (currentStock <= 0) {
+                    showToast(`Sorry! Size ${activeSelectedSize} for this product has just sold out.`, "error");
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "Complete Order";
                     }
+                    return;
                 }
             }
-        } catch (e) {
-            console.error("Failed to check inventory availability, proceeding:", e);
         }
+    } catch (e) {
+        console.error("Failed to check inventory availability, proceeding:", e);
     }
 
     let success = false;
     let orderId = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
 
-    // Try posting to Supabase if configured, fallback to localStorage
-    if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY") {
-        try {
-            const baseUrl = window.SB_URL.replace(/\/+$/, "");
-            const res = await fetch(`${baseUrl}/rest/v1/orders`, {
-                method: 'POST',
-                headers: {
-                    'apikey': window.SB_KEY,
-                    'Authorization': `Bearer ${window.SB_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=representation'
-                },
-                body: JSON.stringify(newOrder)
-            });
-            
-            if (res.ok) {
-                const data = await res.json();
-                if (data && data[0]) {
-                    orderId = '#' + data[0].id;
-                }
-                success = true;
+    // Try posting to Proxy, fallback to localStorage
+    try {
+        const res = await fetch(`/api/proxy?table=orders`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newOrder)
+        });
+        
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data[0]) {
+                orderId = '#' + data[0].id;
+            }
+            success = true;
 
-                // Decrement stock in database since order succeeded
-                try {
-                    const checkRes = await fetch(`${baseUrl}/rest/v1/inventory?product_id=eq.${activeProductId}&size=eq.${activeSelectedSize}`, {
-                        headers: {
-                            'apikey': window.SB_KEY,
-                            'Authorization': `Bearer ${window.SB_KEY}`
-                        }
-                    });
-                    if (checkRes.ok) {
-                        const invData = await checkRes.json();
-                        if (invData && invData.length > 0) {
-                            const currentStock = Number(invData[0].stock);
-                            if (currentStock > 0) {
-                                const newStock = currentStock - 1;
-                                await fetch(`${baseUrl}/rest/v1/inventory?id=eq.${invData[0].id}&stock=eq.${currentStock}`, {
-                                    method: 'PATCH',
-                                    headers: {
-                                        'apikey': window.SB_KEY,
-                                        'Authorization': `Bearer ${window.SB_KEY}`,
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify({ stock: newStock })
-                                });
-                            }
+            // Decrement stock via Proxy since order succeeded
+            try {
+                const checkRes = await fetch(`/api/proxy?table=inventory&product_id=eq.${activeProductId}&size=eq.${activeSelectedSize}`);
+                if (checkRes.ok) {
+                    const invData = await checkRes.json();
+                    if (invData && invData.length > 0) {
+                        const currentStock = Number(invData[0].stock);
+                        if (currentStock > 0) {
+                            const newStock = currentStock - 1;
+                            await fetch(`/api/proxy?table=inventory&id=eq.${invData[0].id}&stock=eq.${currentStock}`, {
+                                method: 'PATCH',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ stock: newStock })
+                            });
                         }
                     }
-                } catch (err) {
-                    console.error("Failed to decrement inventory stock:", err);
                 }
-            } else {
-                console.error("Supabase submission failed, falling back to local storage:", await res.text());
+            } catch (err) {
+                console.error("Failed to decrement inventory stock:", err);
             }
-        } catch (e) {
-            console.error("Database connection down, falling back to local storage:", e);
+        } else {
+            console.error("Supabase submission failed, falling back to local storage:", await res.text());
         }
+    } catch (e) {
+        console.error("Database connection down, falling back to local storage:", e);
     }
 
     const computedTotalSum = finalSubtotal + shippingFeeValue;
@@ -2054,27 +2004,19 @@ async function lookupOrderForRefund() {
     let order = null;
     let isLocal = false;
 
-    if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY") {
-        try {
-            const baseUrl = window.SB_URL.replace(/\/+$/, "");
-            const idInt = parseInt(orderIdInput.replace(/[^0-9]/g, ''));
-            if (!isNaN(idInt)) {
-                const res = await fetch(`${baseUrl}/rest/v1/orders?id=eq.${idInt}&phone=eq.${encodeURIComponent(phoneInput)}`, {
-                    headers: {
-                        'apikey': window.SB_KEY,
-                        'Authorization': `Bearer ${window.SB_KEY}`
-                    }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && data.length > 0) {
-                        order = data[0];
-                    }
+    try {
+        const idInt = parseInt(orderIdInput.replace(/[^0-9]/g, ''));
+        if (!isNaN(idInt)) {
+            const res = await fetch(`/api/proxy?table=orders&id=eq.${idInt}&phone=eq.${encodeURIComponent(phoneInput)}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    order = data[0];
                 }
             }
-        } catch(e) {
-            console.error("Database lookup failed:", e);
         }
+    } catch(e) {
+        console.error("Database lookup failed:", e);
     }
 
     if (!order) {
@@ -2294,29 +2236,23 @@ async function submitRefundRequest() {
             success = true;
         }
     } else {
-        if (window.SB_URL && window.SB_KEY) {
-            try {
-                const baseUrl = window.SB_URL.replace(/\/+$/, "");
-                const res = await fetch(`${baseUrl}/rest/v1/orders?id=eq.${activeRefundOrder.id}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'apikey': window.SB_KEY,
-                        'Authorization': `Bearer ${window.SB_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=representation'
-                    },
-                    body: JSON.stringify(updatedData)
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && data.length > 0) {
-                        activeRefundOrder = { ...data[0], isLocal: false };
-                        success = true;
-                    }
+        try {
+            const res = await fetch(`/api/proxy?table=orders&id=eq.${activeRefundOrder.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedData)
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    activeRefundOrder = { ...data[0], isLocal: false };
+                    success = true;
                 }
-            } catch(e) {
-                console.error("Failed to update refund in database:", e);
             }
+        } catch(e) {
+            console.error("Failed to update refund in database:", e);
         }
     }
 
@@ -2917,50 +2853,38 @@ async function submitAuthSignup() {
     
     let success = false;
     
-    // 1. Try Supabase
-    if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY") {
-        try {
-            const baseUrl = window.SB_URL.replace(/\/+$/, "");
-            
-            // Check if user already exists
-            const checkRes = await fetch(`${baseUrl}/rest/v1/users?select=id&or=(username.eq.${encodeURIComponent(username)},email.eq.${encodeURIComponent(email)})`, {
-                headers: {
-                    'apikey': window.SB_KEY,
-                    'Authorization': `Bearer ${window.SB_KEY}`
+    // 1. Try Proxy
+    try {
+        // Check if user already exists
+        const checkRes = await fetch(`/api/proxy?table=users&select=id&or=(username.eq.${encodeURIComponent(username)},email.eq.${encodeURIComponent(email)})`);
+        
+        if (checkRes.ok) {
+            const existing = await checkRes.json();
+            if (existing && existing.length > 0) {
+                if (errEl) {
+                    errEl.innerText = "Username or Email already registered.";
+                    errEl.style.display = 'block';
                 }
-            });
-            
-            if (checkRes.ok) {
-                const existing = await checkRes.json();
-                if (existing && existing.length > 0) {
-                    if (errEl) {
-                        errEl.innerText = "Username or Email already registered.";
-                        errEl.style.display = 'block';
-                    }
-                    return;
-                }
+                return;
             }
-            
-            // Insert new user
-            const createRes = await fetch(`${baseUrl}/rest/v1/users`, {
-                method: 'POST',
-                headers: {
-                    'apikey': window.SB_KEY,
-                    'Authorization': `Bearer ${window.SB_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=representation'
-                },
-                body: JSON.stringify({ username, email, password })
-            });
-            
-            if (createRes.ok) {
-                success = true;
-            } else {
-                console.error("Supabase user signup failed:", await createRes.text());
-            }
-        } catch(e) {
-            console.error("Database connection down during signup:", e);
         }
+        
+        // Insert new user
+        const createRes = await fetch(`/api/proxy?table=users`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, email, password })
+        });
+        
+        if (createRes.ok) {
+            success = true;
+        } else {
+            console.error("Supabase user signup failed:", await createRes.text());
+        }
+    } catch(e) {
+        console.error("Database connection down during signup:", e);
     }
     
     // 2. Local Storage Fallback if DB offline or failed
@@ -3019,28 +2943,19 @@ async function submitAuthLogin() {
     
     let loggedUser = null;
     
-    // 1. Try Supabase
-    if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY") {
-        try {
-            const baseUrl = window.SB_URL.replace(/\/+$/, "");
-            
-            // Check username or email matching password
-            const loginRes = await fetch(`${baseUrl}/rest/v1/users?select=username,email&password=eq.${encodeURIComponent(password)}&or=(username.eq.${encodeURIComponent(identifier)},email.eq.${encodeURIComponent(identifier)})`, {
-                headers: {
-                    'apikey': window.SB_KEY,
-                    'Authorization': `Bearer ${window.SB_KEY}`
-                }
-            });
-            
-            if (loginRes.ok) {
-                const data = await loginRes.json();
-                if (data && data.length > 0) {
-                    loggedUser = data[0];
-                }
+    // 1. Try Proxy
+    try {
+        // Check username or email matching password
+        const loginRes = await fetch(`/api/proxy?table=users&select=username,email&password=eq.${encodeURIComponent(password)}&or=(username.eq.${encodeURIComponent(identifier)},email.eq.${encodeURIComponent(identifier)})`);
+        
+        if (loginRes.ok) {
+            const data = await loginRes.json();
+            if (data && data.length > 0) {
+                loggedUser = data[0];
             }
-        } catch(e) {
-            console.error("Database connection down during login:", e);
         }
+    } catch(e) {
+        console.error("Database connection down during login:", e);
     }
     
     // 2. Local Storage Fallback if DB offline or failed
@@ -3107,47 +3022,36 @@ async function submitAuthForgot() {
     
     let success = false;
     
-    // 1. Try Supabase
-    if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY") {
-        try {
-            const baseUrl = window.SB_URL.replace(/\/+$/, "");
-            
-            // Check if user exists
-            const checkRes = await fetch(`${baseUrl}/rest/v1/users?select=id&or=(username.eq.${encodeURIComponent(identifier)},email.eq.${encodeURIComponent(identifier)})`, {
-                headers: {
-                    'apikey': window.SB_KEY,
-                    'Authorization': `Bearer ${window.SB_KEY}`
+    // 1. Try Proxy
+    try {
+        // Check if user exists
+        const checkRes = await fetch(`/api/proxy?table=users&select=id&or=(username.eq.${encodeURIComponent(identifier)},email.eq.${encodeURIComponent(identifier)})`);
+        
+        if (checkRes.ok) {
+            const data = await checkRes.json();
+            if (data && data.length > 0) {
+                const userId = data[0].id;
+                // Update user's password
+                const updateRes = await fetch(`/api/proxy?table=users&id=eq.${userId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password: newPass })
+                });
+                if (updateRes.ok) {
+                    success = true;
                 }
-            });
-            
-            if (checkRes.ok) {
-                const data = await checkRes.json();
-                if (data && data.length > 0) {
-                    const userId = data[0].id;
-                    // Update user's password
-                    const updateRes = await fetch(`${baseUrl}/rest/v1/users?id=eq.${userId}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'apikey': window.SB_KEY,
-                            'Authorization': `Bearer ${window.SB_KEY}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ password: newPass })
-                    });
-                    if (updateRes.ok) {
-                        success = true;
-                    }
-                } else {
-                    if (errEl) {
-                        errEl.innerText = "User not found with matching username/email.";
-                        errEl.style.display = 'block';
-                    }
-                    return;
+            } else {
+                if (errEl) {
+                    errEl.innerText = "User not found with matching username/email.";
+                    errEl.style.display = 'block';
                 }
+                return;
             }
-        } catch(e) {
-            console.error("Database connection down during password reset:", e);
         }
+    } catch(e) {
+        console.error("Database connection down during password reset:", e);
     }
     
     // 2. Local Storage Fallback if DB offline or failed
@@ -3208,22 +3112,14 @@ async function loadCustomerProfile() {
     
     let ordersList = [];
     
-    // 1. Fetch from Supabase
-    if (window.SB_URL && window.SB_KEY && window.SB_KEY !== "PLACEHOLDER_ANON_KEY") {
-        try {
-            const baseUrl = window.SB_URL.replace(/\/+$/, "");
-            const res = await fetch(`${baseUrl}/rest/v1/orders?select=*&email=eq.${encodeURIComponent(activeCustomerSession.email)}&order=id.desc`, {
-                headers: {
-                    'apikey': window.SB_KEY,
-                    'Authorization': `Bearer ${window.SB_KEY}`
-                }
-            });
-            if (res.ok) {
-                ordersList = await res.json();
-            }
-        } catch(e) {
-            console.error("Failed to load customer orders from DB:", e);
+    // 1. Fetch from Proxy
+    try {
+        const res = await fetch(`/api/proxy?table=orders&select=*&email=eq.${encodeURIComponent(activeCustomerSession.email)}&order=id.desc`);
+        if (res.ok) {
+            ordersList = await res.json();
         }
+    } catch(e) {
+        console.error("Failed to load customer orders from DB:", e);
     }
     
     // 2. Fetch from Local Storage Fallback
