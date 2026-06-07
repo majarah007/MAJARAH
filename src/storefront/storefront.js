@@ -1091,18 +1091,16 @@ async function openProduct(id) {
             buyBtn.innerText = isAr ? "نفذت الكمية" : "SOLD OUT";
             buyBtn.style.opacity = "0.5";
         } else {
-            buyBtn.disabled = fality = "0.5";
-        } else {
-�شتريه دلtn.disabled = false;
+            buyBtn.disabled = false;
             buyBtn.innerText = isAr ? 'اشتريه دلوقتي' : 'Buy It Now';
-            buyBtn.style.opacity = "1";
+            buyBtn.style.opacity = '1';
         }
     }
 
     // 3. Stock indicator
-    const stock= document.getElment.getElementBckText');
-    ccator');
+    const stockIndicator = document.getElementById('ppStockIndicator');
     const stockText = document.getElementById('ppStockText');
+
     const stockTag = document.getElementById('ppStockTag');
     const stockPulse = document.getElementById('ppStockPulse');
     const stockSegments = document.getElementById('ppStockSegments');
@@ -1186,19 +1184,19 @@ function openCheckout() {
     }
 
     if(!activeSelectedSize) {
-        showTo to checkout.", "info");
+        showToast(currentLang === 'ar' ? 'يرجى اختيار المقاس أولاً.' : 'Please select a size to checkout.', 'info');
         return;
     }
     
     let p = fetchedProducts.find(prod => String(prod.id) === String(activeProductId));
     if (!p) {
-        showToast("Product data not synchronized. Please refresh the page.", "error");
+        showToast('Product data not synchronized. Please refresh the page.', 'error');
         return;
     }
     
     let defaultFront = 'blackinfront.jpg';
     const searchStr = (p.name + ' ' + (p.color || '')).toLowerCase();
-    if (searchStr.includ+ ' ' + (p.color || '')).toLowerCase();
+    if (searchStr.includes('white') || searchStr.includes('alabaster')) {
     if (searchStr.includes('white') || searchStr.includes('alabaster')) {
         defaultFront = 'whiteinfront.jpg';
     }
@@ -1215,9 +1213,7 @@ function openCheckout() {
     document.getElementById('chkItemPrice').innerText = "EGP " + Number(p.price).toFixed(2);
     
     // Reset shipping fields
-    document.getElementById('chkCity').value = ""Lang === 'ar' ? "اختار المحافظة" : "Select city";
-    
-    // Pre-populate fields from activeCustomerSession and 
+    document.getElementById('chkCity').value = '';
     
     // Pre-populate fields from activeCustomerSession and saved address
     if (typeof activeCustomerSession !== 'undefined' && activeCustomerSession) {
@@ -1232,7 +1228,7 @@ function openCheckout() {
 
         if (activeCustomerSession.email) {
             try {
-                const savedAddression.email.toLowerCase()}`));
+                const savedAddr = JSON.parse(localStorage.getItem('mjr_address_' + activeCustomerSession.email.toLowerCase()));
                 if (savedAddr) {
                     if (firstEl && savedAddr.first) firstEl.value = savedAddr.first;
                     if (lastEl && savedAddr.last) lastEl.value = savedAddr.last;
@@ -1270,9 +1266,10 @@ function openCheckout() {
 }
 
 function closeCheckout() {
-    document.getElemeoutPage').classList.remove('open');
+function closeCheckout() {
+    document.getElementById('checkoutPage').classList.remove('open');
     unlockBodyScroll();
-}entById('checkoutPage').classList.remove('open');
+}
     unlockBodyScroll();
 }
 
@@ -1545,15 +1542,11 @@ function calculateTotals() {
         document.getElementById('chkShipping').innerText = "EGP " + Number(shippingFeeValue).toFixed(2);
         document.getElementById('chkTotal').innerHTML = `<span class="chk-currency-code">EGP </span>${computedTotalSum.toFixed(2)}`;
     ng === 'ar' ? "اختار المحافظة" : "Select city";
-        // Show subtotal as total estimate until city is selectedect city";
         // Show subtotal as total estimate until city is selected
-        document.getElementById('chkTotal').inner`;
-    }
+        document.getElementById('chkTotal').innerHTML = '<span>EGP </span>' + finalSubtotal.toFixed(2);
 }
 
-ass="chk-currenc Order to Storagan>${finalSubtotal.toFixed(2)}`;
-    }
-}
+
 
 // Post Manifest Order to Storage Pipeline
 async function submitShopifyCheckout() {
@@ -1579,14 +1572,11 @@ async function submitShopifyCheckout() {
     
     let p = fetchedProducts.find(prod => String(prod.id) === String(activeProductId));
     if (!p) {
-        showToast("Product synchronization error. Please refresh the page and try again.", "error")    submitBtn.innerHTML = currentLang === 'ar' ? 'أكد الطلب دلوقتي' : 'Complete Order';
-        }
+        showToast('Product synchronization error. Please refresh the page and try again.', 'error');
         return;
     }
     const targetZoneObj = currentLoadedShippingRates.find(z => z.name === cityInput);
     const shippingFeeValue = targetZoneObj ? targetZoneObj.price : 0;
-
-    let basePrice = NugFeeValue = targ 0;
     let discountAmount = 0;
     if (activeDiscountCode && activeDiscountValue > 0) {
         if (activeDiscountType === 'percent') {
@@ -1627,10 +1617,8 @@ async function submitShopifyCheckout() {
         if (checkRes.ok) {
             const invData = await checkRes.json();
             if (invData && invData.length > 0) {
-     > 0) {
                 const currentStock = Number(invData[0].stock);
                 if (currentStock <= 0) {
-                    showToast(`Sorry! Size ${activeSelectedSize} for this product has just sold out.`, "error");
                     if (submitBtn) {
                         submitBtn.disabled = false;
                         submitBtn.innerText = "Complete Order";
@@ -1869,9 +1857,9 @@ function sendEmailReceipt(orderId, email, first, last, product, size, payment, s
                         shipping_cost: shipping + ' EGP',
                         total: total + ' EGP'
                     };
-            Config.emailjsTemplateId, templateParams)
+                    emailjs.send(adminConfig.emailjsServiceId, adminConfig.emailjsTemplateId, templateParams)
                         .then(() => {
-                            console.log("Emaille.log("Email receipt sent successfully via EmailJS!");
+                            console.log('Email receipt sent successfully via EmailJS!');
                         })
                         .catch(err => {
                             console.error("EmailJS dispatch failed:", err);
@@ -1940,7 +1928,6 @@ function calculateRecommendedSize() {
     let finalSize = baseSize;
     if (fit === 'snug') {
         if (baseSize === 'M') finalSize = 'S';
-        else if (baseSize === 'L') fe === 'M') finalSize = 'S';
         else if (baseSize === 'L') finalSize = 'M';
         else if (baseSize === 'XL') finalSize = 'L';
     } else if (fit === 'oversized') {
@@ -1960,10 +1947,13 @@ function calculateRecommendedSize() {
     } else if (fit === 'regular') {
         desc = isAr
             ? `المقاس المقترح <strong>${finalSize}</strong> هيكون مريح بس أقرب للمقاسات العادية ومش واسع أوي.`
-            : `Suggested size <strong>${finalSize}</strong> fits loose        desc = isAr
+            : `Suggested size <strong>${finalSize}</strong> fits loose but sits closer to standard sizing dimensions.`;
+    } else {
+        desc = isAr
             ? `المقاس المقترح <strong>${finalSize}</strong> هيكون مظبوط ودايق شوية على الجسم (صغرنا مقاس عن الواسع المعتاد).`
-            : `Suggested size <strong>${fina� المعتاد).`
-            : `Suggested size <strong>${finalSize}</strong> fits snuggier to the body (sizing down from deftDesc').innerHTML = desc;
+            : `Suggested size <strong>${finalSize}</strong> fits snuggier to the body (sizing down from default).`;
+    }
+    document.getElementById('recommenderFitDesc').innerHTML = desc;
 }
 
 function applyRecommendedSize() {
