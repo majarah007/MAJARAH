@@ -40,6 +40,29 @@ function throttle(func, limit) {
     }
 }
 
+// ── DOM ELEMENT CACHE ──
+const DOM = {
+    grid: null,
+    promoText: null,
+    promoTextDup: null,
+    marqueeTrack: null,
+    themeToggle: null,
+    navAuthLink: null,
+    body: null,
+    html: null
+};
+
+function initDOMCache() {
+    DOM.grid = document.querySelector('.grid');
+    DOM.promoText = document.getElementById('promoText');
+    DOM.promoTextDup = document.getElementById('promoTextDup');
+    DOM.marqueeTrack = document.querySelector('.promo-scroller-track');
+    DOM.themeToggle = document.getElementById('themeToggle');
+    DOM.navAuthLink = document.getElementById('navAuthLink');
+    DOM.body = document.body;
+    DOM.html = document.documentElement;
+}
+
 // ── GLOBAL CONFIGURATION — loaded from Supabase site_config ──
 window.SITE_CONFIG = {};
 
@@ -199,8 +222,8 @@ const PRODUCT_TRANSLATIONS = {
 
 // Load products from Supabase via Proxy
 async function loadProducts() {
-    if (!DOM.grid) initDOMCache();
-    const grid = DOM.grid;
+    if (!window.DOM.grid) window.initDOMCache();
+    const grid = window.DOM.grid;
     if (!grid) return;
 
     let products = [];
@@ -240,22 +263,23 @@ async function loadProducts() {
         console.error("[Storefront] Exception in loadProducts:", e);
     }
 
-    fetchedProducts = products;
-    fetchedInventory = allInventory;
+    window.fetchedProducts = products;
+    window.fetchedInventory = allInventory;
 
     if (products.length === 0) {
+        console.warn("[Storefront] No products found in database or local state.");
         grid.innerHTML = `<div style="grid-column: 1/-1; padding: 100px 20px; text-align: center; color: #444; text-transform: uppercase; letter-spacing: 2px; font-size: 11px;">
             ${currentLang === 'ar' ? 'لا يوجد منتجات حالياً. ترقبوا الإطلاق!' : 'No products found. Stay tuned for the launch!'}
         </div>`;
         return;
     }
 
-    renderProductsGrid(products, allInventory);
+    window.renderProductsGrid(products, allInventory);
 }
 
-function renderProductsGrid(products, inventory) {
-    if (!DOM.grid) initDOMCache();
-    if (!DOM.grid) return;
+window.renderProductsGrid = function(products, inventory) {
+    if (!window.DOM.grid) window.initDOMCache();
+    if (!window.DOM.grid) return;
     const isAr = (currentLang === 'ar');
 
     // Optimization: Group inventory by product ID once
@@ -266,7 +290,7 @@ function renderProductsGrid(products, inventory) {
         inventoryMap[pid] += (Number(item.stock) || 0);
     });
 
-    DOM.grid.innerHTML = products.filter(p => p.status === 'active').map((p, idx) => {
+    window.DOM.grid.innerHTML = products.filter(p => p.status === 'active' || !p.status || p.status === '').map((p, idx) => {
         const totalStock = inventoryMap[p.id] || 0;
         const frontImg = resolveImgSrc(p.front_image_url, 'blackinfront.jpg');
         const backImg = resolveImgSrc(p.back_image_url, 'Blackback.jpg');
@@ -285,9 +309,9 @@ function renderProductsGrid(products, inventory) {
         let fabricTranslated = p.fabric || 'Heavyweight Cotton';
 
         if (isAr) {
-            if (PRODUCT_TRANSLATIONS.ar[p.name]) nameTranslated = PRODUCT_TRANSLATIONS.ar[p.name];
-            if (PRODUCT_TRANSLATIONS.ar[p.color]) colorTranslated = PRODUCT_TRANSLATIONS.ar[p.color];
-            if (PRODUCT_TRANSLATIONS.ar[p.fabric || 'Heavyweight Cotton']) fabricTranslated = PRODUCT_TRANSLATIONS.ar[p.fabric || 'Heavyweight Cotton'];
+            if (window.PRODUCT_TRANSLATIONS.ar[p.name]) nameTranslated = window.PRODUCT_TRANSLATIONS.ar[p.name];
+            if (window.PRODUCT_TRANSLATIONS.ar[p.color]) colorTranslated = window.PRODUCT_TRANSLATIONS.ar[p.color];
+            if (window.PRODUCT_TRANSLATIONS.ar[p.fabric || 'Heavyweight Cotton']) fabricTranslated = window.PRODUCT_TRANSLATIONS.ar[p.fabric || 'Heavyweight Cotton'];
         }
 
         const tapHintText = isSoldOut 
@@ -1536,7 +1560,7 @@ function getShippingRate(cityName) {
 }
 // Dynamic Price Calculation
 function calculateTotals() {
-    let p = fetchedProducts.find(prod => String(prod.id) === String(activeProductId));
+    let p = window.fetchedProducts.find(prod => String(prod.id) === String(activeProductId));
     if (!p) return;
     
     const selectedCity = document.getElementById('chkCity').value;

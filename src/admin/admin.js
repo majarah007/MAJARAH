@@ -758,13 +758,13 @@ async function showDashboard() {
   if (loginScreen) loginScreen.style.display = 'none';
   if (appEl) appEl.style.display = 'block';
 
-  renderDashboard();
-  await initSupabase();
-  await initializeTweaks();
-  await syncDashboardData();
+  window.renderDashboard();
+  await window.initSupabase();
+  await window.initializeTweaks();
+  await window.syncDashboardData();
   
-  startAutoSync();
-  requestNotificationPermission();
+  if (window.startAutoSync) window.startAutoSync();
+  if (window.requestNotificationPermission) window.requestNotificationPermission();
 }
 
 
