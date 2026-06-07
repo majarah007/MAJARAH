@@ -109,9 +109,9 @@
             display: flex; justify-content: space-between;
             align-items: flex-start; padding: 0 4px; margin-bottom: 6px;
         }
-        .details h3 { font-size: 14px; font-weight: 500; letter-spacing: 1px; margin-bottom: 5px; text-transform: uppercase; }
-        .details p { font-size: 11px; color: #444; text-transform: uppercase; letter-spacing: 1px; }
-        .price { font-size: 14px; font-weight: 600; color: #fff; letter-spacing: 1px; }
+        .details h3 { font-size: 15px; font-weight: 600; letter-spacing: 1.5px; margin-bottom: 5px; text-transform: uppercase; color: #fff; }
+        .details p { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .price { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 1.5px; }
         .tap-hint { padding: 0 4px; font-size: 10px; color: #2a2a2a; letter-spacing: 2px; text-transform: uppercase; margin-top: 8px; }
 
         /* ── BOTTOM DESCRIPTION TRIGGER ── */

@@ -101,7 +101,7 @@ function populateTweaksFromConfig() {
     
     // Teaser
     if (document.getElementById('tweakShowTeaser')) document.getElementById('tweakShowTeaser').value = String(cfg('drop2TeaserVisible', false));
-    if (document.getElementById('tweakTeaserDate')) document.getElementById('tweakTeaserDate').value = cfg('drop2TeaserDate', '2026-09-01T20:00:00');
+    if (document.getElementById('tweakTeaserDate')) document.getElementById('tweakTeaserDate').value = cfg('drop2TeaserDate', '2026-07-15T20:00:00');
     if (document.getElementById('tweakTeaserBadge')) document.getElementById('tweakTeaserBadge').value = cfg('drop2TeaserBadge', 'TEASER / DROP 02');
     if (document.getElementById('tweakTeaserTitle')) document.getElementById('tweakTeaserTitle').value = cfg('drop2TeaserTitle', 'ECLIPSE COLLECTION');
     if (document.getElementById('tweakTeaserDesc')) document.getElementById('tweakTeaserDesc').value = cfg('drop2TeaserDesc', '');
@@ -377,7 +377,7 @@ function renderDashboard() {
             </div>
             <div class="field-group" style="flex:2;">
               <label>Target Release Date &amp; Time (ISO Format)</label>
-              <input type="text" id="tweakTeaserDate" placeholder="e.g. 2026-07-11T20:00:00" style="width:100%;">
+              <input type="text" id="tweakTeaserDate" placeholder="e.g. 2026-07-15T20:00:00" style="width:100%;">
             </div>
           </div>
           <div class="field-row" style="margin-top:10px;">
@@ -723,7 +723,7 @@ async function initSupabase() {
   
   // Teaser
   if (document.getElementById('tweakShowTeaser')) document.getElementById('tweakShowTeaser').value = String(cfg('drop2TeaserVisible', false));
-  if (document.getElementById('tweakTeaserDate')) document.getElementById('tweakTeaserDate').value = cfg('drop2TeaserDate', '2026-09-01T20:00:00');
+  if (document.getElementById('tweakTeaserDate')) document.getElementById('tweakTeaserDate').value = cfg('drop2TeaserDate', '2026-07-15T20:00:00');
   if (document.getElementById('tweakTeaserBadge')) document.getElementById('tweakTeaserBadge').value = cfg('drop2TeaserBadge', 'TEASER / DROP 02');
   if (document.getElementById('tweakTeaserTitle')) document.getElementById('tweakTeaserTitle').value = cfg('drop2TeaserTitle', 'ECLIPSE COLLECTION');
   if (document.getElementById('tweakTeaserDesc')) document.getElementById('tweakTeaserDesc').value = cfg('drop2TeaserDesc', '');
@@ -2260,7 +2260,7 @@ function buildConfigFromInputs() {
   const prelaunchPassword = document.getElementById('tweakPrelaunchPassword') ? document.getElementById('tweakPrelaunchPassword').value.trim() : 'majarah2026';
   
   const showTeaser = document.getElementById('tweakShowTeaser') ? (document.getElementById('tweakShowTeaser').value === 'true') : false;
-  const teaserDate = document.getElementById('tweakTeaserDate') ? document.getElementById('tweakTeaserDate').value.trim() : '2026-07-11T20:00:00';
+  const teaserDate = document.getElementById('tweakTeaserDate') ? document.getElementById('tweakTeaserDate').value.trim() : '2026-07-15T20:00:00';
   const teaserBadge = document.getElementById('tweakTeaserBadge') ? document.getElementById('tweakTeaserBadge').value.trim() : 'TEASER / DROP 02';
   const teaserTitle = document.getElementById('tweakTeaserTitle') ? document.getElementById('tweakTeaserTitle').value.trim() : 'ECLIPSE COLLECTION';
   const teaserDesc = document.getElementById('tweakTeaserDesc') ? document.getElementById('tweakTeaserDesc').value.trim() : 'The next evolution of identity architecture. Pre-register to secure access.';

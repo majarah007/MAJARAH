@@ -37,7 +37,7 @@ INSERT INTO public.site_config (id, config) VALUES (1, '{
   "bypassPassword": "majarah2026",
   "prelaunchEmailText": "ENTER YOUR EMAIL TO SECURE EARLY ACCESS AND LAUNCH NOTIFICATIONS.",
   "drop2TeaserVisible": false,
-  "drop2TeaserDate": "2026-09-01T20:00:00",
+  "drop2TeaserDate": "2026-07-15T20:00:00",
   "drop2TeaserTitle": "ECLIPSE COLLECTION",
   "drop2TeaserDesc": "The next evolution of identity architecture. Pre-register to secure access.",
   "drop2TeaserBadge": "TEASER / DROP 02",

@@ -91,13 +91,21 @@ function applyConfigToDOM() {
     const teaser = document.getElementById('drop2TeaserSection');
     if (teaser) teaser.style.display = cfg('drop2TeaserVisible', false) ? 'block' : 'none';
     if (cfg('drop2TeaserVisible', false)) {
-        document.getElementById('teaserBadge').textContent = cfg('drop2TeaserBadge', 'TEASER');
-        document.getElementById('teaserTitle').textContent = cfg('drop2TeaserTitle', 'ECLIPSE');
-        document.getElementById('teaserDesc').textContent = cfg('drop2TeaserDesc', '');
-        document.getElementById('teaserName1').textContent = cfg('drop2Product1Name', '');
-        document.getElementById('teaserName2').textContent = cfg('drop2Product2Name', '');
-        document.getElementById('teaserImg1').src = cfg('drop2Product1Image', '');
-        document.getElementById('teaserImg2').src = cfg('drop2Product2Image', '');
+        if (document.getElementById('teaserBadge')) document.getElementById('teaserBadge').textContent = cfg('drop2TeaserBadge', 'TEASER');
+        if (document.getElementById('teaserTitle')) document.getElementById('teaserTitle').textContent = cfg('drop2TeaserTitle', 'ECLIPSE');
+        if (document.getElementById('teaserDesc')) document.getElementById('teaserDesc').textContent = cfg('drop2TeaserDesc', '');
+        if (document.getElementById('teaserName1')) document.getElementById('teaserName1').textContent = cfg('drop2Product1Name', '');
+        if (document.getElementById('teaserName2')) document.getElementById('teaserName2').textContent = cfg('drop2Product2Name', '');
+        if (document.getElementById('teaserImg1')) document.getElementById('teaserImg1').src = resolveImgSrc(cfg('drop2Product1Image', ''), 'blackinfront.jpg');
+        if (document.getElementById('teaserImg2')) document.getElementById('teaserImg2').src = resolveImgSrc(cfg('drop2Product2Image', ''), 'whiteinfront.jpg');
+        
+        // Start teaser countdown
+        initTeaserCountdown();
+    } else {
+        if (teaserCountdownInterval) {
+            clearInterval(teaserCountdownInterval);
+            teaserCountdownInterval = null;
+        }
     }
 
     // 4. Visibility Toggles
@@ -267,7 +275,7 @@ function renderProductsGrid(products, inventory) {
             : (isAr ? '← اضغط للاستكشاف والطلب' : '→ Tap to explore & order');
 
         return `
-            <div class="product-card scroll-reveal" onclick="openProduct('${p.id}')" style="transition-delay: ${idx * 0.15}s;">
+            <article class="product-card scroll-reveal" onclick="openProduct('${p.id}')" style="transition-delay: ${idx * 0.15}s;">
                 <div class="image-container">
                     ${badgeHTML}
                     ${overlayHTML}
@@ -282,7 +290,7 @@ function renderProductsGrid(products, inventory) {
                     <div class="price">EGP ${p.price}</div>
                 </div>
                 <div class="tap-hint">${tapHintText}</div>
-            </div>
+            </article>
         `;
     }).join('');
 
@@ -347,14 +355,14 @@ const TRANSLATIONS = {
     brand_title: "The Brand",
     brand_sub: "Majarah Universe",
     brand_slogan: "Between <em>stars,</em><br>nothing is wasted.",
-    brand_body: "<strong>Majarah — مَجَرَّة</strong> is an Egyptian streetwear collective founded to construct high-concept garments that act as blank canvases for cosmic identity architecture. Crafted in Cairo, scaled for the infinite.",
+    brand_body: "MAJARAH is a celestial map of the self, founded in the heart of Cairo. We view every individual as a vast system of architecture and void, waiting to be expressed through fabric. We produce heavyweight, high-density garments for those who navigate the urban landscape while carrying a private universe within. From the streets of Egypt to the edge of the unknown, we provide the uniform for exploration.",
     track_refund_title: "Track & Refund",
     track_refund_sub: "Look up your order to track its status or request a refund",
     order_id_lbl: "Order ID / Number",
     phone_lbl: "Phone Number",
     find_order: "Find Order",
     back_to_search: "← Back to Search",
-    delivery_banner: "HOME DELIVERY · ALL EGYPT GOVERNORATES 🚚",
+    delivery_banner: "HOME DELIVERY · ALL EGYPT GOVERNORATES",
     height: "Height",
     weight: "Weight",
     fit_pref: "Fit Preference",
@@ -409,7 +417,10 @@ const TRANSLATIONS = {
     days_label: "DAYS",
     hours_label: "HOURS",
     mins_label: "MINS",
-    secs_label: "SECS"
+    secs_label: "SECS",
+    manifesto_title: "THE UNIVERSE WITHIN",
+    manifesto_en: "MAJARAH is a celestial map of the self, founded in the heart of Cairo. We view every individual as a vast system of architecture and void, waiting to be expressed through fabric. We produce heavyweight, high-density garments for those who navigate the urban landscape while carrying a private universe within. From the streets of Egypt to the edge of the unknown, we provide the uniform for exploration.",
+    manifesto_ar: "مجرة هي خريطة سماوية للذات، تأسست في قلب القاهرة. نحن نرى كل فرد ككيان واسع من التصميم والفراغ، ينتظر التعبير عنه من خلال القماش. نصنع ملابس ثقيلة الوزن وعالية الكثافة لأولئك الذين يخوضون صخب المدينة وهم يحملون كوناً خاصاً بداخلهم. من شوارع مصر إلى حافة المجهول، نحن نصنع الزي الرسمي للاستكشاف."
   },
   ar: {
     collection: "القطع",
@@ -448,6 +459,8 @@ const TRANSLATIONS = {
     total: "الإجمالي الكلي",
     how_title: "طريقة الطلب",
     how_sub: "٣ خطوات · في أقل من دقيقة",
+    how_title: "طريقة الطلب",
+    how_sub: "٣ خطوات · في أقل من دقيقة",
     how_step1_title: "اختار قطعتك",
     how_step1_desc: "دوس على أي قطعة عشان تشوف تفاصيلها ورسوماتها ومقاساتها بالظبط.",
     how_step2_title: "ادخل بياناتك",
@@ -464,14 +477,14 @@ const TRANSLATIONS = {
     brand_title: "عن البراند",
     brand_sub: "كون MAJARAH",
     brand_slogan: "بين النجوم،<br>مفيش حاجة بتضيع.",
-    brand_body: "<strong>MAJARAH — مَجَرَّة</strong> هي براند ملابس مصرية بتصمم قطع مميزة بتعبر عن الهوية بلمسة كوزمية فريدة. اتصممت في القاهرة، ومجهزة للمستقبل.",
+    brand_body: "مجرة هي خريطة سماوية للذات، تأسست في قلب القاهرة. نحن نرى كل فرد ككيان واسع من التصميم والفراغ، ينتظر التعبير عنه من خلال القماش. نصنع ملابس ثقيلة الوزن وعالية الكثافة لأولئك الذين يخوضون صخب المدينة وهم يحملون كوناً خاصاً بداخلهم. من شوارع مصر إلى حافة المجهول، نحن نصنع الزي الرسمي للاستكشاف.",
     track_refund_title: "تتبع وارجاع الطلبات",
     track_refund_sub: "اكتب بيانات طلبك عشان تتابعه أو تطلب استرجاع",
     order_id_lbl: "رقم الطلب",
     phone_lbl: "رقم الموبايل",
     find_order: "دوّر على الطلب",
     back_to_search: "← رجوع للبحث",
-    delivery_banner: "توصيل للمنزل · لكل محافظات مصر 🚚",
+    delivery_banner: "توصيل للمنزل · لكل محافظات مصر",
     height: "الطول",
     weight: "الوزن",
     fit_pref: "ستايل اللبس",
@@ -526,7 +539,10 @@ const TRANSLATIONS = {
     days_label: "أيام",
     hours_label: "ساعات",
     mins_label: "دقائق",
-    secs_label: "ثواني"
+    secs_label: "ثواني",
+    manifesto_title: "THE UNIVERSE WITHIN",
+    manifesto_en: "MAJARAH is a celestial map of the self, founded in the heart of Cairo. We view every individual as a vast system of architecture and void, waiting to be expressed through fabric. We produce heavyweight, high-density garments for those who navigate the urban landscape while carrying a private universe within. From the streets of Egypt to the edge of the unknown, we provide the uniform for exploration.",
+    manifesto_ar: "مجرة هي خريطة سماوية للذات، تأسست في قلب القاهرة. نحن نرى كل فرد ككيان واسع من التصميم والفراغ، ينتظر التعبير عنه من خلال القماش. نصنع ملابس ثقيلة الوزن وعالية الكثافة لأولئك الذين يخوضون صخب المدينة وهم يحملون كوناً خاصاً بداخلهم. من شوارع مصر إلى حافة المجهول، نحن نصنع الزي الرسمي للاستكشاف."
   }
 };
 
@@ -1784,8 +1800,8 @@ function showOrderConfirmationModal(orderId, firstName, productName, size, subto
     const isAr = currentLang === 'ar';
     const waMsg = encodeURIComponent(
         isAr
-            ? `مرحباً! تم تأكيد طلبي رقم ${orderId} على MAJARAH.\nالمنتج: ${productName} (${size})\nالإجمالي: EGP ${total.toFixed(2)}\nشكراً!`
-            : `Hi! My order ${orderId} at MAJARAH is confirmed.\nProduct: ${productName} (${size})\nTotal: EGP ${total.toFixed(2)}\nThanks!`
+            ? `تأكيد طلب مجرة\nرقم الطلب: ${orderId}\nالاسم: ${firstName}\nالقطعة: ${productName} (مقاس ${size})\nالإجمالي: ${total.toFixed(2)} جنيه مصري\nطريقة الدفع: نقداً عند الاستلام\n\nطلبك قيد التنفيذ وسيتم التوصيل خلال ٢ إلى ٤ أيام عمل. سيقوم المندوب بالاتصال بك فور وصوله إلى منطقتك.`
+            : `MAJARAH | Order Confirmation\nOrder Number: ${orderId}\nCustomer Name: ${firstName}\nItem: ${productName} (Size ${size})\nTotal Amount: ${total.toFixed(2)} EGP\nPayment Method: Cash on Delivery\n\nYour order is being processed and will be delivered within 2 to 4 business days. You will receive a call from our courier once they arrive in your area.`
     );
     const waLink = `https://wa.me/201229067066?text=${waMsg}`;
 
@@ -2574,6 +2590,52 @@ function checkPrelaunch() {
 function lockPrelaunchStore() {
     localStorage.removeItem('mjr_bypass_prelaunch');
     location.reload();
+}
+
+let teaserCountdownInterval = null;
+function initTeaserCountdown() {
+    const dateStr = cfg('drop2TeaserDate', '2026-07-15T20:00:00');
+    const targetDate = window.parseLaunchDate ? window.parseLaunchDate(dateStr) : new Date(dateStr).getTime();
+
+    function updateTeaserCountdown() {
+        const now = new Date().getTime();
+        const diff = targetDate - now;
+
+        if (diff <= 0) {
+            if (teaserCountdownInterval) {
+                clearInterval(teaserCountdownInterval);
+                teaserCountdownInterval = null;
+            }
+            const daysEl = document.getElementById('teaser-days');
+            const hoursEl = document.getElementById('teaser-hours');
+            const minsEl = document.getElementById('teaser-minutes');
+            const secsEl = document.getElementById('teaser-seconds');
+            if (daysEl) daysEl.innerText = '00';
+            if (hoursEl) hoursEl.innerText = '00';
+            if (minsEl) minsEl.innerText = '00';
+            if (secsEl) secsEl.innerText = '00';
+            return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        const daysEl = document.getElementById('teaser-days');
+        const hoursEl = document.getElementById('teaser-hours');
+        const minsEl = document.getElementById('teaser-minutes');
+        const secsEl = document.getElementById('teaser-seconds');
+
+        if (daysEl) daysEl.innerText = String(days).padStart(2, '0');
+        if (hoursEl) hoursEl.innerText = String(hours).padStart(2, '0');
+        if (minsEl) minsEl.innerText = String(minutes).padStart(2, '0');
+        if (secsEl) secsEl.innerText = String(seconds).padStart(2, '0');
+    }
+
+    if (teaserCountdownInterval) clearInterval(teaserCountdownInterval);
+    updateTeaserCountdown();
+    teaserCountdownInterval = setInterval(updateTeaserCountdown, 1000);
 }
 
 let prelaunchCountdownInterval = null;
