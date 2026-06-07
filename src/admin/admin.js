@@ -1017,6 +1017,7 @@ async function showDashboard() {
   
   showToast('Initializing dashboard...');
   await initSupabase();
+  await initializeTweaks();
   await syncDashboardData();
   
   startAutoSync();
@@ -2323,6 +2324,70 @@ function copyConfigJsonText() {
   }
 }
 
+/**
+ * Fetches current configurations and pre-launch emails from Supabase
+ * and populates the Tweaks form fields to ensure UI consistency on load/refresh.
+ */
+async function initializeTweaks() {
+    // 1. UI Loading State: Disable save buttons to prevent concurrent modification issues
+    const saveButtons = document.querySelectorAll('button[onclick="saveTweaks()"]');
+    saveButtons.forEach(btn => btn.disabled = true);
+
+    try {
+        const token = localStorage.getItem('mjr_admin_token') || '';
+        if (!token) return;
+
+        // 2. Fetch the saved tweaks from 'site_config' table (row ID 1)
+        const configData = await sbFetch('site_config', 'GET', null, '?id=eq.1&select=config');
+
+        if (configData && configData.length > 0 && configData[0].config) {
+            window.ADMIN_CONFIG = configData[0].config;
+
+            // 3. Sync to localStorage for fallback and preview consistency
+            Object.keys(window.ADMIN_CONFIG).forEach(k => {
+                localStorage.setItem(`mjr_${k}`, JSON.stringify(window.ADMIN_CONFIG[k]));
+            });
+            // Fix potential promo text naming mismatch in existing preview logic
+            if (window.ADMIN_CONFIG.promoText) {
+                localStorage.setItem('mjr_promoText', window.ADMIN_CONFIG.promoText);
+                localStorage.setItem('mjr_promo_text', window.ADMIN_CONFIG.promoText);
+            }
+
+            // 4. Populate ALL form fields using the helper function
+            populateTweaksFromConfig();
+        }
+
+        // 5. Separately fetch Pre-launch registered emails from 'settings' table
+        const emailsData = await sbFetch('settings', 'GET', null, '?key=eq.prelaunch_emails&select=value');
+        if (emailsData && emailsData.length > 0 && emailsData[0].value) {
+            try {
+                const emails = JSON.parse(emailsData[0].value);
+                const textarea = document.getElementById('tweakPrelaunchEmails');
+                if (textarea && Array.isArray(emails)) {
+                    textarea.value = emails.join('\n');
+                    // Ensure local cache matches DB for exports
+                    localStorage.setItem('mjr_prelaunch_emails', emailsData[0].value);
+                }
+            } catch (e) {
+                console.error("Failed to parse pre-launch emails JSON:", e);
+            }
+        }
+
+        // 6. Refresh UI Previews (Marquee and Teaser Images)
+        if (typeof updatePromoPreviewStats === 'function') updatePromoPreviewStats();
+        if (typeof updateImagePreview === 'function') {
+            updateImagePreview('tweakTeaserImage1', 'tweakTeaserImage1Preview');
+            updateImagePreview('tweakTeaserImage2', 'tweakTeaserImage2Preview');
+        }
+
+    } catch (err) {
+        console.error("Critical: Failed to initialize admin tweaks from Supabase.", err);
+    } finally {
+        // 7. Restore UI: Re-enable save buttons
+        saveButtons.forEach(btn => btn.disabled = false);
+    }
+}
+
 async function saveTweaks() {
   const partial = {
     promoText: document.getElementById('promoTextSetting').value.trim(),
@@ -2537,3 +2602,9 @@ function updateSimulatorControlsUI() {
 
 // Initialise clock updater
 setInterval(updateSimulatorClock, 30000);
+
+// Initialize tweaks from Supabase on page load or refresh
+document.addEventListener('DOMContentLoaded', () => {
+    // Small delay to ensure renderDashboard() has finished if auto-logged in
+    setTimeout(initializeTweaks, 800);
+});
