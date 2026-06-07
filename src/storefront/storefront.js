@@ -1067,19 +1067,23 @@ async function loadActiveProductInventory(productId) {
 }
 
 async function openProduct(id) {
+    console.log(`[Storefront] Opening product ID: ${id}`);
     activeProductId = id;
     
     // Fetch latest inventory from database
     await loadActiveProductInventory(id);
     
     // Find product in fetchedProducts or fallback
-    let p = fetchedProducts.find(prod => String(prod.id) === String(id));
-    if (!p) return;
+    let p = window.fetchedProducts.find(prod => String(prod.id) === String(id));
+    if (!p) {
+        console.error(`[Storefront] Product ${id} not found in synced products list.`);
+        return;
+    }
     
     const isAr = (currentLang === 'ar');
-    let colorTranslated = isAr ? (PRODUCT_TRANSLATIONS.ar[p.color] || p.color) : p.color;
-    let nameTranslated = isAr ? (PRODUCT_TRANSLATIONS.ar[p.name] || p.name) : p.name;
-    let descTranslated = isAr ? (PRODUCT_TRANSLATIONS.ar[p.description] || p.description) : p.description;
+    let colorTranslated = isAr ? (window.PRODUCT_TRANSLATIONS.ar[p.color] || p.color) : p.color;
+    let nameTranslated = isAr ? (window.PRODUCT_TRANSLATIONS.ar[p.name] || p.name) : p.name;
+    let descTranslated = isAr ? (window.PRODUCT_TRANSLATIONS.ar[p.description] || p.description) : p.description;
     
     document.getElementById('ppSub').innerText = colorTranslated;
     document.getElementById('ppTitle').innerText = nameTranslated;

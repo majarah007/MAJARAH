@@ -357,7 +357,7 @@ function renderDashboard() {
               <input type="text" id="tweakTeaserBadge" placeholder="e.g. TEASER / DROP 02" style="width:100%;">
             </div>
             <div class="field-group" style="flex:2;">
-              <label>Header Title</label>
+              <label>Header Title (Section Name)</label>
               <input type="text" id="tweakTeaserTitle" placeholder="e.g. ECLIPSE COLLECTION" style="width:100%;">
             </div>
           </div>
