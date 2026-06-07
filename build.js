@@ -17,16 +17,16 @@ function cleanDir(dirPath) {
 
 function minifyCss(css) {
   return css
-    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove comments
-    .replace(/\s+/g, ' ')             // Collapse whitespace
-    .replace(/\s*([\{\}:;,])\s*/g, '$1') // Remove spaces around delimiters
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\s+/g, ' ')
+    .replace(/\s*([\{\}:;,])\s*/g, '$1')
     .trim();
 }
 
 function minifyHtml(html) {
   return html
-    .replace(/<!--[\s\S]*?-->/g, '')  // Remove comments
-    .replace(/>\s+</g, '><')          // Remove spacing between tags
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/>\s+</g, '><')
     .trim();
 }
 
@@ -35,11 +35,9 @@ console.log('🚀 Starting MAJARAH build process...');
 const distDir = path.join(__dirname, 'dist');
 const fienDistDir = path.join(distDir, 'fien');
 
-// 1. Clean output directory
 cleanDir(distDir);
 ensureDirExists(fienDistDir);
 
-// 2. Define source paths
 const srcStorefrontDir = path.join(__dirname, 'src', 'storefront');
 const srcAdminDir = path.join(__dirname, 'src', 'admin');
 
@@ -50,11 +48,9 @@ if (fs.existsSync(srcStorefrontDir)) {
   const jsSrc = fs.readFileSync(path.join(srcStorefrontDir, 'storefront.js'), 'utf8');
   const cssSrc = fs.readFileSync(path.join(srcStorefrontDir, 'storefront.css'), 'utf8');
 
-  // Minify HTML and CSS
   const minHtml = minifyHtml(htmlSrc);
   const minCss = minifyCss(cssSrc);
 
-  // Obfuscate JS
   console.log('🔒 Obfuscating storefront.js...');
   const obfuscatedJs = JavaScriptObfuscator.obfuscate(jsSrc, {
     compact: true,
@@ -72,7 +68,6 @@ if (fs.existsSync(srcStorefrontDir)) {
     unicodeEscapeSequence: false
   }).getObfuscatedCode();
 
-  // Write outputs
   fs.writeFileSync(path.join(distDir, 'index.html'), minHtml);
   fs.writeFileSync(path.join(distDir, 'storefront.css'), minCss);
   fs.writeFileSync(path.join(distDir, 'storefront.js'), obfuscatedJs);
@@ -88,18 +83,14 @@ if (fs.existsSync(srcAdminDir)) {
   const jsSrc = fs.readFileSync(path.join(srcAdminDir, 'admin.js'), 'utf8');
   const cssSrc = fs.readFileSync(path.join(srcAdminDir, 'admin.css'), 'utf8');
 
-  // Minify HTML and CSS
   const minHtml = minifyHtml(htmlSrc);
   const minCss = minifyCss(cssSrc);
 
-  // Obfuscate JS
   console.log('🔒 Obfuscating admin.js...');
   const obfuscatedJs = JavaScriptObfuscator.obfuscate(jsSrc, {
     compact: true,
-    controlFlowFlattening: true,
-    controlFlowFlatteningThreshold: 0.7,
-    deadCodeInjection: true,
-    deadCodeInjectionThreshold: 0.4,
+    controlFlowFlattening: false,
+    deadCodeInjection: false,
     numbersToExpressions: true,
     simplify: true,
     stringArray: true,
@@ -110,7 +101,6 @@ if (fs.existsSync(srcAdminDir)) {
     unicodeEscapeSequence: false
   }).getObfuscatedCode();
 
-  // Write outputs
   fs.writeFileSync(path.join(fienDistDir, 'index.html'), minHtml);
   fs.writeFileSync(path.join(fienDistDir, 'admin.css'), minCss);
   fs.writeFileSync(path.join(fienDistDir, 'admin.js'), obfuscatedJs);
@@ -119,7 +109,7 @@ if (fs.existsSync(srcAdminDir)) {
   console.warn('⚠ Admin Panel source directory not found.');
 }
 
-// 5. Copy static assets (Favicons, background images, sound effects, etc.)
+// 5. Copy static assets
 console.log('📋 Copying static assets...');
 const srcAssetsDir = path.join(__dirname, 'src', 'assets');
 if (fs.existsSync(srcAssetsDir)) {
@@ -127,8 +117,6 @@ if (fs.existsSync(srcAssetsDir)) {
   assets.forEach(asset => {
     const srcPath = path.join(srcAssetsDir, asset);
     const destPath = path.join(distDir, asset);
-    
-    // Only copy files (not directories)
     if (fs.lstatSync(srcPath).isFile()) {
       fs.copyFileSync(srcPath, destPath);
       console.log(`  -> Copied ${asset}`);
