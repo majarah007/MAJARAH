@@ -1197,7 +1197,6 @@ function openCheckout() {
     let defaultFront = 'blackinfront.jpg';
     const searchStr = (p.name + ' ' + (p.color || '')).toLowerCase();
     if (searchStr.includes('white') || searchStr.includes('alabaster')) {
-    if (searchStr.includes('white') || searchStr.includes('alabaster')) {
         defaultFront = 'whiteinfront.jpg';
     }
     
@@ -1541,11 +1540,12 @@ function calculateTotals() {
     if (selectedCity) {
         document.getElementById('chkShipping').innerText = "EGP " + Number(shippingFeeValue).toFixed(2);
         document.getElementById('chkTotal').innerHTML = `<span class="chk-currency-code">EGP </span>${computedTotalSum.toFixed(2)}`;
-    ng === 'ar' ? "اختار المحافظة" : "Select city";
-        // Show subtotal as total estimate until city is selected
-        document.getElementById('chkTotal').innerHTML = '<span>EGP </span>' + finalSubtotal.toFixed(2);
+    } else {
+        const placeholder = currentLang === 'ar' ? "اختار المحافظة" : "Select city";
+        document.getElementById('chkShipping').innerText = placeholder;
+        document.getElementById('chkTotal').innerHTML = `<span class="chk-currency-code">EGP </span>${finalSubtotal.toFixed(2)}`;
+    }
 }
-
 
 
 // Post Manifest Order to Storage Pipeline
@@ -2556,7 +2556,7 @@ function initTeaserCountdown() {
         }
 
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000diff / (1000 * 6) / (1000 * 60 *        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
@@ -2774,9 +2774,8 @@ function openAuthModal() {
     }
 }
 
-functio e.target.classL(e) {
-    if (!dal-x')) {
-    assList.contains('overlay') || e.target.classList.contains('modal-x')) {
+function closeAuthModal(e) {
+    if (!e || e.target.classList.contains("overlay") || e.target.classList.contains("modal-x")) {
         document.getElementById('authModal').classList.remove('open');
         unlockBodyScroll();
     }
@@ -2837,7 +2836,9 @@ async function submitAuthSignup() {
         return;
     }
     
-    const emailRegex = /^[^\s@]{
+    const emailRegex = /^[^s@]+@[^s@]+.[^s@]+$/;
+    if (!emailRegex.test(email)) {
+        if (errEl) {
             errEl.innerText = "Please enter a valid email address.";
             errEl.style.display = 'block';
         }
@@ -2863,8 +2864,8 @@ async function submitAuthSignup() {
     
     if (password.length < 6) {
         if (errEl) {
-            errEl.innerText = "Password must be at least 6 characte(errEl) {
-            errEl.innisplay = 'block';
+            errEl.innerText = "Password must be at least 6 characters.";
+            errEl.style.display = 'block';
         }
         return;
     }
@@ -2878,10 +2879,10 @@ async function submitAuthSignup() {
         
         if (checkRes.ok) {
             const existing = await checkRes.json();
-            if (existing && ex       const existing = await checkRes.json();
             if (existing && existing.length > 0) {
                 if (errEl) {
-                      errEl.strText = "Usernamlock';
+                    errEl.innerText = "Username or Email already registered.";
+                    errEl.style.display = 'block';
                 }
                 return;
             }
@@ -2889,9 +2890,6 @@ async function submitAuthSignup() {
         
         // Insert new user
         const createRes = await fetch(`/api/proxy?table=users`, {
-            method: 'POST',
-            headers: {
-    oxy?table=users`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -2937,7 +2935,8 @@ async function submitAuthSignup() {
         // Clear fields
         document.getElementById('authSignupUser').value = '';
         document.getElementById('authSignupEmail').value = '';
-        document.getElementById('au').value = '';
+        document.getElementById('authSignupPass').value = '';
+        document.getElementById('authSignupConfirm').value = '';
     } else {
         if (errEl) {
             errEl.innerText = "Signup failed. Please try again.";
@@ -2989,9 +2988,6 @@ async function submitAuthLogin() {
             loggedUser = { username: found.username, email: found.email };
         }
     }
-    
-    if (loggedUser) {
-        const sessionVal = encodeURIComponent(JS
     
     if (loggedUser) {
         const sessionVal = encodeURIComponent(JSON.stringify(loggedUser));
@@ -3105,7 +3101,10 @@ async function submitAuthForgot() {
 
 function submitAuthLogout() {
     eraseCookie('mjr_customer_session');
-    showToast("Signed oodal tabs display
+    showToast("Signed out successfully.", "success");
+    initUserSession();
+    
+    // Reset modal tabs display
     document.getElementById('tabLoginBtn').style.display = 'block';
     document.getElementById('tabSignupBtn').style.display = 'block';
     document.getElementById('tabProfileBtn').style.display = 'none';
@@ -3113,7 +3112,6 @@ function submitAuthLogout() {
     switchAuthTab('login');
     closeAuthModal();
 }
-
 async function loadCustomerProfile() {
     if (!activeCustomerSession) return;
     
