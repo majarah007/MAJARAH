@@ -1577,11 +1577,12 @@ async function submitShopifyCheckout() {
     
     let p = fetchedProducts.find(prod => String(prod.id) === String(activeProductId));
     if (!p) {
-        const staticP = productsData[activeProductId];
-        p = {
-            name: staticP.title,
-            price: staticP.price
-        };
+        showToast("Product synchronization error. Please refresh the page and try again.", "error");
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = currentLang === 'ar' ? 'أكد الطلب دلوقتي' : 'Complete Order';
+        }
+        return;
     }
     const targetZoneObj = currentLoadedShippingRates.find(z => z.name === cityInput);
     const shippingFeeValue = targetZoneObj ? targetZoneObj.price : 0;
@@ -3377,4 +3378,4 @@ document.addEventListener('touchstart', (e) => {
 })();
 
 // Run Application Bootstrap Setup Loop
-initApp();p();
+initApp();
