@@ -2303,7 +2303,13 @@ async function clearPrelaunchEmails() {
 // Consolidated initialization and authentication logic
 window.addEventListener('DOMContentLoaded', async () => {
   const token = localStorage.getItem('mjr_admin_token');
+  const loginScreen = document.getElementById('loginScreen');
+  const appEl = document.getElementById('app');
+
   if (token) {
+    if (loginScreen) loginScreen.style.display = 'none';
+    if (appEl) appEl.style.display = 'block';
+    
     await showDashboard();
     
     // Initialise shipping zones panel
@@ -2322,26 +2328,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Initialize tweaks
     setTimeout(initializeTweaks, 800);
   } else {
-    // Show login screen
-    const appEl = document.getElementById('app');
+    // No active session — show login screen defined in index.html
+    if (loginScreen) loginScreen.style.display = 'flex';
     if (appEl) {
-      appEl.innerHTML = `
-        <div class="login-wrap">
-          <div class="login-card">
-            <div class="login-logo">MAJARAH</div>
-            <div class="login-title">Admin Terminal</div>
-            <div class="field-group">
-              <label>Username</label>
-              <input type="text" id="loginUser" placeholder="admin">
-            </div>
-            <div class="field-group">
-              <label>Password</label>
-              <input type="password" id="loginPass" placeholder="••••••••">
-            </div>
-            <button class="login-btn" onclick="doLogin()">Login to Dashboard</button>
-          </div>
-        </div>
-      `;
+        appEl.style.display = 'none';
+        appEl.innerHTML = '';
     }
   }
 });
