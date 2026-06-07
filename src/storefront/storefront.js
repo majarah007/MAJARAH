@@ -1319,10 +1319,7 @@ function openCheckout() {
 }
 
 function closeCheckout() {
-function closeCheckout() {
     document.getElementById('checkoutPage').classList.remove('open');
-    unlockBodyScroll();
-}
     unlockBodyScroll();
 }
 
@@ -1518,8 +1515,9 @@ async function trackOrdersByPhone() {
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
                 <div>
                     <h3 style="font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0 0 4px 0; color: #fff;">${isAr ? 'طلب' : 'Order'} #${order.id}</h3>
-                    <p style="font-size: 10px; color: #555; text-transforte'}: ${dateStr}tter-spacing: 1p      </div>
-                <span class="status-badge ${badgeClass}" style="font-size: 10px; p            <spa border-radius: badge ${badgeClass}" style="font-size: 10px; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; font-weight: 600;">${order.status}</span>
+                    <p style="font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px;">${isAr ? 'تاريخ الطلب' : 'Date'}: ${dateStr}</p>
+                </div>
+                <span class="status-badge ${badgeClass}" style="font-size: 10px; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; font-weight: 600;">${order.status}</span>
             </div>
             
             ${stepperHTML ? stepperHTML : `
@@ -3399,3 +3397,4 @@ window.initScrollReveal = initScrollReveal;
 window.applyConfigToDOM = applyConfigToDOM;
 window.loadSiteConfig = loadSiteConfig;
 window.initApp = initApp;
+window.parseLaunchDate = window.parseLaunchDate;
