@@ -698,7 +698,49 @@ async function initSupabase() {
   updatePromoPreviewStats();
 }
 
-// ... rest of sbFetch ...
+// Returns the best available auth token: user JWT if logged in, anon key as fallback
+async function sbFetch(table, method='GET', body=null, filters='', id=null) {
+  const token = localStorage.getItem('mjr_admin_token') || '';
+  
+  // Build query string
+  let queryParams = '';
+  if (id) {
+    queryParams = `?id=eq.${id}`;
+  } else if (filters) {
+    queryParams = filters;
+  }
+
+  // Combine query string with proxy table parameter
+  const connector = queryParams ? '&' : '?';
+  const url = `/api/proxy${queryParams}${connector}table=${table}`;
+
+  const opts = {
+    method,
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  };
+
+  if (body) opts.body = JSON.stringify(body);
+
+  try {
+    const res = await fetch(url, opts);
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error(`Proxy Database Error (${res.status}):`, errText);
+      if (res.status === 401) {
+          showToast('Session expired. Please log in again.', 'error');
+          logout();
+      }
+      return null;
+    }
+    return await res.json();
+  } catch (e) {
+    console.error("Database communication down:", e);
+    return null;
+  }
+}
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // DATA SYNC & DISPLAY ENGINE
@@ -727,7 +769,61 @@ async function syncDashboardData(isBackground = false) {
   if (products) storeProducts = products;
   if (inventory) storeInventory = inventory;
   
-  // ... rest of syncDashboardData ...
+  // Update last synced time
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const syncEl = document.getElementById('sidebarSyncTime');
+  if (syncEl) syncEl.textContent = `Synced ${timeStr}`;
+  const headerSyncEl = document.getElementById('headerSyncTime');
+  if (headerSyncEl) headerSyncEl.textContent = `Synced ${timeStr}`;
+
+  // Update pending order badge on sidebar & mobile nav
+  const pendingCount = storeOrders.filter(o => o.status === 'pending').length;
+  const badge = document.getElementById('newOrdersBadge');
+  const mobileBadge = document.getElementById('mobileOrdersBadge');
+  if (badge) { badge.textContent = pendingCount; badge.style.display = pendingCount > 0 ? '' : 'none'; }
+  if (mobileBadge) { mobileBadge.textContent = pendingCount; mobileBadge.style.display = pendingCount > 0 ? '' : 'none'; }
+
+  // 2. Render UI Components
+  renderOverviewCounters();
+  renderRecentOrdersTable();
+  renderOrdersTable(storeOrders);
+  renderProductsTable();
+  renderInventoryGrid();
+  renderAnalyticsCharts(storeOrders);
+  
+  // 3. Play notification sound if there are new orders or updates
+  if (isBackground && previousOrders.length > 0 && orders) {
+    let hasNewNotifications = false;
+    let notificationMessage = "";
+    
+    for (const o of orders) {
+      const prev = previousOrders.find(p => String(p.id) === String(o.id));
+      if (!prev) {
+        hasNewNotifications = true;
+        notificationMessage = `New order #${o.id} received from ${o.first_name || ''} ${o.last_name || ''}!`;
+        break;
+      } else if (prev.status !== o.status) {
+        if (o.status === 'refund_requested') {
+          hasNewNotifications = true;
+          notificationMessage = `Refund requested for order #${o.id}!`;
+          break;
+        } else if (o.status === 'pending') {
+          hasNewNotifications = true;
+          notificationMessage = `Order #${o.id} status changed to pending!`;
+          break;
+        }
+      }
+    }
+    
+    if (hasNewNotifications) {
+      playNotificationSound();
+      flashTitle(notificationMessage);
+      showSystemNotification("MAJARAH Admin Notification", notificationMessage);
+      showToast(notificationMessage);
+    }
+  }
+}
 
 function renderOverviewCounters() {
   const animateCount = (el, target, prefix = '', suffix = '') => {
