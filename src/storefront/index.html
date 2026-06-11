@@ -68,7 +68,7 @@
         <!-- Notify form -->
         <div id="prelaunchSubscription" style="max-width: 450px; margin: 0 auto 40px;">
             <p style="font-size: 11px; color: #666; letter-spacing: 1px; margin-bottom: 20px; line-height: 1.8;">ENTER YOUR EMAIL TO SECURE EARLY ACCESS AND LAUNCH NOTIFICATIONS.</p>
-            <form onsubmit="handlePrelaunchNotify(event)" style="display: flex; gap: 8px; width: 100%;">
+            <form onsubmit="window.handlePrelaunchNotify(event)" style="display: flex; gap: 8px; width: 100%;">
                 <input type="email" id="prelaunchEmail" aria-label="Email Address for Notifications" required placeholder="EMAIL ADDRESS" style="flex: 1; background: #080808; border: 1px solid #1c1c1c; color: #fff; padding: 14px 18px; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; outline: none; border-radius: 4px; transition: border-color 0.3s; font-family: inherit;" onfocus="this.style.borderColor='#444'" onblur="this.style.borderColor='#1c1c1c'">
                 <button type="submit" style="background: #fff; color: #050505; border: none; padding: 14px 28px; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; border-radius: 4px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">NOTIFY ME</button>
             </form>
@@ -77,9 +77,9 @@
 
         <!-- Bypass -->
         <div style="margin-top: 60px; border-top: 1px solid #111; padding-top: 25px;">
-            <button onclick="togglePrelaunchPasswordInput()" style="background: none; border: none; padding: 0; cursor: pointer; font-size: 9px; letter-spacing: 2.5px; color: #333; text-transform: uppercase; transition: color 0.2s; font-family: inherit;" onmouseover="this.style.color='#888'" onmouseout="this.style.color='#333'">ENTER STORE USING PASSWORD</button>
+            <button onclick="window.togglePrelaunchPasswordInput()" style="background: none; border: none; padding: 0; cursor: pointer; font-size: 9px; letter-spacing: 2.5px; color: #333; text-transform: uppercase; transition: color 0.2s; font-family: inherit;" onmouseover="this.style.color='#888'" onmouseout="this.style.color='#333'">ENTER STORE USING PASSWORD</button>
             <div id="prelaunchPasswordContainer" style="display: none; margin-top: 15px;">
-                <form onsubmit="handlePrelaunchBypass(event)" style="display: flex; gap: 8px; max-width: 280px; margin: 0 auto;">
+                <form onsubmit="window.handlePrelaunchBypass(event)" style="display: flex; gap: 8px; max-width: 280px; margin: 0 auto;">
                     <input type="password" id="prelaunchBypassPass" aria-label="Bypass Password" required placeholder="PASSWORD" autocomplete="new-password" style="flex: 1; background: #080808; border: 1px solid #1c1c1c; color: #fff; padding: 10px 14px; font-size: 10px; letter-spacing: 2px; outline: none; border-radius: 4px; text-align: center;">
                     <button type="submit" style="background: transparent; border: 1px solid #333; color: #fff; padding: 10px 18px; font-size: 9px; letter-spacing: 1.5px; cursor: pointer; text-transform: uppercase; border-radius: 4px;">ENTER</button>
                 </form>
@@ -130,13 +130,13 @@
 <canvas id="cosmic-canvas"></canvas>
 
 <header style="direction: ltr !important;">
-    <div class="logo" style="cursor: pointer;" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">MAJARAH</div>
+    <div class="logo" style="cursor: pointer;" onclick="window.MJR.goHome()">MAJARAH</div>
     <nav style="display: flex; align-items: center; gap: 28px;">
         <ul style="display: flex; align-items: center; gap: 28px; list-style: none;">
-            <li><a href="#collection" data-t="collection">Collection</a></li>
-            <li id="navAuthLi"><button id="navAuthLink" onclick="openAuthModal()" data-t="signin" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Sign In</button></li>
+            <li><a href="/#collection" onclick="window.MJR.goCollection(event)" data-t="collection">Collection</a></li>
+            <li id="navAuthLi"><button id="navAuthLink" onclick="window.openAuthModal()" data-t="signin" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Sign In</button></li>
         </ul>
-        <button id="themeToggle" onclick="toggleTheme()" aria-label="Toggle Theme" style="background: none; border: none; color: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; transition: transform 0.3s ease; position: relative;">
+        <button id="themeToggle" onclick="window.toggleTheme()" aria-label="Toggle Theme" style="background: none; border: none; color: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; transition: transform 0.3s ease; position: relative;">
             <svg id="themeToggleIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);">
                 <path id="themeTogglePath" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
             </svg>
@@ -147,7 +147,7 @@
 <section class="hero scroll-reveal">
     <h1 class="scroll-reveal delay-100">MAJARAH</h1>
     <p class="scroll-reveal delay-200" data-t="hero_sub">Drop 01</p>
-    <a href="#collection" class="cta-btn scroll-reveal delay-300" data-t="explore">Explore Drop 01</a>
+    <a href="/#collection" onclick="window.MJR.goCollection(event)" class="cta-btn scroll-reveal delay-300" data-t="explore">Explore Drop 01</a>
 </section>
 
 
@@ -206,7 +206,7 @@
             <!-- Product 1 -->
             <div class="teaser-product-card">
                 <div class="teaser-img-wrapper">
-                    <img id="teaserImg1" class="teaser-img" src="" alt="Teaser Shirt" loading="lazy">
+                    <img id="teaserImg1" class="teaser-img" src="blackinfront.jpg" alt="Teaser Shirt" loading="lazy">
                     <div class="teaser-img-overlay">
                         <span class="teaser-overlay-badge" id="teaserOverlayBadge1">CLASSIFIED</span>
                     </div>
@@ -219,7 +219,7 @@
             <!-- Product 2 -->
             <div class="teaser-product-card">
                 <div class="teaser-img-wrapper">
-                    <img id="teaserImg2" class="teaser-img" src="" alt="Teaser Shorts" loading="lazy">
+                    <img id="teaserImg2" class="teaser-img" src="whiteinfront.jpg" alt="Teaser Shorts" loading="lazy">
                     <div class="teaser-img-overlay">
                         <span class="teaser-overlay-badge" id="teaserOverlayBadge2">CLASSIFIED</span>
                     </div>
@@ -240,8 +240,8 @@
         <div class="footer-col">
             <h4 data-t="company">Company</h4>
             <ul>
-                <li><button onclick="openBrand()" data-t="about_us" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">About Us</button></li>
-                <li><button onclick="triggerFooterContact()" data-t="contact_us" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Contact Us</button></li>
+                <li><button onclick="window.openBrand()" data-t="about_us" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">About Us</button></li>
+                <li><button onclick="window.triggerFooterContact()" data-t="contact_us" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Contact Us</button></li>
             </ul>
         </div>
 
@@ -249,11 +249,11 @@
         <div class="footer-col">
             <h4 data-t="get_help">Get Help</h4>
             <ul>
-                <li><button onclick="openOrderTrackerModal()" data-t="track_order" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Track Order</button></li>
-                <li><button onclick="openRefundModal()" data-t="refund_ex" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Refund & Exchange</button></li>
-                <li><button onclick="openHow()" data-t="how_to_order" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">How to order</button></li>
-                <li><button onclick="showToast(currentLang === 'ar' ? 'سياسة الخصوصية: جميع بيانات العملاء والطلبات مشفرة ومحمية.' : 'Privacy Policy: All customer registration and order details are encrypted.', 'info')" data-t="privacy" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Privacy Policy</button></li>
-                <li><button onclick="toggleLanguage()" id="langToggleLink" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">العربية (Arabic)</button></li>
+                <li><button onclick="window.openOrderTrackerModal()" data-t="track_order" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Track Order</button></li>
+                <li><button onclick="window.openRefundModal()" data-t="refund_ex" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Refund & Exchange</button></li>
+                <li><button onclick="window.openHow()" data-t="how_to_order" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">How to order</button></li>
+                <li><button onclick="window.showToast(currentLang === 'ar' ? 'سياسة الخصوصية: جميع بيانات العملاء والطلبات مشفرة ومحمية.' : 'Privacy Policy: All customer registration and order details are encrypted.', 'info')" data-t="privacy" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Privacy Policy</button></li>
+                <li><button onclick="window.toggleLanguage()" id="langToggleLink" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">العربية (Arabic)</button></li>
             </ul>
         </div>
 
@@ -261,8 +261,8 @@
         <div class="footer-col">
             <h4 data-t="sizing">Sizing</h4>
             <ul>
-                <li><button onclick="openSize()" data-t="sizing_chart" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Sizing Chart</button></li>
-                <li><button onclick="openSizeRecommender()" id="footerSizeCalcLink" data-t="size_calculator" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Size Calculator</button></li>
+                <li><button onclick="window.openSize()" data-t="sizing_chart" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Sizing Chart</button></li>
+                <li><button onclick="window.openSizeRecommender()" id="footerSizeCalcLink" data-t="size_calculator" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Size Calculator</button></li>
             </ul>
         </div>
 
@@ -270,8 +270,8 @@
         <div class="footer-col">
             <h4 data-t="care_guide">Care Guide</h4>
             <ul>
-                <li><button onclick="openWashingModal()" data-t="washing" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Washing Instructions</button></li>
-                <li><button onclick="openGarmentModal()" data-t="garment_care" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Garment Care</button></li>
+                <li><button onclick="window.openWashingModal()" data-t="washing" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Washing Instructions</button></li>
+                <li><button onclick="window.openGarmentModal()" data-t="garment_care" style="background:none; border:none; padding:0; cursor:pointer; font-family:inherit; font-size:inherit; color:inherit;">Garment Care</button></li>
             </ul>
         </div>
     </div>
@@ -291,7 +291,7 @@
 </footer>
 
 <!-- Support Chat Widget -->
-<div class="support-chat-widget" onclick="toggleChatWidget(event)" role="button" aria-haspopup="true" aria-expanded="false" aria-label="Open Live Support Chat">
+<div class="support-chat-widget" onclick="window.toggleChatWidget(event)" role="button" aria-haspopup="true" aria-expanded="false" aria-label="Open Live Support Chat">
     <div class="widget-chat-btn">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.477 2 2 6.13 2 11.2c0 2.685 1.258 5.1 3.284 6.786-.168.966-.613 2.595-1.792 3.864 0 0 2.215-.224 4.397-1.748C8.835 20.35 10.38 20.4 12 20.4c5.523 0 10-4.13 10-9.2C22 6.13 17.523 2 12 2z"/></svg>
         <span>Chat</span>
@@ -303,7 +303,7 @@
 <div class="support-chat-window" id="chatWindow" style="display: none;" role="dialog" aria-labelledby="chatHeader">
     <div class="chat-win-header" id="chatHeader">
         <span>Majarah Live Support</span>
-        <button onclick="toggleChatWidget(event)" aria-label="Close Chat">✕</button>
+        <button onclick="window.toggleChatWidget(event)" aria-label="Close Chat">✕</button>
     </div>
     <div class="chat-win-body">
         <p style="color:#666;line-height:1.6;font-size:11px;margin-bottom:16px;">We would love to help you! Tap a channel to chat with us directly:</p>
@@ -316,15 +316,15 @@
     </div>
 </div>
 
-<div class="overlay" id="authModal" onclick="closeAuthModal(event)" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+<div class="overlay" id="authModal" onclick="window.closeAuthModal(event)" role="dialog" aria-modal="true" aria-labelledby="authTitle">
     <div class="modal-box" style="max-width: 500px; padding: 50px 45px; border-radius: 8px;">
-        <button class="modal-x" onclick="closeAuthModal()" aria-label="Close Authentication Modal">✕</button>
+        <button class="modal-x" onclick="window.closeAuthModal()" aria-label="Close Authentication Modal">✕</button>
         
         <!-- Tab Headers -->
         <div id="authTitle" style="display: flex; gap: 20px; border-bottom: 1px solid #141414; padding-bottom: 10px; margin-bottom: 25px;">
-            <button id="tabLoginBtn" class="auth-tab active" onclick="switchAuthTab('login')" style="background:none; border:none; padding:0; cursor:pointer; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-family:inherit; color:inherit;">Log In</button>
-            <button id="tabSignupBtn" class="auth-tab" onclick="switchAuthTab('signup')" style="background:none; border:none; padding:0; cursor:pointer; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #444; font-family:inherit;">Sign Up</button>
-            <button id="tabProfileBtn" class="auth-tab" onclick="switchAuthTab('profile')" style="display: none; background:none; border:none; padding:0; cursor:pointer; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-family:inherit; color:inherit;">Profile</button>
+            <button id="tabLoginBtn" class="auth-tab active" onclick="window.switchAuthTab('login')" style="background:none; border:none; padding:0; cursor:pointer; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-family:inherit; color:inherit;">Log In</button>
+            <button id="tabSignupBtn" class="auth-tab" onclick="window.switchAuthTab('signup')" style="background:none; border:none; padding:0; cursor:pointer; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #444; font-family:inherit;">Sign Up</button>
+            <button id="tabProfileBtn" class="auth-tab" onclick="window.switchAuthTab('profile')" style="display: none; background:none; border:none; padding:0; cursor:pointer; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-family:inherit; color:inherit;">Profile</button>
         </div>
 
         <!-- 1. LOGIN PANE -->
@@ -340,9 +340,9 @@
                 </div>
             </div>
             <div style="text-align: right; margin-bottom: 20px;">
-                <button onclick="switchAuthTab('forgot')" style="background:none; border:none; padding:0; cursor: pointer; font-size: 10px; color: #555; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px dashed #444; font-family:inherit;">Forgot Password?</button>
+                <button onclick="window.switchAuthTab('forgot')" style="background:none; border:none; padding:0; cursor: pointer; font-size: 10px; color: #555; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px dashed #444; font-family:inherit;">Forgot Password?</button>
             </div>
-            <button class="checkout-trigger-btn" onclick="submitAuthLogin()" style="margin-top: 0;">Log In</button>
+            <button class="checkout-trigger-btn" onclick="window.submitAuthLogin()" style="margin-top: 0;">Log In</button>
             <p id="authLoginError" style="font-size: 11px; color: #ff4444; margin-top: 12px; display: none; letter-spacing: 0.5px;" aria-live="assertive"></p>
         </div>
 
@@ -366,7 +366,7 @@
                     <input type="password" id="authSignupConfirm" class="chk-input-field" placeholder="Confirm password" required>
                 </div>
             </div>
-            <button class="checkout-trigger-btn" onclick="submitAuthSignup()" style="margin-top: 0;">Create Account</button>
+            <button class="checkout-trigger-btn" onclick="window.submitAuthSignup()" style="margin-top: 0;">Create Account</button>
             <p id="authSignupError" style="font-size: 11px; color: #ff4444; margin-top: 12px; display: none; letter-spacing: 0.5px;" aria-live="assertive"></p>
         </div>
 
@@ -382,7 +382,7 @@
                     <p style="font-size: 11px; color: #444;">No orders placed yet.</p>
                 </div>
             </div>
-            <button class="checkout-trigger-btn" onclick="submitAuthLogout()" style="background: #ff4444; color: #fff; margin-top: 0;">Log Out</button>
+            <button class="checkout-trigger-btn" onclick="window.submitAuthLogout()" style="background: #ff4444; color: #fff; margin-top: 0;">Log Out</button>
         </div>
 
         <!-- 4. FORGOT PASSWORD PANE -->
@@ -401,19 +401,19 @@
                     <input type="password" id="authForgotConfirmNewPass" class="chk-input-field" placeholder="Confirm new password" required>
                 </div>
             </div>
-            <button class="checkout-trigger-btn" onclick="submitAuthForgot()" style="margin-top: 0; background:#fff; color:#050505;">Reset Password</button>
+            <button class="checkout-trigger-btn" onclick="window.submitAuthForgot()" style="margin-top: 0; background:#fff; color:#050505;">Reset Password</button>
             <p id="authForgotError" style="font-size: 11px; color: #ff4444; margin-top: 12px; display: none; letter-spacing: 0.5px;" aria-live="assertive"></p>
             <div style="text-align: center; margin-top: 15px;">
-                <button onclick="switchAuthTab('login')" class="back-to-login-link" style="background:none; border:none; padding:0; cursor: pointer; font-size: 10px; color: #aaa; letter-spacing: 1.5px; text-transform: uppercase; text-decoration: underline; font-family:inherit;">← Back to Log In</button>
+                <button onclick="window.switchAuthTab('login')" class="back-to-login-link" style="background:none; border:none; padding:0; cursor: pointer; font-size: 10px; color: #aaa; letter-spacing: 1.5px; text-transform: uppercase; text-decoration: underline; font-family:inherit;">← Back to Log In</button>
             </div>
         </div>
 
     </div>
 </div>
 
-<div class="overlay" id="howModal" onclick="closeHow(event)" role="dialog" aria-modal="true" aria-labelledby="howTitle">
+<div class="overlay" id="howModal" onclick="window.closeHow(event)" role="dialog" aria-modal="true" aria-labelledby="howTitle">
     <div class="modal-box how-modal-box">
-        <button class="modal-x" onclick="closeHow()" aria-label="Close How to Order Modal">✕</button>
+        <button class="modal-x" onclick="window.closeHow()" aria-label="Close How to Order Modal">✕</button>
         <div class="how-modal-grid">
             <div class="how-modal-left">
                 <div class="modal-h" id="howTitle" data-t="how_title">How to Order</div>
@@ -426,9 +426,9 @@
     </div>
 </div>
 
-<div class="overlay" id="sizeModal" onclick="closeSize(event)" role="dialog" aria-modal="true" aria-labelledby="sizeTitle">
+<div class="overlay" id="sizeModal" onclick="window.closeSize(event)" role="dialog" aria-modal="true" aria-labelledby="sizeTitle">
     <div class="modal-box">
-        <button class="modal-x" onclick="closeSize()" aria-label="Close Size Guide Modal">✕</button>
+        <button class="modal-x" onclick="window.closeSize()" aria-label="Close Size Guide Modal">✕</button>
         <div class="modal-h" id="sizeTitle" data-t="sizing_chart">Size Guide</div>
         <div class="modal-sub" data-t="measurements_cm">Measurements in centimeters</div>
         <div id="sizeModalContent">
@@ -437,9 +437,9 @@
     </div>
 </div>
 
-<div class="overlay" id="brandModal" onclick="closeBrand(event)" role="dialog" aria-modal="true" aria-labelledby="brandTitle">
+<div class="overlay" id="brandModal" onclick="window.closeBrand(event)" role="dialog" aria-modal="true" aria-labelledby="brandTitle">
     <div class="modal-box">
-        <button class="modal-x" onclick="closeBrand()" aria-label="Close Brand Modal">✕</button>
+        <button class="modal-x" onclick="window.closeBrand()" aria-label="Close Brand Modal">✕</button>
         <div class="modal-h" id="brandTitle" data-t="brand_title">The Brand</div>
         <div class="modal-sub" data-t="brand_sub">Majarah Universe</div>
         <div id="brandModalContent">
@@ -448,25 +448,26 @@
     </div>
 </div>
 
-<div class="overlay" id="refundLookupModal" onclick="closeRefundModal(event)" role="dialog" aria-modal="true" aria-labelledby="refundTitle">
+<div class="overlay" id="refundLookupModal" onclick="window.closeRefundModal(event)" role="dialog" aria-modal="true" aria-labelledby="refundTitle">
     <div class="modal-box">
-        <button class="modal-x" onclick="closeRefundModal()" aria-label="Close Refund Lookup Modal">✕</button>
+        <button class="modal-x" onclick="window.closeRefundModal()" aria-label="Close Refund Lookup Modal">✕</button>
         <div class="modal-h" id="refundTitle" data-t="track_refund_title">Track & Refund</div>
         <div class="modal-sub" data-t="track_refund_sub">Look up your order to track its status or request a refund</div>
         
         <!-- STEP 1: Lookup Form -->
         <div id="refundLookupForm">
+            <p style="font-size: 11px; color: #888; margin-bottom: 20px; line-height: 1.6;" data-t="track_refund_instructions">Enter your order number or phone number to track your order or request a refund.</p>
             <div style="display: flex; flex-direction: column; gap: 18px; margin-bottom: 24px;">
                 <div>
                     <label for="refundOrderId" data-t="order_id_lbl" style="display: block; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #444; margin-bottom: 8px; font-weight: 700;">Order ID / Number</label>
-                    <input type="text" id="refundOrderId" class="chk-input-field" placeholder="e.g. 12 or #12" style="background: #111; border-color: #222;" required>
+                    <input type="text" id="refundOrderId" class="chk-input-field" data-t-placeholder="order_id_lbl" placeholder="e.g. 12 or #12" style="background: #111; border-color: #222;" required>
                 </div>
                 <div>
                     <label for="refundPhone" data-t="phone_lbl" style="display: block; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #444; margin-bottom: 8px; font-weight: 700;">Phone Number</label>
-                    <input type="text" id="refundPhone" class="chk-input-field" placeholder="e.g. 01xxxxxxxxx" style="background: #111; border-color: #222;" required>
+                    <input type="text" id="refundPhone" class="chk-input-field" data-t-placeholder="phone_lbl" placeholder="e.g. 01xxxxxxxxx" style="background: #111; border-color: #222;" required>
                 </div>
             </div>
-            <button class="checkout-trigger-btn" onclick="lookupOrderForRefund()" data-t="find_order">Find Order</button>
+            <button class="checkout-trigger-btn" onclick="window.lookupOrderForRefund()" data-t="find_order">Find Order</button>
             <p id="refundLookupError" style="font-size: 11px; color: #ff4444; margin-top: 12px; display: none; letter-spacing: 0.5px;" aria-live="assertive"></p>
             
             <div id="refundPolicyContent" style="margin-top: 30px; border-top: 1px solid #151515; padding-top: 28px;">
@@ -482,14 +483,14 @@
             <div id="refundActionArea">
                 <!-- Dynamically populated action/form area based on eligibility and state -->
             </div>
-            <button class="desc-trigger-btn" onclick="backToRefundLookup()" data-t="back_to_search" style="margin-top: 15px; width: 100%; border-color: #111;">← Back to Search</button>
+            <button class="desc-trigger-btn" onclick="window.backToRefundLookup()" data-t="back_to_search" style="margin-top: 15px; width: 100%; border-color: #111;">← Back to Search</button>
         </div>
     </div>
 </div>
 
-<div class="overlay" id="sizeRecommenderModal" onclick="closeSizeRecommender(event)" role="dialog" aria-modal="true" aria-labelledby="recommenderTitle">
+<div class="overlay" id="sizeRecommenderModal" onclick="window.closeSizeRecommender(event)" role="dialog" aria-modal="true" aria-labelledby="recommenderTitle">
     <div class="modal-box" style="max-width: 500px; padding: 50px 45px; border-radius: 8px;">
-        <button class="modal-x" onclick="closeSizeRecommender()" aria-label="Close Size Recommender Modal">✕</button>
+        <button class="modal-x" onclick="window.closeSizeRecommender()" aria-label="Close Size Recommender Modal">✕</button>
         <div class="modal-h" id="recommenderTitle" data-t="size_recommend_title">Size Recommender</div>
         <div class="modal-sub" data-t="size_recommend_sub">Calculate your perfect fit in seconds</div>
         
@@ -499,7 +500,7 @@
                     <span data-t="height">Height</span>
                     <span id="recommenderHeightVal">175 cm</span>
                 </label>
-                <input type="range" id="recommenderHeight" min="150" max="210" value="175" class="chk-input-field" style="padding: 0; height: 6px; background: #222; -webkit-appearance: none; cursor: pointer; border: none;" oninput="updateRecommenderLabels()">
+                <input type="range" id="recommenderHeight" min="150" max="210" value="175" class="chk-input-field" style="padding: 0; height: 6px; background: #222; -webkit-appearance: none; cursor: pointer; border: none;" oninput="window.updateRecommenderLabels()">
             </div>
             
             <div>
@@ -507,13 +508,13 @@
                     <span data-t="weight">Weight</span>
                     <span id="recommenderWeightVal">70 kg</span>
                 </label>
-                <input type="range" id="recommenderWeight" min="45" max="130" value="70" class="chk-input-field" style="padding: 0; height: 6px; background: #222; -webkit-appearance: none; cursor: pointer; border: none;" oninput="updateRecommenderLabels()">
+                <input type="range" id="recommenderWeight" min="45" max="130" value="70" class="chk-input-field" style="padding: 0; height: 6px; background: #222; -webkit-appearance: none; cursor: pointer; border: none;" oninput="window.updateRecommenderLabels()">
             </div>
             
             <div>
                 <label for="recommenderFit" data-t="fit_pref" style="display: block; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #666; margin-bottom: 8px; font-weight: 700;">Fit Preference</label>
                 <div class="chk-select-wrap">
-                    <select id="recommenderFit" class="chk-input-field select-box" style="background: #111; border-color: #222;" onchange="calculateRecommendedSize()">
+                    <select id="recommenderFit" class="chk-input-field select-box" style="background: #111; border-color: #222;" onchange="window.calculateRecommendedSize()">
                         <option value="oversized" data-t="fit_oversized" selected>Streetwear Oversized (Recommended)</option>
                         <option value="regular" data-t="fit_regular">Regular Fit</option>
                         <option value="snug" data-t="fit_snug">Slightly Snug</option>
@@ -527,15 +528,15 @@
                 <div id="recommenderFitDesc" style="font-size: 11px; color: #777; margin-top: 8px; line-height: 1.6; letter-spacing: 0.5px;">Fits loose and relaxed as intended.</div>
             </div>
 
-            <button class="checkout-trigger-btn" onclick="applyRecommendedSize()" data-t="apply_size_btn" style="margin-top: 5px;">Apply & Select Size</button>
+            <button class="checkout-trigger-btn" onclick="window.applyRecommendedSize()" data-t="apply_size_btn" style="margin-top: 5px;">Apply & Select Size</button>
         </div>
     </div>
 </div>
 
 <!-- Customer Order Tracker Modal -->
-<div class="overlay" id="orderTrackerModal" onclick="closeOrderTrackerModal(event)" role="dialog" aria-modal="true" aria-labelledby="trackerModalTitle">
+<div class="overlay" id="orderTrackerModal" onclick="window.closeOrderTrackerModal(event)" role="dialog" aria-modal="true" aria-labelledby="trackerModalTitle">
     <div class="modal-box" style="max-width: 500px; padding: 40px 30px; border-radius: 8px;">
-        <button class="modal-x" onclick="closeOrderTrackerModal()" aria-label="Close Order Tracker Modal">✕</button>
+        <button class="modal-x" onclick="window.closeOrderTrackerModal()" aria-label="Close Order Tracker Modal">✕</button>
         <div class="modal-h" id="trackerModalTitle" data-t="track_order">Track Order</div>
         <div class="modal-sub" id="trackerModalSub" data-t="tracker_modal_sub">Enter your phone number to view your order status and timeline.</div>
         
@@ -545,7 +546,7 @@
                 <label for="trackerPhoneInput" style="display: block; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #444; margin-bottom: 8px; font-weight: 700;" data-t="phone_lbl">Phone Number</label>
                 <input type="text" id="trackerPhoneInput" class="chk-input-field" placeholder="e.g. 01xxxxxxxxx" style="background: #111; border-color: #222;" required>
             </div>
-            <button class="checkout-trigger-btn" onclick="trackOrdersByPhone()" id="trackerSearchBtn" data-t="track_order">Track Order</button>
+            <button class="checkout-trigger-btn" onclick="window.trackOrdersByPhone()" id="trackerSearchBtn" data-t="track_order">Track Order</button>
             <p id="trackerError" style="font-size: 11px; color: #ff4444; margin-top: 12px; display: none; letter-spacing: 0.5px;" aria-live="assertive"></p>
         </div>
         
@@ -557,9 +558,9 @@
 </div>
 
 <!-- Washing Instructions Modal -->
-<div class="overlay" id="washingModal" onclick="closeWashingModal(event)" role="dialog" aria-modal="true" aria-labelledby="washingTitle">
+<div class="overlay" id="washingModal" onclick="window.closeWashingModal(event)" role="dialog" aria-modal="true" aria-labelledby="washingTitle">
     <div class="modal-box" style="max-width: 450px; padding: 50px 40px; border-radius: 8px;">
-        <button class="modal-x" onclick="closeWashingModal()" aria-label="Close Washing Instructions Modal">✕</button>
+        <button class="modal-x" onclick="window.closeWashingModal()" aria-label="Close Washing Instructions Modal">✕</button>
         <div class="modal-h" id="washingTitle" data-t="washing_title" style="font-family: 'Cinzel', serif; letter-spacing: 3px;">Washing Instructions</div>
         <div class="modal-sub" data-t="washing_sub" style="letter-spacing: 1px;">Care guide to preserve your garment's life</div>
         
@@ -570,9 +571,9 @@
 </div>
 
 <!-- Garment Care Modal -->
-<div class="overlay" id="garmentModal" onclick="closeGarmentModal(event)" role="dialog" aria-modal="true" aria-labelledby="garmentTitle">
+<div class="overlay" id="garmentModal" onclick="window.closeGarmentModal(event)" role="dialog" aria-modal="true" aria-labelledby="garmentTitle">
     <div class="modal-box" style="max-width: 450px; padding: 50px 40px; border-radius: 8px;">
-        <button class="modal-x" onclick="closeGarmentModal()" aria-label="Close Garment Care Modal">✕</button>
+        <button class="modal-x" onclick="window.closeGarmentModal()" aria-label="Close Garment Care Modal">✕</button>
         <div class="modal-h" id="garmentTitle" data-t="garment_title" style="font-family: 'Cinzel', serif; letter-spacing: 3px;">Garment Care</div>
         <div class="modal-sub" data-t="garment_sub" style="letter-spacing: 1px;">How to dry, iron, and store your pieces</div>
         
@@ -583,7 +584,7 @@
 </div>
 
 <div class="product-page" id="productPage" role="dialog" aria-labelledby="ppTitle">
-    <button class="pp-back" onclick="closeProduct()" data-t="back" aria-label="Go back to collection">← Back</button>
+    <button class="pp-back" onclick="window.closeProduct()" data-t="back" aria-label="Go back to collection">← Back</button>
     <div class="pp-inner">
         <div class="pp-images">
             <div class="pp-main"><img id="ppMainImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Main Product Image"></div>
@@ -604,16 +605,16 @@
                 <div class="pp-size-row">
                     <span class="pp-size-lbl" data-t="select_size">Select Size</span>
                     <div style="display: flex; gap: 12px;">
-                        <button class="pp-size-guide-btn" onclick="openSize()" data-t="size_guide_btn">Size Guide</button>
-                        <button class="pp-size-guide-btn" onclick="openSizeRecommender()" id="productPageSizeCalcBtn" data-t="size_calculator_btn">Size Calculator →</button>
+                        <button class="pp-size-guide-btn" onclick="window.openSize()" data-t="size_guide_btn">Size Guide</button>
+                        <button class="pp-size-guide-btn" onclick="window.openSizeRecommender()" id="productPageSizeCalcBtn" data-t="size_calculator_btn">Size Calculator →</button>
                     </div>
                 </div>
                 <div class="pp-sizes" role="radiogroup" aria-labelledby="selectSizeLabel">
                     <span id="selectSizeLabel" class="sr-only">Select size</span>
-                    <button class="pp-size-btn" onclick="pickSize(this)" aria-checked="false" role="radio">S</button>
-                    <button class="pp-size-btn" onclick="pickSize(this)" aria-checked="false" role="radio">M</button>
-                    <button class="pp-size-btn" onclick="pickSize(this)" aria-checked="false" role="radio">L</button>
-                    <button class="pp-size-btn" onclick="pickSize(this)" aria-checked="false" role="radio">XL</button>
+                    <button class="pp-size-btn" onclick="window.pickSize(this)" aria-checked="false" role="radio">S</button>
+                    <button class="pp-size-btn" onclick="window.pickSize(this)" aria-checked="false" role="radio">M</button>
+                    <button class="pp-size-btn" onclick="window.pickSize(this)" aria-checked="false" role="radio">L</button>
+                    <button class="pp-size-btn" onclick="window.pickSize(this)" aria-checked="false" role="radio">XL</button>
                 </div>
                 
                 <!-- Majarah Stock Indicator -->
@@ -630,7 +631,7 @@
                     </div>
                 </div>
             </div>
-            <button class="checkout-trigger-btn" onclick="openCheckout()" data-t="buy_now">Buy It Now</button>
+            <button class="checkout-trigger-btn" onclick="window.openCheckout()" data-t="buy_now">Buy It Now</button>
         </div>
     </div>
 </div>
@@ -641,7 +642,7 @@
         <div class="chk-main-panel">
             <div class="chk-header-nav">
                 <div class="chk-brand-logo" id="chkBrandTitle">MAJARAH</div>
-                <button class="chk-close-action" onclick="closeCheckout()" data-t="cancel">Cancel</button>
+                <button class="chk-close-action" onclick="window.closeCheckout()" data-t="cancel">Cancel</button>
             </div>
             
             <div class="chk-section-block">
@@ -678,7 +679,7 @@
                 </div>
                 <div class="chk-input-split">
                     <div class="chk-select-wrap">
-                        <select id="chkCity" aria-label="City" class="chk-input-field select-box" onchange="calculateTotals()" required>
+                        <select id="chkCity" aria-label="City" class="chk-input-field select-box" onchange="window.calculateTotals()" required>
                         </select>
                     </div>
                     <input type="text" id="chkPostal" aria-label="Postal Code" class="chk-input-field" placeholder="Postal code (Optional)" data-t-placeholder="postal_code">
@@ -692,21 +693,21 @@
             <div class="chk-section-block">
                 <div class="chk-section-title" data-t="payment_method">Payment Method</div>
                 <div class="chk-payment-box" role="radiogroup" aria-label="Select Payment Method">
-                    <div class="chk-payment-row active" id="checkoutPayRowCOD" onclick="selectCheckoutPayment(this, 'COD')" role="radio" aria-checked="true" tabindex="0">
+                    <div class="chk-payment-row active" id="checkoutPayRowCOD" onclick="window.selectCheckoutPayment(this, 'COD')" role="radio" aria-checked="true" tabindex="0">
                         <label class="chk-radio-lbl">
                             <span class="chk-radio-circle"><span class="chk-radio-inner"></span></span>
                             <span data-t="cod">Cash on Delivery (COD)</span>
                         </label>
                         <div class="chk-payment-icons"><span class="chk-pay-badge" data-t="badge_local">Local</span></div>
                     </div>
-                    <div class="chk-payment-row" id="checkoutPayRowApple" onclick="selectCheckoutPayment(this, 'Apple Pay')" role="radio" aria-checked="false" tabindex="0">
+                    <div class="chk-payment-row" id="checkoutPayRowApple" onclick="window.selectCheckoutPayment(this, 'Apple Pay')" role="radio" aria-checked="false" tabindex="0">
                         <label class="chk-radio-lbl">
                             <span class="chk-radio-circle"><span class="chk-radio-inner"></span></span>
                             <span>Apple Pay</span>
                         </label>
                         <div class="chk-payment-icons"><span class="chk-pay-badge" data-t="badge_wallet">Wallet</span></div>
                     </div>
-                    <div class="chk-payment-row" id="checkoutPayRowCard" onclick="selectCheckoutPayment(this, 'Card')" role="radio" aria-checked="false" tabindex="0">
+                    <div class="chk-payment-row" id="checkoutPayRowCard" onclick="window.selectCheckoutPayment(this, 'Card')" role="radio" aria-checked="false" tabindex="0">
                         <label class="chk-radio-lbl">
                             <span class="chk-radio-circle"><span class="chk-radio-inner"></span></span>
                             <span data-t="card">Credit / Debit Card</span>
@@ -719,7 +720,7 @@
                 </div>
             </div>
             
-            <button class="chk-submit-button" onclick="submitShopifyCheckout()" data-t="confirm_order">Complete Order</button>
+            <button class="chk-submit-button" onclick="window.submitShopifyCheckout()" data-t="confirm_order">Complete Order</button>
         </div>
         
         <div class="chk-sidebar-panel">
@@ -739,7 +740,7 @@
                 <label for="chkCouponInput" style="font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: #444; font-weight: 700;" data-t="coupon_code_lbl">Discount Code</label>
                 <div style="display: flex; gap: 8px;">
                     <input type="text" id="chkCouponInput" class="chk-input-field" placeholder="Enter coupon code" style="padding: 10px; background: #111; border-color: #222;" data-t-placeholder="coupon_placeholder">
-                    <button type="button" class="btn" onclick="applyCheckoutCoupon()" style="padding: 0 15px; font-size: 11px; background: #222; border: 1px solid #333; color: #fff; cursor: pointer; border-radius: 4px;" data-t="apply_btn">Apply</button>
+                    <button type="button" class="btn" onclick="window.applyCheckoutCoupon()" style="padding: 0 15px; font-size: 11px; background: #222; border: 1px solid #333; color: #fff; cursor: pointer; border-radius: 4px;" data-t="apply_btn">Apply</button>
                 </div>
                 <div id="chkCouponMessage" style="font-size: 11px; display: none;" aria-live="polite"></div>
             </div>

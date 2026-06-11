@@ -999,6 +999,7 @@
         }
         .promo-scroller-track {
             display: inline-flex;
+            align-items: center;
             animation: marquee 25s linear infinite;
         }
         .promo-scroller-text {

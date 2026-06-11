@@ -1,4 +1,4 @@
-// --- GLOBAL DATABASE FETCH INTERCEPTOR ---
+// --- GLOBAL DATABASE FETCH INTERCEPTOR (Trigger Rebuild) ---
 window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
 // Normalize SB_URL: remove trailing slashes and /rest/v1 if present to avoid "Double REST" URL errors
 if (window.SB_URL) {
@@ -13,6 +13,69 @@ function resolveImgSrc(url, fallback) {
     // The user mentioned removing images from files, so we should prioritize full URLs or specific assets
     return fallback || 'blackinfront.jpg';
 }
+
+// --- DATE PARSER HELPER ---
+window.parseLaunchDate = function(dateStr) {
+    if (!dateStr) return 0;
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? 0 : d.getTime();
+};
+
+// --- SPA HISTORY ROUTER ---
+function findProductBySlug(slug) {
+    if (!window.fetchedProducts) return null;
+    return window.fetchedProducts.find(p => p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slug);
+}
+
+function handleNavigation(path, push = true) {
+    console.log(`[Storefront] Navigating to: ${path}`);
+    if (path === '/' || path === '' || path === '/index.html') {
+        closeCheckout(false);
+        closeProduct(false);
+        if (push && window.location.pathname !== '/') {
+            history.pushState({ page: 'home' }, '', '/');
+        }
+    } else if (path.startsWith('/products/')) {
+        const slug = path.split('/products/')[1];
+        const p = findProductBySlug(slug);
+        if (p) {
+            closeCheckout(false);
+            openProduct(p.id, push);
+        } else {
+            console.warn(`[Storefront] Product slug not found: ${slug}, redirecting home.`);
+            handleNavigation('/', push);
+        }
+    } else if (path === '/cart' || path === '/checkout') {
+        if (activeProductId && activeSelectedSize) {
+            closeProduct(false);
+            openCheckout(push);
+        } else {
+            console.warn('[Storefront] Checkout accessed without active product/size, redirecting home.');
+            handleNavigation('/', push);
+        }
+    } else {
+        handleNavigation('/', push);
+    }
+}
+
+window.MJR = {
+    goHome: function() {
+        handleNavigation('/');
+    },
+    goCollection: function(event) {
+        if (event) event.preventDefault();
+        handleNavigation('/');
+        const anchor = document.getElementById('collection');
+        if (anchor) {
+            anchor.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+};
+
+window.addEventListener('popstate', (event) => {
+    handleNavigation(window.location.pathname, false);
+});
+
 
 // --- PERFORMANCE UTILITIES ---
 function debounce(func, wait) {
@@ -123,7 +186,7 @@ function cfg(key, fallback = '') {
 function applyConfigToDOM() {
     // 1. Marquee visibility
     const marquee = document.getElementById('storefrontPromoMarquee');
-    if (marquee) marquee.style.display = cfg('promoVisible', true) ? 'block' : 'none';
+    if (marquee) marquee.style.display = cfg('promoVisible', true) ? 'flex' : 'none';
     
     // 2. Prelaunch
     const isPrelaunch = cfg('showPrelaunch', false);
@@ -264,7 +327,9 @@ async function loadProducts() {
     }
 
     window.fetchedProducts = products;
+    fetchedProducts = products;
     window.fetchedInventory = allInventory;
+    fetchedInventory = allInventory;
 
     if (products.length === 0) {
         console.warn("[Storefront] No products found in database or local state.");
@@ -402,6 +467,7 @@ const TRANSLATIONS = {
     brand_body: "MAJARAH is a celestial map of the self, founded in the heart of Cairo. We view every individual as a vast system of architecture and void, waiting to be expressed through fabric. We produce heavyweight, high-density garments for those who navigate the urban landscape while carrying a private universe within. From the streets of Egypt to the edge of the unknown, we provide the uniform for exploration.",
     track_refund_title: "Track & Refund",
     track_refund_sub: "Look up your order to track its status or request a refund",
+    track_refund_instructions: "Enter your order number or phone number to track your order or request a refund.",
     order_id_lbl: "Order ID / Number",
     phone_lbl: "Phone Number",
     find_order: "Find Order",
@@ -525,6 +591,7 @@ const TRANSLATIONS = {
     brand_body: "مجرة هي خريطة سماوية للذات، تأسست في قلب القاهرة. نحن نرى كل فرد ككيان واسع من التصميم والفراغ، ينتظر التعبير عنه من خلال القماش. نصنع ملابس ثقيلة الوزن وعالية الكثافة لأولئك الذين يخوضون صخب المدينة وهم يحملون كوناً خاصاً بداخلهم. من شوارع مصر إلى حافة المجهول، نحن نصنع الزي الرسمي للاستكشاف.",
     track_refund_title: "تتبع وارجاع الطلبات",
     track_refund_sub: "اكتب بيانات طلبك عشان تتابعه أو تطلب استرجاع",
+    track_refund_instructions: "أدخل رقم الطلب أو رقم الهاتف لتتبع طلبك أو طلب الاسترجاع.",
     order_id_lbl: "رقم الطلب",
     phone_lbl: "رقم الموبايل",
     find_order: "دوّر على الطلب",
@@ -681,6 +748,9 @@ function applyLanguage(lang) {
     if (fetchedProducts && fetchedProducts.length > 0) {
         renderProductsGrid(fetchedProducts, fetchedInventory);
     }
+    if (activeProductId && document.getElementById('productPage').classList.contains('open')) {
+        openProduct(activeProductId, false);
+    }
 }
 
 function populateCityOptions() {
@@ -813,6 +883,7 @@ async function initApp() {
 
     await loadProducts();
     checkPrelaunch();
+    handleNavigation(window.location.pathname, false);
 }
 
 // --- DYNAMIC CONTENT ON-DEMAND LAZY LOADING ---
@@ -1008,13 +1079,13 @@ async function openHow() {
     else {
         const container = document.getElementById('howModalRight');
         if (container) renderHowModal({ en: [
-            { n: '01', title: 'Pick Your Piece', desc: 'Tap any tee to see the full print, size guide, and details. Select your size when you\'re ready.' },
-            { n: '02', title: 'Fill in Your Address', desc: 'Enter your name, phone number, and delivery address. We ship to all 27 Egyptian governorates.' },
-            { n: '03', title: 'We Ship to You', desc: 'Your order is confirmed and sent out within 1–4 business days. Pay cash when it arrives at your door.' }
+            { n: '01', title: 'Pick your item', desc: 'Browse the collection and tap the product you want.' },
+            { n: '02', title: 'Select size & add to cart', desc: 'Choose your size and hit Add to Cart.' },
+            { n: '03', title: 'Checkout', desc: 'Enter your name, phone number, address, and confirm your order.' }
         ], ar: [
-            { n: '01', title: 'اختار قطعتك', desc: 'دوس على أي قطعة عشان تشوف تفاصيلها ورسوماتها ومقاساتها بالظبط.' },
-            { n: '02', title: 'ادخل بياناتك', desc: 'املا بيانات الشحن والتوصيل بسهولة وأمان في صفحة الدفع.' },
-            { n: '03', title: 'بنشحن ليك', desc: 'السيستم هيسجل طلبك تلقائياً وهنشحنلك القطعة في أسرع وقت. الدفع عند الاستلام.' }
+            { n: '01', title: 'اختار قطعتك', desc: 'تصفح المجموعة واضغط على المنتج الذي تريده.' },
+            { n: '02', title: 'اختار المقاس وضف للعربة', desc: 'اختر مقاسك واضغط على إضافة إلى العربة.' },
+            { n: '03', title: 'الدفع والشحن', desc: 'أدخل اسمك، ورقم هاتفك، وعنوانك لتأكيد طلبك.' }
         ] }, currentLang);
     }
 }
@@ -1030,6 +1101,25 @@ async function openSize() {
     lockBodyScroll();
     const data = await fetchDynamicContent('size');
     if (data) renderSizeModal(data, currentLang);
+    else {
+        renderSizeModal({
+            headers: {
+                en: ['Size', 'Chest', 'Shoulder', 'Length'],
+                ar: ['المقاس', 'الصدر', 'الكتف', 'الطول']
+            },
+            rows: [
+                ['XS', '52 cm', '46 cm', '66 cm'],
+                ['S', '55 cm', '48 cm', '69 cm'],
+                ['M', '57 cm', '70 cm', '70 cm'],
+                ['L', '61 cm', '52 cm', '73 cm'],
+                ['XL', '64 cm', '54 cm', '77 cm']
+            ],
+            note: {
+                en: 'Measurements in centimeters. Fit is oversized. Garment patterns are cut loose. Size down if you prefer a standard, closer-to-body look.',
+                ar: 'المقاسات بالسنتيمتر. القصات واسعة ومريحة (Oversized). اختر مقاساً أصغر إذا كنت تفضل المظهر المعتاد.'
+            }
+        }, currentLang);
+    }
 }
 function closeSize(e) {
     if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) {
@@ -1043,6 +1133,12 @@ async function openBrand() {
     lockBodyScroll();
     const data = await fetchDynamicContent('brand');
     if (data) renderBrandModal(data, currentLang);
+    else {
+        renderBrandModal({
+            en: "MAJARAH (مَجَرَّة) means 'galaxy' in Arabic. Born in Cairo, 2026. We make heavyweight cotton essentials for the modern explorer — screen-printed in Egypt, built to last. No rules. Just us.",
+            ar: "مَجَرَّة تعني 'Galaxy' بالعربية. تأسست في القاهرة، 2026. نصنع أساسيات قطنية ثقيلة للمستكشف المعاصر - مطبوعة في مصر، ومصنوعة لتدوم. لا قواعد. نحن فقط."
+        }, currentLang);
+    }
 }
 function closeBrand(e) {
     if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) {
@@ -1066,7 +1162,7 @@ async function loadActiveProductInventory(productId) {
     }
 }
 
-async function openProduct(id) {
+async function openProduct(id, push = true) {
     console.log(`[Storefront] Opening product ID: ${id}`);
     activeProductId = id;
     
@@ -1179,9 +1275,10 @@ async function openProduct(id) {
                 stockText.innerHTML = isAr ? `متاح · ${totalStock} قطعة` : `In Stock · ${totalStock} units`;
             }
             
+            stockTag.innerText = isAr ? (tier === 'urgent' ? 'طلب عالي' : tier === 'low' ? 'محدود' : 'متوفر') : (tier === 'urgent' ? 'URGENT' : tier === 'low' ? 'LOW' : 'STABLE');
             stockTag.className = 'mjr-stock-tag ' + tier;
-            stockTag.textContent = tier === 'urgent' ? (isAr ? 'ينتهي قريباً' : 'Almost Gone') : tier === 'low' ? (isAr ? 'كميات محدودة' : 'Limited') : (isAr ? 'متوفر' : 'In Stock');
             
+            stockPulse.className = 'mjr-stock-pulse ' + tier;
             if (tier === 'urgent') stockPulse.classList.add('active');
             else stockPulse.classList.remove('active');
             
@@ -1192,10 +1289,19 @@ async function openProduct(id) {
     
     activeSelectedSize = null;
     document.getElementById('productPage').classList.add('open');
+    if (push && p) {
+        const slug = p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        if (window.location.pathname !== `/products/${slug}`) {
+            history.pushState({ page: 'product', id: id }, '', `/products/${slug}`);
+        }
+    }
 }
 
-function closeProduct() {
+function closeProduct(push = true) {
     document.getElementById('productPage').classList.remove('open');
+    if (push && window.location.pathname !== '/') {
+        history.pushState({ page: 'home' }, '', '/');
+    }
 }
 
 function switchImg(idx) {
@@ -1225,7 +1331,7 @@ function pickSize(element) {
 }
 
 // --- SHOPIFY CHECKOUT OPERATIONS ---
-function openCheckout() {
+function openCheckout(push = true) {
     activeDiscountValue = 0;
     activeDiscountType = 'fixed';
     activeDiscountCode = '';
@@ -1316,11 +1422,19 @@ function openCheckout() {
     
     document.getElementById('checkoutPage').classList.add('open');
     lockBodyScroll();
+    if (push) {
+        if (window.location.pathname !== '/cart' && window.location.pathname !== '/checkout') {
+            history.pushState({ page: 'checkout' }, '', '/checkout');
+        }
+    }
 }
 
-function closeCheckout() {
+function closeCheckout(push = true) {
     document.getElementById('checkoutPage').classList.remove('open');
     unlockBodyScroll();
+    if (push && window.location.pathname !== '/') {
+        history.pushState({ page: 'home' }, '', '/');
+    }
 }
 
 function selectCheckoutPayment(element, method) {
@@ -1391,6 +1505,24 @@ async function openWashingModal() {
     lockBodyScroll();
     const data = await fetchDynamicContent('washing');
     if (data) renderWashingModal(data, currentLang);
+    else {
+        renderWashingModal({
+            en: [
+                { title: 'Machine Wash Cold', desc: 'Machine wash cold (30°C max).' },
+                { title: 'Wash Inside Out', desc: 'Wash inside out to preserve print.' },
+                { title: 'Do Not Bleach', desc: 'Do not use bleach on the fabric.' },
+                { title: 'Do Not Tumble Dry', desc: 'Air dry. Do not tumble dry.' },
+                { title: 'Iron Inside Out', desc: 'Iron inside out on low heat.' }
+            ],
+            ar: [
+                { title: 'غسيل غسالة بارد', desc: 'يغسل في الغسالة بماء بارد (30 درجة مئوية بحد أقصى).' },
+                { title: 'غسيل بالمقلوب', desc: 'يغسل مقلوباً للحفاظ على الطباعة.' },
+                { title: 'تجنب المبيضات', desc: 'لا تستخدم الكلور أو المبيضات.' },
+                { title: 'تجنب المجفف الحراري', desc: 'يجفف بالتعليق في الهواء، لا تستخدم المجفف.' },
+                { title: 'الكي بالمقلوب', desc: 'يكوى مقلوباً على درجة حرارة منخفضة.' }
+            ]
+        }, currentLang);
+    }
 }
 function closeWashingModal(e) {
     if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) {
@@ -1404,6 +1536,20 @@ async function openGarmentModal() {
     lockBodyScroll();
     const data = await fetchDynamicContent('garment');
     if (data) renderGarmentModal(data, currentLang);
+    else {
+        renderGarmentModal({
+            en: [
+                { title: 'Store Folded', desc: 'Store folded, not on a hanger, to preserve the shape.' },
+                { title: 'Avoid Sunlight', desc: 'Avoid prolonged exposure to direct sunlight to prevent fading.' },
+                { title: 'Keep Away From Rough Surfaces', desc: 'Keep away from rough surfaces that may pill the fabric.' }
+            ],
+            ar: [
+                { title: 'التخزين مطوياً', desc: 'يخزن مطوياً وليس على علاقة للحفاظ على الشكل.' },
+                { title: 'تجنب أشعة الشمس', desc: 'تجنب التعرض الطويل لأشعة الشمس المباشرة لمنع بهتان اللون.' },
+                { title: 'الابتعاد عن الأسطح الخشنة', desc: 'يحفظ بعيداً عن الأسطح الخشنة التي قد تسبب تشقق القماش.' }
+            ]
+        }, currentLang);
+    }
 }
 function closeGarmentModal(e) {
     if(!e || e.target.classList.contains('overlay') || e.target.classList.contains('modal-x')) {
@@ -2585,7 +2731,10 @@ function lockPrelaunchStore() {
 let teaserCountdownInterval = null;
 function initTeaserCountdown() {
     const dateStr = cfg('drop2TeaserDate', '2026-07-15T20:00:00');
-    const targetDate = window.parseLaunchDate ? window.parseLaunchDate(dateStr) : new Date(dateStr).getTime();
+    let targetDate = window.parseLaunchDate ? window.parseLaunchDate(dateStr) : new Date(dateStr).getTime();
+    if (!targetDate || isNaN(targetDate) || targetDate <= Date.now()) {
+        targetDate = Date.now() + 90 * 24 * 60 * 60 * 1000;
+    }
 
     function updateTeaserCountdown() {
         const now = new Date().getTime();
@@ -2631,7 +2780,10 @@ function initTeaserCountdown() {
 let prelaunchCountdownInterval = null;
 function initPrelaunchCountdown() {
     const dateStr = cfg('prelaunchDate', '2026-07-01T20:00:00');
-    const targetDate = window.parseLaunchDate ? window.parseLaunchDate(dateStr) : new Date(dateStr).getTime();
+    let targetDate = window.parseLaunchDate ? window.parseLaunchDate(dateStr) : new Date(dateStr).getTime();
+    if (!targetDate || isNaN(targetDate) || targetDate <= Date.now()) {
+        targetDate = Date.now() + 90 * 24 * 60 * 60 * 1000;
+    }
     
     function updateCountdown() {
         const now = new Date().getTime();
@@ -3283,13 +3435,7 @@ function toggleChatWidget(event) {
 }
 
 function triggerFooterContact() {
-    const chatWin = document.getElementById('chatWindow');
-    if (chatWin) {
-        chatWin.style.display = 'block';
-        // Scroll to bottom of page so chat widget is visible
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        showToast(currentLang === 'ar' ? 'تواصل معانا عبر واتساب أو انستجرام 👇' : 'Chat with us via WhatsApp or Instagram 👇', 'info');
-    }
+    window.open('https://wa.me/201229067066', '_blank');
 }
 
 // Close chat window on click outside
@@ -3398,3 +3544,14 @@ window.applyConfigToDOM = applyConfigToDOM;
 window.loadSiteConfig = loadSiteConfig;
 window.initApp = initApp;
 window.parseLaunchDate = window.parseLaunchDate;
+window.openAuthModal = openAuthModal;
+window.closeAuthModal = closeAuthModal;
+window.switchAuthTab = switchAuthTab;
+window.submitAuthLogin = submitAuthLogin;
+window.submitAuthSignup = submitAuthSignup;
+window.submitAuthForgot = submitAuthForgot;
+window.submitAuthLogout = submitAuthLogout;
+window.togglePrelaunchPasswordInput = togglePrelaunchPasswordInput;
+window.handlePrelaunchNotify = handlePrelaunchNotify;
+window.handlePrelaunchBypass = handlePrelaunchBypass;
+window.showToast = showToast;

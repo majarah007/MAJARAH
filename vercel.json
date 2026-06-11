@@ -5,6 +5,10 @@
   "routes": [
     { "src": "/fien", "status": 308, "headers": { "Location": "/fien/" } },
     { "src": "/fien/(.*)", "dest": "/fien/$1" },
-    { "src": "/((?!api).*)", "dest": "/$1" }
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/products/(.*)", "dest": "/index.html" },
+    { "src": "/cart", "dest": "/index.html" },
+    { "src": "/checkout", "dest": "/index.html" },
+    { "src": "/(.*)", "dest": "/$1" }
   ]
 }
