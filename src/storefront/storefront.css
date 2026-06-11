@@ -2094,14 +2094,102 @@
         }
 /* --- MOBILE RESPONSIVE ENHANCEMENTS --- */
 @media (max-width: 768px) {
+    /* 1. Promo bar full-width */
+    .promo-scroller-wrap {
+        width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 1001;
+    }
+    .promo-scroller-track {
+        animation-name: scrollPromoMobile;
+    }
+    @keyframes scrollPromoMobile {
+        from { transform: translateX(100%); }
+        to { transform: translateX(-100%); }
+    }
+
+    /* 2. Hero section */
+    .hero, #hero, section.hero {
+        min-height: 100svh;
+        padding: 60px 20px 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: auto !important;
+    }
+
+    /* 3 & 4. Teaser section fallback */
+    .teaser-product-info h3, .teaser-product-name {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    }
+    .teaser-img, .teaser-img-overlay {
+        color: transparent; /* hides broken alt icon */
+        background-color: #111;
+        min-height: 250px;
+        position: relative;
+    }
+
+    /* 6. Footer flex column layout */
+    .footer-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+        align-items: center;
+        text-align: center;
+    }
+    .footer-col {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .footer-col ul {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .footer-col ul li, .footer-col ul li a, .footer-col ul li button {
+        width: 100%;
+        text-align: center;
+        display: block;
+    }
+
+    /* 7. Global overflow-x hidden */
+    html, body {
+        overflow-x: hidden;
+        width: 100%;
+        position: relative;
+    }
+
+    /* 8. Navbar sticky */
+    header, .nav-container {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        flex-wrap: wrap;
+        padding: 15px 20px !important;
+        justify-content: space-between;
+        width: 100%;
+    }
+    nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+    nav ul li {
+        white-space: nowrap;
+    }
+
+    /* Existing */
     .pp-details {
         padding: 25px 20px !important;
     }
     .pp-title {
         font-size: clamp(24px, 6vw, 28px) !important;
-    }
-    .nav-container {
-        padding: 15px 20px !important;
     }
     .grid {
         grid-template-columns: 1fr !important;
@@ -2109,3 +2197,6 @@
         padding: 0 15px !important;
     }
 }
+
+/* Hide widgets on specific pages */
+body.on-product .support-chat-widget, body.on-product #prelaunchBypassBadge, body.on-cart .support-chat-widget, body.on-cart #prelaunchBypassBadge, body.on-checkout .support-chat-widget, body.on-checkout #prelaunchBypassBadge { display: none !important; }

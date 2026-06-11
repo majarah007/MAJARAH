@@ -29,6 +29,17 @@ function findProductBySlug(slug) {
 
 function handleNavigation(path, push = true) {
     console.log(`[Storefront] Navigating to: ${path}`);
+    
+    // Toggle floating widgets
+    const isHome = path === '/' || path === '' || path === '/#collection' || path === '/index.html';
+    const chatWidget = document.querySelector('.support-chat-widget');
+    const lockIcon = document.querySelector('#prelaunchBypassBadge');
+    if (chatWidget) chatWidget.style.display = isHome ? 'block' : 'none';
+    if (lockIcon) lockIcon.style.display = isHome ? 'flex' : 'none';
+    
+    // Manage body classes for CSS hard fallbacks
+    document.body.classList.remove('on-product', 'on-cart', 'on-checkout');
+
     if (path === '/' || path === '' || path === '/index.html') {
         closeCheckout(false);
         closeProduct(false);
@@ -36,6 +47,7 @@ function handleNavigation(path, push = true) {
             history.pushState({ page: 'home' }, '', '/');
         }
     } else if (path.startsWith('/products/')) {
+        document.body.classList.add('on-product');
         const slug = path.split('/products/')[1];
         const p = findProductBySlug(slug);
         if (p) {
@@ -46,6 +58,7 @@ function handleNavigation(path, push = true) {
             handleNavigation('/', push);
         }
     } else if (path === '/cart' || path === '/checkout') {
+        document.body.classList.add(path === '/cart' ? 'on-cart' : 'on-checkout');
         if (activeProductId && activeSelectedSize) {
             closeProduct(false);
             openCheckout(push);
