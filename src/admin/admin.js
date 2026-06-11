@@ -1,4 +1,4 @@
-﻿window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
+window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
 // Normalize SB_URL: remove trailing slashes and /rest/v1 if present to avoid "Double REST" URL errors
 if (window.SB_URL) {
     window.SB_URL = window.SB_URL.replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
@@ -1980,6 +1980,38 @@ async function saveOrder() {
   const res = await sbFetch('orders', 'POST', newOrder);
   if (res) {
     showToast("Order added successfully!");
+    
+    // --- SEND DISCORD WEBHOOK ---
+    const WEBHOOK_URL = 'https://discord.com/api/webhooks/1514721625206165578/9z2Lh7Ufp6d_AU3TDJbFfLsbXtPw-cRb9FKKhKurfz9z31_eKGbFRDorRtQGBkoZYmKW';
+    const embed = {
+      username: 'Majarah Orders',
+      avatar_url: 'https://majarah.vercel.app/logo.png',
+      embeds: [{
+        title: 'NEW ORDER (MANUAL) - MAJARAH',
+        color: 0xffffff,
+        fields: [
+          { name: 'Name', value: first_name + ' ' + last_name, inline: true },
+          { name: 'Phone', value: phone, inline: true },
+          { name: 'Governorate', value: city, inline: true },
+          { name: 'Address', value: address, inline: true },
+          { name: 'Product', value: product_name, inline: true },
+          { name: 'Size', value: size, inline: true },
+          { name: 'Total', value: `EGP ${subtotal + shipping_cost}`, inline: true },
+          { name: 'Status', value: status || 'Pending', inline: true },
+          { name: 'Time', value: new Date().toLocaleString('en-EG', { timeZone: 'Africa/Cairo' }), inline: false },
+        ],
+        footer: { text: 'Majarah Admin Panel - Cairo, Egypt' }
+      }]
+    };
+    try {
+      await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(embed)
+      });
+    } catch(e) { console.error(e); }
+    // ----------------------------
+    
     closeModal('orderModal');
     syncDashboardData();
   } else {
