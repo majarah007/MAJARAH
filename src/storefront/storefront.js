@@ -1,4 +1,4 @@
-// --- GLOBAL DATABASE FETCH INTERCEPTOR (Trigger Rebuild) ---
+﻿// --- GLOBAL DATABASE FETCH INTERCEPTOR (Trigger Rebuild) ---
 window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
 // Normalize SB_URL: remove trailing slashes and /rest/v1 if present to avoid "Double REST" URL errors
 if (window.SB_URL) {
@@ -778,7 +778,7 @@ function populateCityOptions() {
     const selectedVal = citySelect.value;
     
     if (!currentLoadedShippingRates || currentLoadedShippingRates.length === 0) {
-        currentLoadedShippingRates = JSON.parse(localStorage.getItem('storeZones')) || window.bostaDefaultTiers;
+        currentLoadedShippingRates = window.bostaDefaultTiers;
     }
     
     citySelect.innerHTML = `<option value="" disabled selected>${isAr ? 'اختار المحافظة' : 'Select Governorate / City'}</option>` + 
@@ -1788,7 +1788,7 @@ async function submitShopifyCheckout() {
 
     const combinedAddress = `${addressInputMain} | ${buildingInput} | ${floorInput || '-'} | ${apartmentInput || '-'} | ${landmarkInput || '-'}`;
 
-    currentLoadedShippingRates = JSON.parse(localStorage.getItem('storeZones')) || bostaDefaultTiers;
+    currentLoadedShippingRates = window.bostaDefaultTiers;
     
     let p = fetchedProducts.find(prod => String(prod.id) === String(activeProductId));
     if (!p) {

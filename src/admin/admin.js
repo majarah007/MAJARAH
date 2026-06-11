@@ -1,4 +1,4 @@
-window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
+﻿window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
 // Normalize SB_URL: remove trailing slashes and /rest/v1 if present to avoid "Double REST" URL errors
 if (window.SB_URL) {
     window.SB_URL = window.SB_URL.replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
@@ -1882,7 +1882,7 @@ async function saveInventory() {
 }
 async function saveShipping() {
   const zoneInputs = document.querySelectorAll('.zone-price-input');
-  const zones = JSON.parse(localStorage.getItem('storeZones')) || [];
+  const zones = [{ name: 'Cairo', price: 93 }, { name: 'Giza', price: 93 }, { name: 'Alexandria', price: 101 }, { name: 'Qalyubia', price: 104 }, { name: 'Sharqia', price: 104 }, { name: 'Dakahlia', price: 104 }, { name: 'Gharbia', price: 104 }, { name: 'Monufia', price: 104 }, { name: 'Beheira', price: 104 }, { name: 'Damietta', price: 104 }, { name: 'Port Said', price: 104 }, { name: 'Ismailia', price: 104 }, { name: 'Suez', price: 104 }, { name: 'Kafr El Sheikh', price: 104 }, { name: 'Fayoum', price: 112 }, { name: 'Beni Suef', price: 112 }, { name: 'Minya', price: 112 }, { name: 'Asyut', price: 112 }, { name: 'Sohag', price: 122 }, { name: 'Qena', price: 122 }, { name: 'Luxor', price: 122 }, { name: 'Aswan', price: 122 }, { name: 'Red Sea', price: 136 }, { name: 'Matrouh', price: 136 }, { name: 'New Valley', price: 136 }, { name: 'North Sinai', price: 136 }, { name: 'South Sinai', price: 136 }];
   const shippingRates = {};
   
   zoneInputs.forEach((inp, i) => {
@@ -1905,7 +1905,7 @@ async function saveShippingRules() {
 }
 
 function addZone() {
-  const zones = JSON.parse(localStorage.getItem('storeZones')) || [];
+  const zones = [{ name: 'Cairo', price: 93 }, { name: 'Giza', price: 93 }, { name: 'Alexandria', price: 101 }, { name: 'Qalyubia', price: 104 }, { name: 'Sharqia', price: 104 }, { name: 'Dakahlia', price: 104 }, { name: 'Gharbia', price: 104 }, { name: 'Monufia', price: 104 }, { name: 'Beheira', price: 104 }, { name: 'Damietta', price: 104 }, { name: 'Port Said', price: 104 }, { name: 'Ismailia', price: 104 }, { name: 'Suez', price: 104 }, { name: 'Kafr El Sheikh', price: 104 }, { name: 'Fayoum', price: 112 }, { name: 'Beni Suef', price: 112 }, { name: 'Minya', price: 112 }, { name: 'Asyut', price: 112 }, { name: 'Sohag', price: 122 }, { name: 'Qena', price: 122 }, { name: 'Luxor', price: 122 }, { name: 'Aswan', price: 122 }, { name: 'Red Sea', price: 136 }, { name: 'Matrouh', price: 136 }, { name: 'New Valley', price: 136 }, { name: 'North Sinai', price: 136 }, { name: 'South Sinai', price: 136 }];
   zones.push({ name: 'New Zone', price: 0 });
   localStorage.setItem('storeZones', JSON.stringify(zones));
   renderShippingZones();
@@ -1914,7 +1914,7 @@ function addZone() {
 function renderShippingZones() {
   const container = document.getElementById('zonesContainer');
   if (!container) return;
-  const zones = JSON.parse(localStorage.getItem('storeZones')) || [];
+  const zones = [{ name: 'Cairo', price: 93 }, { name: 'Giza', price: 93 }, { name: 'Alexandria', price: 101 }, { name: 'Qalyubia', price: 104 }, { name: 'Sharqia', price: 104 }, { name: 'Dakahlia', price: 104 }, { name: 'Gharbia', price: 104 }, { name: 'Monufia', price: 104 }, { name: 'Beheira', price: 104 }, { name: 'Damietta', price: 104 }, { name: 'Port Said', price: 104 }, { name: 'Ismailia', price: 104 }, { name: 'Suez', price: 104 }, { name: 'Kafr El Sheikh', price: 104 }, { name: 'Fayoum', price: 112 }, { name: 'Beni Suef', price: 112 }, { name: 'Minya', price: 112 }, { name: 'Asyut', price: 112 }, { name: 'Sohag', price: 122 }, { name: 'Qena', price: 122 }, { name: 'Luxor', price: 122 }, { name: 'Aswan', price: 122 }, { name: 'Red Sea', price: 136 }, { name: 'Matrouh', price: 136 }, { name: 'New Valley', price: 136 }, { name: 'North Sinai', price: 136 }, { name: 'South Sinai', price: 136 }];
   container.innerHTML = zones.map((z, i) => `
     <div class="zone-row">
       <span class="zone-name">${z.name}</span>
@@ -2241,7 +2241,7 @@ function buildConfigFromInputs() {
   const teaserImage2 = getVal('tweakTeaserImage2', 'whiteinfront.jpg');
 
   // Shipping rates
-  const zones = JSON.parse(localStorage.getItem('storeZones')) || [];
+  const zones = [{ name: 'Cairo', price: 93 }, { name: 'Giza', price: 93 }, { name: 'Alexandria', price: 101 }, { name: 'Qalyubia', price: 104 }, { name: 'Sharqia', price: 104 }, { name: 'Dakahlia', price: 104 }, { name: 'Gharbia', price: 104 }, { name: 'Monufia', price: 104 }, { name: 'Beheira', price: 104 }, { name: 'Damietta', price: 104 }, { name: 'Port Said', price: 104 }, { name: 'Ismailia', price: 104 }, { name: 'Suez', price: 104 }, { name: 'Kafr El Sheikh', price: 104 }, { name: 'Fayoum', price: 112 }, { name: 'Beni Suef', price: 112 }, { name: 'Minya', price: 112 }, { name: 'Asyut', price: 112 }, { name: 'Sohag', price: 122 }, { name: 'Qena', price: 122 }, { name: 'Luxor', price: 122 }, { name: 'Aswan', price: 122 }, { name: 'Red Sea', price: 136 }, { name: 'Matrouh', price: 136 }, { name: 'New Valley', price: 136 }, { name: 'North Sinai', price: 136 }, { name: 'South Sinai', price: 136 }];
   const shippingRates = {};
   zones.forEach(z => {
     shippingRates[z.name] = z.price;
