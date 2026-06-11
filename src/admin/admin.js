@@ -1,4 +1,4 @@
-window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
+﻿window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
 // Normalize SB_URL: remove trailing slashes and /rest/v1 if present to avoid "Double REST" URL errors
 if (window.SB_URL) {
     window.SB_URL = window.SB_URL.replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
@@ -59,7 +59,7 @@ const CONFIG_KEYS = [
     'drop2Product1Image', 'drop2Product2Name', 'drop2Product2Image',
     'showSignIn', 'instagramVisible', 'tiktokVisible', 'showSizeCalc',
     'showStars', 'showCoupons', 'coupons', 'paymentCOD', 'paymentApplePay', 'paymentCard',
-    'shippingRates', 'translations'
+    'shippingRates', 'translations', 'waNumber'
 ];
 
 function loadLocalAdminConfig() {
@@ -139,6 +139,7 @@ function populateTweaksFromConfig() {
     
     // Prelaunch
     setVal('tweakShowPrelaunch', String(cfg('showPrelaunch', false)));
+    setVal('waNumber', cfg('waNumber', '201229067066'));
     setVal('tweakPrelaunchDate', cfg('prelaunchDate', '2026-07-01T20:00:00'));
     setVal('tweakPrelaunchPassword', cfg('bypassPassword', 'majarah2026'));
     

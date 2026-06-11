@@ -1,4 +1,4 @@
-﻿// --- GLOBAL DATABASE FETCH INTERCEPTOR (Trigger Rebuild) ---
+// --- GLOBAL DATABASE FETCH INTERCEPTOR (Trigger Rebuild) ---
 window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
 // Normalize SB_URL: remove trailing slashes and /rest/v1 if present to avoid "Double REST" URL errors
 if (window.SB_URL) {
@@ -116,7 +116,7 @@ function throttle(func, limit) {
     }
 }
 
-// â”€â”€ DOM ELEMENT CACHE â”€â”€
+// ── DOM ELEMENT CACHE ──
 window.DOM = {
     grid: null,
     promoText: null,
@@ -139,7 +139,7 @@ window.initDOMCache = function() {
     window.DOM.html = document.documentElement;
 }
 
-// â”€â”€ GLOBAL CONFIGURATION â€” loaded from Supabase site_config â”€â”€
+// ── GLOBAL CONFIGURATION — loaded from Supabase site_config ──
 window.SITE_CONFIG = {};
 
 // CONFIG KEYS for sync
@@ -284,15 +284,15 @@ let currentLoadedShippingRates = [];
 let fetchedProducts = [];
 let fetchedInventory = [];
 
-// â”€â”€ PRODUCT TRANSLATIONS â”€â”€
+// ── PRODUCT TRANSLATIONS ──
 const PRODUCT_TRANSLATIONS = {
     ar: {
-        'Onyx Graphic Tee': 'ØªÙŠØ´Ø±Øª Ø£ÙˆÙ†ÙŠÙƒØ³ Ø¬Ø±Ø§ÙÙŠÙƒ',
-        'Alabaster Graphic Tee': 'ØªÙŠØ´Ø±Øª Ø£Ù„Ø¨Ø§Ø³ØªØ± Ø¬Ø±Ø§ÙÙŠÙƒ',
-        'Onyx Black': 'Ø£Ø³ÙˆØ¯ Ø£ÙˆÙ†ÙŠÙƒØ³',
-        'Alabaster White': 'Ø£Ø¨ÙŠØ¶ Ø£Ù„Ø¨Ø§Ø³ØªØ±',
-        'Heavyweight Cotton': 'Ù‚Ø·Ù† Ø«Ù‚ÙŠÙ„ Ù…Ù…ØªØ§Ø²',
-        'Premium Oversized': 'Ø£ÙˆÙØ±Ø³Ø§ÙŠØ² Ø¨Ø±ÙŠÙ…ÙŠÙˆÙ…'
+        'Onyx Graphic Tee': 'تيشرت أونيكس جرافيك',
+        'Alabaster Graphic Tee': 'تيشرت ألباستر جرافيك',
+        'Onyx Black': 'أسود أونيكس',
+        'Alabaster White': 'أبيض ألباستر',
+        'Heavyweight Cotton': 'قطن ثقيل ممتاز',
+        'Premium Oversized': 'أوفرسايز بريميوم'
     }
 };
 
@@ -347,7 +347,7 @@ async function loadProducts() {
     if (products.length === 0) {
         console.warn("[Storefront] No products found in database or local state.");
         grid.innerHTML = `<div style="grid-column: 1/-1; padding: 100px 20px; text-align: center; color: #444; text-transform: uppercase; letter-spacing: 2px; font-size: 11px;">
-            ${currentLang === 'ar' ? 'Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ù…Ù†ØªØ¬Ø§Øª Ø­Ø§Ù„ÙŠØ§Ù‹. ØªØ±Ù‚Ø¨ÙˆØ§ Ø§Ù„Ø¥Ø·Ù„Ø§Ù‚!' : 'No products found. Stay tuned for the launch!'}
+            ${currentLang === 'ar' ? 'لا يوجد منتجات حالياً. ترقبوا الإطلاق!' : 'No products found. Stay tuned for the launch!'}
         </div>`;
         return;
     }
@@ -378,8 +378,8 @@ window.renderProductsGrid = function(products, inventory) {
         let overlayHTML = '';
         
         if (isSoldOut) {
-            badgeHTML = `<div class="badge" style="background: #ff4444; color: #fff;">${isAr ? 'Ù†ÙØ°Øª Ø§Ù„ÙƒÙ…ÙŠØ©' : 'SOLD OUT'}</div>`;
-            overlayHTML = `<div class="sold-out-overlay">${isAr ? 'Ù†ÙØ°Øª Ø§Ù„ÙƒÙ…ÙŠØ©' : 'SOLD OUT'}</div>`;
+            badgeHTML = `<div class="badge" style="background: #ff4444; color: #fff;">${isAr ? 'نفذت الكمية' : 'SOLD OUT'}</div>`;
+            overlayHTML = `<div class="sold-out-overlay">${isAr ? 'نفذت الكمية' : 'SOLD OUT'}</div>`;
         }
 
         let nameTranslated = p.name || '';
@@ -393,8 +393,8 @@ window.renderProductsGrid = function(products, inventory) {
         }
 
         const tapHintText = isSoldOut 
-            ? (isAr ? 'ØºÙŠØ± Ù…ØªÙˆÙØ±' : 'Out of Stock') 
-            : (isAr ? 'â† Ø§Ø¶ØºØ· Ù„Ù„Ø§Ø³ØªÙƒØ´Ø§Ù ÙˆØ§Ù„Ø·Ù„Ø¨' : 'â†’ Tap to explore & order');
+            ? (isAr ? 'غير متوفر' : 'Out of Stock') 
+            : (isAr ? '← اضغط للاستكشاف والطلب' : '→ Tap to explore & order');
 
         return `
             <article class="product-card scroll-reveal" onclick="openProduct('${p.id}')" style="transition-delay: ${idx * 0.15}s;">
@@ -407,7 +407,7 @@ window.renderProductsGrid = function(products, inventory) {
                 <div class="product-meta">
                     <div class="details">
                         <h3>${nameTranslated}</h3>
-                        <p>${colorTranslated} Â· ${fabricTranslated}</p>
+                        <p>${colorTranslated} · ${fabricTranslated}</p>
                     </div>
                     <div class="price">EGP ${p.price}</div>
                 </div>
@@ -430,7 +430,7 @@ const TRANSLATIONS = {
     explore: "Explore Drop 01",
     universe_within: "The Universe Within",
     universe_tagline: "Drop 01 &mdash; 100% heavyweight cotton. Screen-printed in Cairo. Ships across all of Egypt.",
-    tap_explore: "Tap any piece to explore Â· Hover to see the back",
+    tap_explore: "Tap any piece to explore · Hover to see the back",
     company: "Company",
     get_help: "Get Help",
     sizing: "Sizing",
@@ -444,10 +444,10 @@ const TRANSLATIONS = {
     size_calculator: "Size Calculator",
     washing: "Washing Instructions",
     garment_care: "Garment Care",
-    back: "â† Back",
+    back: "← Back",
     select_size: "Select Size",
     size_guide_btn: "Size Guide",
-    size_calculator_btn: "Size Calculator â†’",
+    size_calculator_btn: "Size Calculator →",
     buy_now: "Buy It Now",
     cancel: "Cancel",
     contact: "Contact",
@@ -460,13 +460,13 @@ const TRANSLATIONS = {
     shipping: "Shipping",
     total: "Total",
     how_title: "How to Order",
-    how_sub: "3 steps Â· less than a minute",
+    how_sub: "3 steps · less than a minute",
     how_step1_title: "Pick Your Piece",
     how_step1_desc: "Tap any tee to see the full print, size guide, and details. Select your size when you're ready.",
     how_step2_title: "Fill in Your Address",
     how_step2_desc: "Enter your name, phone number, and delivery address. We ship to all 27 Egyptian governorates.",
     how_step3_title: "We Ship to You",
-    how_step3_desc: "We call to confirm, then ship within 1â€“4 business days. Pay cash at your door â€” no upfront payment needed.",
+    how_step3_desc: "We call to confirm, then ship within 1–4 business days. Pay cash at your door — no upfront payment needed.",
     measurements_cm: "Measurements in centimeters",
     tbl_size: "Size",
     tbl_chest: "Chest (Width)",
@@ -484,8 +484,8 @@ const TRANSLATIONS = {
     order_id_lbl: "Order ID / Number",
     phone_lbl: "Phone Number",
     find_order: "Find Order",
-    back_to_search: "â† Back to Search",
-    delivery_banner: "HOME DELIVERY Â· ALL EGYPT GOVERNORATES",
+    back_to_search: "← Back to Search",
+    delivery_banner: "HOME DELIVERY · ALL EGYPT GOVERNORATES",
     height: "Height",
     weight: "Weight",
     fit_pref: "Fit Preference",
@@ -511,8 +511,8 @@ const TRANSLATIONS = {
     apply_btn: "Apply",
     policy_title: "Exchange & Return Policy",
     policy_item1: "<strong>Confirmation Call:</strong> After your order is placed, our team reaches out within 48 hours across different time windows. If we can't get through, the order is automatically voided.",
-    policy_item2: "<strong>Fulfillment Window:</strong> Your drop ships 1â€“4 business days after your order is confirmed over the phone.",
-    policy_item3: "<strong>Package Integrity:</strong> Per our courier partner's protocol, packages may not be opened at the door â€” this keeps your piece protected in transit.",
+    policy_item2: "<strong>Fulfillment Window:</strong> Your drop ships 1–4 business days after your order is confirmed over the phone.",
+    policy_item3: "<strong>Package Integrity:</strong> Per our courier partner's protocol, packages may not be opened at the door — this keeps your piece protected in transit.",
     policy_item4: "<strong>Rejected Deliveries:</strong> If delivery is refused at the doorstep, return shipping costs are charged to the customer.",
     policy_item5: "<strong>Exchange & Return:</strong> We offer exchanges and returns within 14 calendar days from your confirmed delivery date.",
     track_order: "Track Order",
@@ -543,162 +543,162 @@ const TRANSLATIONS = {
     secs_label: "SECS",
     manifesto_title: "THE UNIVERSE WITHIN",
     manifesto_en: "MAJARAH is a celestial map of the self, founded in the heart of Cairo. We view every individual as a vast system of architecture and void, waiting to be expressed through fabric. We produce heavyweight, high-density garments for those who navigate the urban landscape while carrying a private universe within. From the streets of Egypt to the edge of the unknown, we provide the uniform for exploration.",
-    manifesto_ar: "Ù…Ø¬Ø±Ø© Ù‡ÙŠ Ø®Ø±ÙŠØ·Ø© Ø³Ù…Ø§ÙˆÙŠØ© Ù„Ù„Ø°Ø§ØªØŒ ØªØ£Ø³Ø³Øª ÙÙŠ Ù‚Ù„Ø¨ Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©. Ù†Ø­Ù† Ù†Ø±Ù‰ ÙƒÙ„ ÙØ±Ø¯ ÙƒÙƒÙŠØ§Ù† ÙˆØ§Ø³Ø¹ Ù…Ù† Ø§Ù„ØªØµÙ…ÙŠÙ… ÙˆØ§Ù„ÙØ±Ø§ØºØŒ ÙŠÙ†ØªØ¸Ø± Ø§Ù„ØªØ¹Ø¨ÙŠØ± Ø¹Ù†Ù‡ Ù…Ù† Ø®Ù„Ø§Ù„ Ø§Ù„Ù‚Ù…Ø§Ø´. Ù†ØµÙ†Ø¹ Ù…Ù„Ø§Ø¨Ø³ Ø«Ù‚ÙŠÙ„Ø© Ø§Ù„ÙˆØ²Ù† ÙˆØ¹Ø§Ù„ÙŠØ© Ø§Ù„ÙƒØ«Ø§ÙØ© Ù„Ø£ÙˆÙ„Ø¦Ùƒ Ø§Ù„Ø°ÙŠÙ† ÙŠØ®ÙˆØ¶ÙˆÙ† ØµØ®Ø¨ Ø§Ù„Ù…Ø¯ÙŠÙ†Ø© ÙˆÙ‡Ù… ÙŠØ­Ù…Ù„ÙˆÙ† ÙƒÙˆÙ†Ø§Ù‹ Ø®Ø§ØµØ§Ù‹ Ø¨Ø¯Ø§Ø®Ù„Ù‡Ù…. Ù…Ù† Ø´ÙˆØ§Ø±Ø¹ Ù…ØµØ± Ø¥Ù„Ù‰ Ø­Ø§ÙØ© Ø§Ù„Ù…Ø¬Ù‡ÙˆÙ„ØŒ Ù†Ø­Ù† Ù†ØµÙ†Ø¹ Ø§Ù„Ø²ÙŠ Ø§Ù„Ø±Ø³Ù…ÙŠ Ù„Ù„Ø§Ø³ØªÙƒØ´Ø§Ù."
+    manifesto_ar: "مجرة هي خريطة سماوية للذات، تأسست في قلب القاهرة. نحن نرى كل فرد ككيان واسع من التصميم والفراغ، ينتظر التعبير عنه من خلال القماش. نصنع ملابس ثقيلة الوزن وعالية الكثافة لأولئك الذين يخوضون صخب المدينة وهم يحملون كوناً خاصاً بداخلهم. من شوارع مصر إلى حافة المجهول، نحن نصنع الزي الرسمي للاستكشاف."
   },
   ar: {
-    collection: "Ø§Ù„Ù‚Ø·Ø¹",
-    signin: "Ø¯Ø®ÙˆÙ„",
-    hero_sub: "Ø¯Ø±ÙˆØ¨ 01",
-    explore: "Ø§ÙƒØªØ´Ù Ø¯Ø±ÙˆØ¨ 01",
-    universe_within: "Ø§Ù„ÙƒÙˆÙ† Ø¬ÙˆÙ‘Ø§Ù†Ø§",
-    universe_tagline: "Ø¯Ø±ÙˆØ¨ 01 &mdash; Ù‚Ø·Ù† Ø«Ù‚ÙŠÙ„ 100Ùª. Ø·Ø¨Ø§Ø¹Ø© ÙŠØ¯ÙˆÙŠØ© ÙÙŠ Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©. Ø´Ø­Ù† Ù„ÙƒÙ„ Ù…ØµØ±.",
-    tap_explore: "Ø¯ÙˆØ³ Ø¹Ù„Ù‰ Ø£ÙŠ Ù‚Ø·Ø¹Ø© Ø¹Ø´Ø§Ù† ØªÙƒØªØ´ÙÙ‡Ø§ Â· Ø¹Ø¯ÙŠ Ø¨Ø§Ù„Ù…Ø§ÙˆØ³ Ø¹Ø´Ø§Ù† ØªØ´ÙˆÙ Ø§Ù„Ø¸Ù‡Ø±",
-    company: "Ø§Ù„Ø´Ø±ÙƒØ©",
-    get_help: "Ù…Ø³Ø§Ø¹Ø¯Ø©",
-    sizing: "Ø§Ù„Ù…Ù‚Ø§Ø³Ø§Øª",
-    care_guide: "Ø¯Ù„ÙŠÙ„ Ø§Ù„Ø¹Ù†Ø§ÙŠØ©",
-    about_us: "Ø¹Ù† Ø§Ù„Ø¨Ø±Ø§Ù†Ø¯",
-    contact_us: "ØªÙˆØ§ØµÙ„ Ù…Ø¹Ø§Ù†Ø§",
-    refund_ex: "Ø§Ù„Ø§Ø³ØªØ±Ø¬Ø§Ø¹ ÙˆØ§Ù„Ø§Ø³ØªØ¨Ø¯Ø§Ù„",
-    how_to_order: "Ø§Ø²Ø§ÙŠ ØªØ·Ù„Ø¨",
-    privacy: "Ø³ÙŠØ§Ø³Ø© Ø§Ù„Ø®ØµÙˆÙ„ÙŠØ©",
-    sizing_chart: "Ø¬Ø¯ÙˆÙ„ Ø§Ù„Ù…Ù‚Ø§Ø³Ø§Øª",
-    size_calculator: "Ø­Ø§Ø³Ø¨Ø© Ø§Ù„Ù…Ù‚Ø§Ø³",
-    washing: "ØªØ¹Ù„ÙŠÙ…Ø§Øª Ø§Ù„ØºØ³ÙŠÙ„",
-    garment_care: "Ø§Ù„Ø¹Ù†Ø§ÙŠØ© Ø¨Ø§Ù„Ù‡Ø¯ÙˆÙ…",
-    back: "â† Ø±Ø¬ÙˆØ¹",
-    select_size: "Ø§Ø®ØªØ§Ø± Ù…Ù‚Ø§Ø³Ùƒ",
-    size_guide_btn: "Ø¬Ø¯ÙˆÙ„ Ø§Ù„Ù…Ù‚Ø§Ø³Ø§Øª",
-    size_calculator_btn: "Ø­Ø§Ø³Ø¨Ø© Ø§Ù„Ù…Ù‚Ø§Ø³ â†",
-    buy_now: "Ø§Ø´ØªØ±ÙŠÙ‡ Ø¯Ù„ÙˆÙ‚ØªÙŠ",
-    cancel: "Ø¥Ù„ØºØ§Ø¡",
-    contact: "Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„ØªÙˆØ§ØµÙ„",
-    delivery_address: "Ø¹Ù†ÙˆØ§Ù† Ø§Ù„ØªÙˆØµÙŠÙ„",
-    payment_method: "Ø·Ø±ÙŠÙ‚Ø© Ø§Ù„Ø¯ÙØ¹",
-    cod: "Ø§Ù„Ø¯ÙØ¹ Ø¹Ù†Ø¯ Ø§Ù„Ø§Ø³ØªÙ„Ø§Ù… (COD)",
-    card: "ÙƒØ§Ø±Øª ÙÙŠØ²Ø§ / Ù…Ø§Ø³ØªØ±ÙƒØ§Ø±Ø¯",
-    confirm_order: "Ø£ÙƒØ¯ Ø§Ù„Ø·Ù„Ø¨ Ø¯Ù„ÙˆÙ‚ØªÙŠ",
-    subtotal: "Ø§Ù„Ù…Ø¬Ù…ÙˆØ¹",
-    shipping: "Ø§Ù„Ø´Ø­Ù†",
-    total: "Ø§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„ÙƒÙ„ÙŠ",
-    how_title: "Ø·Ø±ÙŠÙ‚Ø© Ø§Ù„Ø·Ù„Ø¨",
-    how_sub: "Ù£ Ø®Ø·ÙˆØ§Øª Â· ÙÙŠ Ø£Ù‚Ù„ Ù…Ù† Ø¯Ù‚ÙŠÙ‚Ø©",
-    how_title: "Ø·Ø±ÙŠÙ‚Ø© Ø§Ù„Ø·Ù„Ø¨",
-    how_sub: "Ù£ Ø®Ø·ÙˆØ§Øª Â· ÙÙŠ Ø£Ù‚Ù„ Ù…Ù† Ø¯Ù‚ÙŠÙ‚Ø©",
-    how_step1_title: "Ø§Ø®ØªØ§Ø± Ù‚Ø·Ø¹ØªÙƒ",
-    how_step1_desc: "Ø¯ÙˆØ³ Ø¹Ù„Ù‰ Ø£ÙŠ Ù‚Ø·Ø¹Ø© Ø¹Ø´Ø§Ù† ØªØ´ÙˆÙ ØªÙØ§ØµÙŠÙ„Ù‡Ø§ ÙˆØ±Ø³ÙˆÙ…Ø§ØªÙ‡Ø§ ÙˆÙ…Ù‚Ø§Ø³Ø§ØªÙ‡Ø§ Ø¨Ø§Ù„Ø¸Ø¨Ø·.",
-    how_step2_title: "Ø§Ø¯Ø®Ù„ Ø¨ÙŠØ§Ù†Ø§ØªÙƒ",
-    how_step2_desc: "Ø§Ù…Ù„Ø§ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø´Ø­Ù† ÙˆØ§Ù„ØªÙˆØµÙŠÙ„ Ø¨Ø³Ù‡ÙˆÙ„Ø© ÙˆØ£Ù…Ø§Ù† ÙÙŠ ØµÙØ­Ø© Ø§Ù„Ø¯ÙØ¹ ÙˆØ§Ù„Ø·Ù„Ø¨.",
-    how_step3_title: "Ø´Ø­Ù† Ø§Ù„Ø·Ù„Ø¨",
-    how_step3_desc: "Ø¨Ø¹Ø¯ Ù…Ø§ ØªØ£ÙƒØ¯ Ø·Ù„Ø¨Ùƒ ØªÙ„ÙŠÙÙˆÙ†ÙŠØ§Ù‹ØŒ Ø¨Ù†Ø´Ø­Ù†Ù‡ ÙÙŠ 1â€“4 Ø£ÙŠØ§Ù… Ø´ØºÙ„. Ø§Ù„Ø¯ÙØ¹ Ø¹Ù†Ø¯ Ø§Ù„Ø§Ø³ØªÙ„Ø§Ù… Ù†Ù‚Ø¯Ø§Ù‹ Ø¹Ù„Ù‰ Ø§Ù„Ø¨Ø§Ø¨.",
-    measurements_cm: "Ø§Ù„Ù…Ù‚Ø§Ø³Ø§Øª Ø¨Ø§Ù„Ø³Ù†ØªÙŠÙ…ØªØ±",
-    tbl_size: "Ø§Ù„Ù…Ù‚Ø§Ø³",
-    tbl_chest: "Ø§Ù„ØµØ¯Ø± (Ø¹Ø±Ø¶)",
-    tbl_length: "Ø§Ù„Ø·ÙˆÙ„ (Ø§Ù„Ù‚Ø·Ø¹Ø©)",
-    tbl_weight: "Ø§Ù„ÙˆØ²Ù† (Ø§Ù„Ø´Ø®Øµ)",
-    tbl_height: "Ø§Ù„Ø·ÙˆÙ„ (Ø§Ù„Ø´Ø®Øµ)",
-    size_note_body: "<strong>Ø§Ù„Ø§Ø³ØªØ§ÙŠÙ„ Ø£ÙˆÙØ±Ø³Ø§ÙŠØ² ÙˆØ§Ø³Ø¹.</strong> Ø§Ù„ØªÙ‚ØµÙŠØµØ© ÙˆØ§Ø³Ø¹Ø© ÙˆÙ…Ø±ÙŠØ­Ø©. Ù„Ùˆ Ø­Ø§Ø¨Ø¨ Ø§Ù„Ù„Ø¨Ø³ ÙŠÙƒÙˆÙ† Ù…Ø¸Ø¨ÙˆØ· Ø£Ùˆ Ø£Ù‚Ø±Ø¨ Ù„Ù„Ù…Ù‚Ø§Ø³ Ø§Ù„Ø¹Ø§Ø¯ÙŠØŒ ØµØºØ± Ù…Ù‚Ø§Ø³.",
-    brand_title: "Ø¹Ù† Ø§Ù„Ø¨Ø±Ø§Ù†Ø¯",
-    brand_sub: "ÙƒÙˆÙ† MAJARAH",
-    brand_slogan: "Ø¨ÙŠÙ† Ø§Ù„Ù†Ø¬ÙˆÙ…ØŒ<br>Ù…ÙÙŠØ´ Ø­Ø§Ø¬Ø© Ø¨ØªØ¶ÙŠØ¹.",
-    brand_body: "Ù…Ø¬Ø±Ø© Ù‡ÙŠ Ø®Ø±ÙŠØ·Ø© Ø³Ù…Ø§ÙˆÙŠØ© Ù„Ù„Ø°Ø§ØªØŒ ØªØ£Ø³Ø³Øª ÙÙŠ Ù‚Ù„Ø¨ Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©. Ù†Ø­Ù† Ù†Ø±Ù‰ ÙƒÙ„ ÙØ±Ø¯ ÙƒÙƒÙŠØ§Ù† ÙˆØ§Ø³Ø¹ Ù…Ù† Ø§Ù„ØªØµÙ…ÙŠÙ… ÙˆØ§Ù„ÙØ±Ø§ØºØŒ ÙŠÙ†ØªØ¸Ø± Ø§Ù„ØªØ¹Ø¨ÙŠØ± Ø¹Ù†Ù‡ Ù…Ù† Ø®Ù„Ø§Ù„ Ø§Ù„Ù‚Ù…Ø§Ø´. Ù†ØµÙ†Ø¹ Ù…Ù„Ø§Ø¨Ø³ Ø«Ù‚ÙŠÙ„Ø© Ø§Ù„ÙˆØ²Ù† ÙˆØ¹Ø§Ù„ÙŠØ© Ø§Ù„ÙƒØ«Ø§ÙØ© Ù„Ø£ÙˆÙ„Ø¦Ùƒ Ø§Ù„Ø°ÙŠÙ† ÙŠØ®ÙˆØ¶ÙˆÙ† ØµØ®Ø¨ Ø§Ù„Ù…Ø¯ÙŠÙ†Ø© ÙˆÙ‡Ù… ÙŠØ­Ù…Ù„ÙˆÙ† ÙƒÙˆÙ†Ø§Ù‹ Ø®Ø§ØµØ§Ù‹ Ø¨Ø¯Ø§Ø®Ù„Ù‡Ù…. Ù…Ù† Ø´ÙˆØ§Ø±Ø¹ Ù…ØµØ± Ø¥Ù„Ù‰ Ø­Ø§ÙØ© Ø§Ù„Ù…Ø¬Ù‡ÙˆÙ„ØŒ Ù†Ø­Ù† Ù†ØµÙ†Ø¹ Ø§Ù„Ø²ÙŠ Ø§Ù„Ø±Ø³Ù…ÙŠ Ù„Ù„Ø§Ø³ØªÙƒØ´Ø§Ù.",
-    track_refund_title: "ØªØªØ¨Ø¹ ÙˆØ§Ø±Ø¬Ø§Ø¹ Ø§Ù„Ø·Ù„Ø¨Ø§Øª",
-    track_refund_sub: "Ø§ÙƒØªØ¨ Ø¨ÙŠØ§Ù†Ø§Øª Ø·Ù„Ø¨Ùƒ Ø¹Ø´Ø§Ù† ØªØªØ§Ø¨Ø¹Ù‡ Ø£Ùˆ ØªØ·Ù„Ø¨ Ø§Ø³ØªØ±Ø¬Ø§Ø¹",
-    track_refund_instructions: "Ø£Ø¯Ø®Ù„ Ø±Ù‚Ù… Ø§Ù„Ø·Ù„Ø¨ Ø£Ùˆ Ø±Ù‚Ù… Ø§Ù„Ù‡Ø§ØªÙ Ù„ØªØªØ¨Ø¹ Ø·Ù„Ø¨Ùƒ Ø£Ùˆ Ø·Ù„Ø¨ Ø§Ù„Ø§Ø³ØªØ±Ø¬Ø§Ø¹.",
-    order_id_lbl: "Ø±Ù‚Ù… Ø§Ù„Ø·Ù„Ø¨",
-    phone_lbl: "Ø±Ù‚Ù… Ø§Ù„Ù…ÙˆØ¨Ø§ÙŠÙ„",
-    find_order: "Ø¯ÙˆÙ‘Ø± Ø¹Ù„Ù‰ Ø§Ù„Ø·Ù„Ø¨",
-    back_to_search: "â† Ø±Ø¬ÙˆØ¹ Ù„Ù„Ø¨Ø­Ø«",
-    delivery_banner: "ØªÙˆØµÙŠÙ„ Ù„Ù„Ù…Ù†Ø²Ù„ Â· Ù„ÙƒÙ„ Ù…Ø­Ø§ÙØ¸Ø§Øª Ù…ØµØ±",
-    height: "Ø§Ù„Ø·ÙˆÙ„",
-    weight: "Ø§Ù„ÙˆØ²Ù†",
-    fit_pref: "Ø³ØªØ§ÙŠÙ„ Ø§Ù„Ù„Ø¨Ø³",
-    fit_oversized: "Ø£ÙˆÙØ±Ø³Ø§ÙŠØ² Ø³ØªØ±ÙŠØª ÙˆÙŠØ± (Ù…ÙˆØµÙ‰ Ø¨Ù‡)",
-    fit_regular: "Ø¹Ø§Ø¯ÙŠ (Ù…Ø¸Ø¨ÙˆØ·)",
-    fit_snug: "Ø¯Ø§ÙŠÙ‚ Ø´ÙˆÙŠØ©",
-    suggested_size_title: "Ø§Ù„Ù…Ù‚Ø§Ø³ Ø§Ù„Ù…Ù‚ØªØ±Ø­ Ù„ÙŠÙƒ",
-    apply_size_btn: "ØªØ·Ø¨ÙŠÙ‚ ÙˆØ§Ø®ØªÙŠØ§Ø± Ø§Ù„Ù…Ù‚Ø§Ø³",
-    badge_local: "Ù…Ø­Ù„ÙŠ",
-    badge_wallet: "Ù…Ø­ÙØ¸Ø©",
-    phone_placeholder: "Ø±Ù‚Ù… Ø§Ù„Ù…ÙˆØ¨Ø§ÙŠÙ„ (01xxxxxxxxx)",
-    email_placeholder: "Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ (Ù„ØªØ£ÙƒÙŠØ¯ Ø§Ù„Ø·Ù„Ø¨)",
-    first_name: "Ø§Ù„Ø§Ø³Ù… Ø§Ù„Ø£ÙˆÙ„",
-    last_name: "Ø§Ù„Ø§Ø³Ù… Ø§Ù„Ø£Ø®ÙŠØ±",
-    address_placeholder: "Ø§Ù„Ø¹Ù†ÙˆØ§Ù† Ø¨Ø§Ù„ØªÙØµÙŠÙ„ (Ø§Ø³Ù… ÙˆØ±Ù‚Ù… Ø§Ù„Ø´Ø§Ø±Ø¹)",
-    building_placeholder: "Ø§Ø³Ù… Ø£Ùˆ Ø±Ù‚Ù… Ø§Ù„Ø¹Ù…Ø§Ø±Ø©",
-    floor_placeholder: "Ø±Ù‚Ù… Ø§Ù„Ø¯ÙˆØ± (Ø§Ø®ØªÙŠØ§Ø±ÙŠ)",
-    apartment_placeholder: "Ø±Ù‚Ù… Ø§Ù„Ø´Ù‚Ø© (Ø§Ø®ØªÙŠØ§Ø±ÙŠ)",
-    landmark_placeholder: "Ø¹Ù„Ø§Ù…Ø© Ù…Ù…ÙŠØ²Ø© / Ø¨Ø¬ÙˆØ§Ø± (Ø§Ø®ØªÙŠØ§Ø±ÙŠ)",
-    postal_code: "Ø§Ù„Ø±Ù…Ø² Ø§Ù„Ø¨Ø±ÙŠØ¯ÙŠ (Ø§Ø®ØªÙŠØ§Ø±ÙŠ)",
-    coupon_code_lbl: "ÙƒÙˆØ¯ Ø§Ù„Ø®ØµÙ…",
-    coupon_placeholder: "Ø£Ø¯Ø®Ù„ ÙƒÙˆØ¯ Ø§Ù„Ø®ØµÙ…",
-    apply_btn: "ØªØ·Ø¨ÙŠÙ‚",
-    policy_title: "Ø³ÙŠØ§Ø³Ø© Ø§Ù„Ø§Ø³ØªØ¨Ø¯Ø§Ù„ ÙˆØ§Ù„Ø§Ø³ØªØ±Ø¬Ø§Ø¹",
-    policy_item1: "<strong>Ù…ÙƒØ§Ù„Ù…Ø© Ø§Ù„ØªØ£ÙƒÙŠØ¯:</strong> Ø¨Ø¹Ø¯ Ù…Ø§ ØªØªÙ… Ø¹Ù…Ù„ÙŠØ© Ø§Ù„Ø·Ù„Ø¨ØŒ ÙØ±ÙŠÙ‚Ù†Ø§ Ø¨ÙŠØªØµÙ„ Ø¨ÙŠÙƒ Ø®Ù„Ø§Ù„ 48 Ø³Ø§Ø¹Ø© ÙÙŠ Ø£ÙˆÙ‚Ø§Øª Ù…Ø®ØªÙ„ÙØ©. Ù„Ùˆ Ù…Ø¹Ø¯ØªÙŠØ´ Ø±Ø¯ ÙÙŠ Ø§Ù„Ø£ÙˆÙ‚Ø§Øª Ø¯ÙŠØŒ Ø§Ù„Ø£ÙˆØ±Ø¯Ø± Ø¨ÙŠØªÙ„ØºÙ‰ ØªÙ„Ù‚Ø§Ø¦ÙŠØ§Ù‹.",
-    policy_item2: "<strong>Ù…Ø¯Ø© Ø§Ù„ØªÙˆØµÙŠÙ„:</strong> Ø´Ø­Ù†ØªÙƒ Ø¨ØªÙˆØµÙ„ Ø®Ù„Ø§Ù„ 1 Ù„Ù€ 4 Ø£ÙŠØ§Ù… Ø¹Ù…Ù„ Ø¨Ø¹Ø¯ ØªØ£ÙƒÙŠØ¯ Ø§Ù„Ø£ÙˆØ±Ø¯Ø± ØªÙ„ÙŠÙÙˆÙ†ÙŠØ§Ù‹.",
-    policy_item3: "<strong>Ø³Ù„Ø§Ù…Ø© Ø§Ù„Ù…Ù†ØªØ¬:</strong> Ø­Ø³Ø¨ Ø³ÙŠØ§Ø³Ø© Ø´Ø±ÙƒØ© Ø§Ù„Ø´Ø­Ù†ØŒ Ù…Ø´ Ù…Ø³Ù…ÙˆØ­ Ø¨ÙØªØ­ Ø§Ù„Ø·Ø±Ø¯ Ø¹Ù†Ø¯ Ø§Ù„Ø§Ø³ØªÙ„Ø§Ù…ØŒ ÙˆØ¯Ù‡ Ù„Ø¶Ù…Ø§Ù† ÙˆØµÙˆÙ„ Ù‚Ø·Ø¹ØªÙƒ Ø³Ù„ÙŠÙ…Ø©.",
-    policy_item4: "<strong>Ø±ÙØ¶ Ø§Ù„Ø§Ø³ØªÙ„Ø§Ù…:</strong> Ù„Ùˆ Ø±ÙØ¶Øª Ø§Ø³ØªÙ„Ø§Ù… Ø§Ù„Ø´Ø­Ù†Ø© Ù…Ù† Ø§Ù„Ù…Ù†Ø¯ÙˆØ¨ØŒ Ù…ØµØ§Ø±ÙŠÙ Ø§Ù„Ø´Ø­Ù† Ø§Ù„Ø±Ø¬Ø¹Ø© Ø¨ØªØ±Ø¬Ø¹ Ø¹Ù„ÙŠÙƒ.",
-    policy_item5: "<strong>Ø§Ù„Ø§Ø³ØªØ¨Ø¯Ø§Ù„ ÙˆØ§Ù„Ø§Ø³ØªØ±Ø¬Ø§Ø¹:</strong> Ø¨Ù†Ù‚Ø¨Ù„ Ø§Ù„Ø§Ø³ØªØ¨Ø¯Ø§Ù„ Ø£Ùˆ Ø§Ù„Ø§Ø³ØªØ±Ø¬Ø§Ø¹ Ø®Ù„Ø§Ù„ 14 ÙŠÙˆÙ… Ù…Ù† ØªØ§Ø±ÙŠØ® Ø§Ø³ØªÙ„Ø§Ù… Ø§Ù„Ø´Ø­Ù†Ø©.",
-    track_order: "ØªØªØ¨Ø¹ Ø§Ù„Ø·Ù„Ø¨",
-    tracker_modal_sub: "Ø£Ø¯Ø®Ù„ Ø±Ù‚Ù… Ù‡Ø§ØªÙÙƒ Ù„Ù…ØªØ§Ø¨Ø¹Ø© Ø­Ø§Ù„Ø© Ø§Ù„Ø·Ù„Ø¨ ÙˆØ¬Ø¯ÙˆÙ„ Ø§Ù„Ø´Ø­Ù†.",
-    washing_title: "ØªØ¹Ù„ÙŠÙ…Ø§Øª Ø§Ù„ØºØ³ÙŠÙ„",
-    washing_sub: "Ø¯Ù„ÙŠÙ„ Ø§Ù„Ø¹Ù†Ø§ÙŠØ© Ù„Ù„Ø­ÙØ§Ø¸ Ø¹Ù„Ù‰ Ø¹Ù…Ø± Ø®Ø§Ù…Ø© Ù…Ù„Ø§Ø¨Ø³Ùƒ",
-    wash_cold_lbl: "ØºØ³ÙŠÙ„ ÙŠØ¯ÙˆÙŠ Ø¨Ø§Ø±Ø¯",
-    wash_cold_desc: "Ø§ØºØ³Ù„ Ø¨Ù…Ø§Ø¡ Ø¨Ø§Ø±Ø¯ Ù„Ù„Ø­ÙØ§Ø¸ Ø¹Ù„Ù‰ ØªÙ…Ø§Ø³Ùƒ Ø§Ù„Ù‚Ù…Ø§Ø´ ÙˆÙ†Ø¹ÙˆÙ…ØªÙ‡.",
-    inside_out_lbl: "ØºØ³ÙŠÙ„ Ù…Ù‚Ù„ÙˆØ¨",
-    inside_out_desc: "Ø§Ù‚Ù„Ø¨ Ø§Ù„Ù‚Ø·Ø¹Ø© Ù…Ù† Ø§Ù„Ø¯Ø§Ø®Ù„ Ù„Ù„Ø®Ø§Ø±Ø¬ Ù‚Ø¨Ù„ Ø§Ù„ØºØ³ÙŠÙ„ Ù„Ø­Ù…Ø§ÙŠØ© Ø§Ù„Ø·Ø¨Ø§Ø¹Ø©.",
-    no_tumble_lbl: "Ù„Ø§ ØªØ³ØªØ®Ø¯Ù… Ø§Ù„Ù…Ø¬ÙÙ",
-    no_tumble_desc: "Ø§ØªØ±ÙƒÙ‡Ø§ ØªØ¬Ù ÙÙŠ Ø§Ù„Ù‡ÙˆØ§Ø¡ Ø·Ø¨ÙŠØ¹ÙŠØ§Ù‹. Ø§Ø³ØªØ®Ø¯Ø§Ù… Ø§Ù„Ù…Ø¬ÙÙ Ù‚Ø¯ ÙŠØªØ³Ø¨Ø¨ ÙÙŠ Ø§Ù†ÙƒÙ…Ø§Ø´ Ø§Ù„Ù‚Ø·Ù†.",
-    similar_colors_lbl: "Ø§Ù„ØºØ³ÙŠÙ„ Ù…Ø¹ Ø£Ù„ÙˆØ§Ù† Ù…Ù…Ø§Ø«Ù„Ø©",
-    similar_colors_desc: "Ø§ØºØ³Ù„ Ø§Ù„Ù…Ù„Ø§Ø¨Ø³ Ø§Ù„Ø¯Ø§ÙƒÙ†Ø© ÙˆØ§Ù„ÙØ§ØªØ­Ø© Ø¨Ø´ÙƒÙ„ Ù…Ù†ÙØµÙ„ Ù„ØªØ¬Ù†Ø¨ Ø¨Ù‡ØªØ§Ù† Ø§Ù„Ø£Ù„ÙˆØ§Ù†.",
-    garment_title: "Ø§Ù„Ø¹Ù†Ø§ÙŠØ© Ø¨Ø§Ù„Ù…Ù„Ø§Ø¨Ø³",
-    garment_sub: "ÙƒÙŠÙÙŠØ© ØªØ¬ÙÙŠÙ ÙˆÙƒÙŠ ÙˆØªØ®Ø²ÙŠÙ† Ù‚Ø·Ø¹Ùƒ Ø§Ù„Ù…ÙØ¶Ù„Ø©",
-    iron_low_lbl: "ÙƒÙŠ Ø¨Ø¯Ø±Ø¬Ø© Ø­Ø±Ø§Ø±Ø© Ù…Ù†Ø®ÙØ¶Ø©",
-    iron_low_desc: "Ø§Ù„Ù…ÙƒÙˆØ§Ø© Ø¹Ù„Ù‰ Ø¯Ø±Ø¬Ø© Ù…Ù†Ø®ÙØ¶Ø©. Ù„Ø§ ØªÙƒÙˆÙŠ ÙÙˆÙ‚ Ø§Ù„Ø±Ø³ÙˆÙ…Ø§Øª Ø§Ù„Ù…Ø·Ø¨ÙˆØ¹Ø© Ù…Ø¨Ø§Ø´Ø±Ø© Ø£Ø¨Ø¯Ø§Ù‹.",
-    no_bleach_lbl: "Ù„Ø§ ØªØ³ØªØ®Ø¯Ù… Ø§Ù„Ù…Ø¨ÙŠØ¶Ø§Øª",
-    no_bleach_desc: "Ø§Ù„Ù…Ø¨ÙŠØ¶Ø§Øª ØªØªÙ„Ù Ø£Ù„ÙŠØ§Ù Ø§Ù„Ù‚Ø·Ù† Ø§Ù„Ø¹Ø¶ÙˆÙŠ ÙˆØªØ®Ø±Ø¨ Ø§Ù„Ø£Ù„ÙˆØ§Ù† ÙˆØ§Ù„Ø·Ø¨Ø§Ø¹Ø©.",
-    dry_shade_lbl: "ØªØ¬ÙÙŠÙ ÙÙŠ Ø§Ù„Ø¸Ù„",
-    dry_shade_desc: "Ø£Ø´Ø¹Ø© Ø§Ù„Ø´Ù…Ø³ Ø§Ù„Ù…Ø¨Ø§Ø´Ø±Ø© ØªØ¨Ù‡Øª Ø£Ù„ÙˆØ§Ù† Ø§Ù„ØµØ¨ØºØ©. Ø¬ÙÙ Ø§Ù„Ù‚Ø·Ø¹Ø© ÙÙŠ Ø§Ù„Ø¸Ù„ Ø£Ùˆ ÙÙŠ Ø§Ù„Ø¯Ø§Ø®Ù„.",
-    store_folded_lbl: "ØªØ®Ø²ÙŠÙ† Ù…Ø·ÙˆÙŠØ§Ù‹",
-    store_folded_desc: "Ø§Ù„ØªØ¹Ù„ÙŠÙ‚ Ù‚Ø¯ ÙŠÙ…Ø¯Ø¯ Ø®ÙŠØ§Ø·Ø© Ø§Ù„Ø£ÙƒØªØ§Ù Ø¨Ø³Ø¨Ø¨ Ø«Ù‚Ù„ ÙˆØ²Ù† Ø§Ù„Ù‚Ø·Ù†. ÙŠÙØ¶Ù„ Ø­ÙØ¸Ù‡Ø§ Ù…Ø·ÙˆÙŠØ©.",
-    days_label: "Ø£ÙŠØ§Ù…",
-    hours_label: "Ø³Ø§Ø¹Ø§Øª",
-    mins_label: "Ø¯Ù‚Ø§Ø¦Ù‚",
-    secs_label: "Ø«ÙˆØ§Ù†ÙŠ",
+    collection: "القطع",
+    signin: "دخول",
+    hero_sub: "دروب 01",
+    explore: "اكتشف دروب 01",
+    universe_within: "الكون جوّانا",
+    universe_tagline: "دروب 01 &mdash; قطن ثقيل 100٪. طباعة يدوية في القاهرة. شحن لكل مصر.",
+    tap_explore: "دوس على أي قطعة عشان تكتشفها · عدي بالماوس عشان تشوف الظهر",
+    company: "الشركة",
+    get_help: "مساعدة",
+    sizing: "المقاسات",
+    care_guide: "دليل العناية",
+    about_us: "عن البراند",
+    contact_us: "تواصل معانا",
+    refund_ex: "الاسترجاع والاستبدال",
+    how_to_order: "ازاي تطلب",
+    privacy: "سياسة الخصولية",
+    sizing_chart: "جدول المقاسات",
+    size_calculator: "حاسبة المقاس",
+    washing: "تعليمات الغسيل",
+    garment_care: "العناية بالهدوم",
+    back: "← رجوع",
+    select_size: "اختار مقاسك",
+    size_guide_btn: "جدول المقاسات",
+    size_calculator_btn: "حاسبة المقاس ←",
+    buy_now: "اشتريه دلوقتي",
+    cancel: "إلغاء",
+    contact: "بيانات التواصل",
+    delivery_address: "عنوان التوصيل",
+    payment_method: "طريقة الدفع",
+    cod: "الدفع عند الاستلام (COD)",
+    card: "كارت فيزا / ماستركارد",
+    confirm_order: "أكد الطلب دلوقتي",
+    subtotal: "المجموع",
+    shipping: "الشحن",
+    total: "الإجمالي الكلي",
+    how_title: "طريقة الطلب",
+    how_sub: "٣ خطوات · في أقل من دقيقة",
+    how_title: "طريقة الطلب",
+    how_sub: "٣ خطوات · في أقل من دقيقة",
+    how_step1_title: "اختار قطعتك",
+    how_step1_desc: "دوس على أي قطعة عشان تشوف تفاصيلها ورسوماتها ومقاساتها بالظبط.",
+    how_step2_title: "ادخل بياناتك",
+    how_step2_desc: "املا بيانات الشحن والتوصيل بسهولة وأمان في صفحة الدفع والطلب.",
+    how_step3_title: "شحن الطلب",
+    how_step3_desc: "بعد ما تأكد طلبك تليفونياً، بنشحنه في 1–4 أيام شغل. الدفع عند الاستلام نقداً على الباب.",
+    measurements_cm: "المقاسات بالسنتيمتر",
+    tbl_size: "المقاس",
+    tbl_chest: "الصدر (عرض)",
+    tbl_length: "الطول (القطعة)",
+    tbl_weight: "الوزن (الشخص)",
+    tbl_height: "الطول (الشخص)",
+    size_note_body: "<strong>الاستايل أوفرسايز واسع.</strong> التقصيصة واسعة ومريحة. لو حابب اللبس يكون مظبوط أو أقرب للمقاس العادي، صغر مقاس.",
+    brand_title: "عن البراند",
+    brand_sub: "كون MAJARAH",
+    brand_slogan: "بين النجوم،<br>مفيش حاجة بتضيع.",
+    brand_body: "مجرة هي خريطة سماوية للذات، تأسست في قلب القاهرة. نحن نرى كل فرد ككيان واسع من التصميم والفراغ، ينتظر التعبير عنه من خلال القماش. نصنع ملابس ثقيلة الوزن وعالية الكثافة لأولئك الذين يخوضون صخب المدينة وهم يحملون كوناً خاصاً بداخلهم. من شوارع مصر إلى حافة المجهول، نحن نصنع الزي الرسمي للاستكشاف.",
+    track_refund_title: "تتبع وارجاع الطلبات",
+    track_refund_sub: "اكتب بيانات طلبك عشان تتابعه أو تطلب استرجاع",
+    track_refund_instructions: "أدخل رقم الطلب أو رقم الهاتف لتتبع طلبك أو طلب الاسترجاع.",
+    order_id_lbl: "رقم الطلب",
+    phone_lbl: "رقم الموبايل",
+    find_order: "دوّر على الطلب",
+    back_to_search: "← رجوع للبحث",
+    delivery_banner: "توصيل للمنزل · لكل محافظات مصر",
+    height: "الطول",
+    weight: "الوزن",
+    fit_pref: "ستايل اللبس",
+    fit_oversized: "أوفرسايز ستريت وير (موصى به)",
+    fit_regular: "عادي (مظبوط)",
+    fit_snug: "دايق شوية",
+    suggested_size_title: "المقاس المقترح ليك",
+    apply_size_btn: "تطبيق واختيار المقاس",
+    badge_local: "محلي",
+    badge_wallet: "محفظة",
+    phone_placeholder: "رقم الموبايل (01xxxxxxxxx)",
+    email_placeholder: "البريد الإلكتروني (لتأكيد الطلب)",
+    first_name: "الاسم الأول",
+    last_name: "الاسم الأخير",
+    address_placeholder: "العنوان بالتفصيل (اسم ورقم الشارع)",
+    building_placeholder: "اسم أو رقم العمارة",
+    floor_placeholder: "رقم الدور (اختياري)",
+    apartment_placeholder: "رقم الشقة (اختياري)",
+    landmark_placeholder: "علامة مميزة / بجوار (اختياري)",
+    postal_code: "الرمز البريدي (اختياري)",
+    coupon_code_lbl: "كود الخصم",
+    coupon_placeholder: "أدخل كود الخصم",
+    apply_btn: "تطبيق",
+    policy_title: "سياسة الاستبدال والاسترجاع",
+    policy_item1: "<strong>مكالمة التأكيد:</strong> بعد ما تتم عملية الطلب، فريقنا بيتصل بيك خلال 48 ساعة في أوقات مختلفة. لو معدتيش رد في الأوقات دي، الأوردر بيتلغى تلقائياً.",
+    policy_item2: "<strong>مدة التوصيل:</strong> شحنتك بتوصل خلال 1 لـ 4 أيام عمل بعد تأكيد الأوردر تليفونياً.",
+    policy_item3: "<strong>سلامة المنتج:</strong> حسب سياسة شركة الشحن، مش مسموح بفتح الطرد عند الاستلام، وده لضمان وصول قطعتك سليمة.",
+    policy_item4: "<strong>رفض الاستلام:</strong> لو رفضت استلام الشحنة من المندوب، مصاريف الشحن الرجعة بترجع عليك.",
+    policy_item5: "<strong>الاستبدال والاسترجاع:</strong> بنقبل الاستبدال أو الاسترجاع خلال 14 يوم من تاريخ استلام الشحنة.",
+    track_order: "تتبع الطلب",
+    tracker_modal_sub: "أدخل رقم هاتفك لمتابعة حالة الطلب وجدول الشحن.",
+    washing_title: "تعليمات الغسيل",
+    washing_sub: "دليل العناية للحفاظ على عمر خامة ملابسك",
+    wash_cold_lbl: "غسيل يدوي بارد",
+    wash_cold_desc: "اغسل بماء بارد للحفاظ على تماسك القماش ونعومته.",
+    inside_out_lbl: "غسيل مقلوب",
+    inside_out_desc: "اقلب القطعة من الداخل للخارج قبل الغسيل لحماية الطباعة.",
+    no_tumble_lbl: "لا تستخدم المجفف",
+    no_tumble_desc: "اتركها تجف في الهواء طبيعياً. استخدام المجفف قد يتسبب في انكماش القطن.",
+    similar_colors_lbl: "الغسيل مع ألوان مماثلة",
+    similar_colors_desc: "اغسل الملابس الداكنة والفاتحة بشكل منفصل لتجنب بهتان الألوان.",
+    garment_title: "العناية بالملابس",
+    garment_sub: "كيفية تجفيف وكي وتخزين قطعك المفضلة",
+    iron_low_lbl: "كي بدرجة حرارة منخفضة",
+    iron_low_desc: "المكواة على درجة منخفضة. لا تكوي فوق الرسومات المطبوعة مباشرة أبداً.",
+    no_bleach_lbl: "لا تستخدم المبيضات",
+    no_bleach_desc: "المبيضات تتلف ألياف القطن العضوي وتخرب الألوان والطباعة.",
+    dry_shade_lbl: "تجفيف في الظل",
+    dry_shade_desc: "أشعة الشمس المباشرة تبهت ألوان الصبغة. جفف القطعة في الظل أو في الداخل.",
+    store_folded_lbl: "تخزين مطوياً",
+    store_folded_desc: "التعليق قد يمدد خياطة الأكتاف بسبب ثقل وزن القطن. يفضل حفظها مطوية.",
+    days_label: "أيام",
+    hours_label: "ساعات",
+    mins_label: "دقائق",
+    secs_label: "ثواني",
     manifesto_title: "THE UNIVERSE WITHIN",
     manifesto_en: "MAJARAH is a celestial map of the self, founded in the heart of Cairo. We view every individual as a vast system of architecture and void, waiting to be expressed through fabric. We produce heavyweight, high-density garments for those who navigate the urban landscape while carrying a private universe within. From the streets of Egypt to the edge of the unknown, we provide the uniform for exploration.",
-    manifesto_ar: "Ù…Ø¬Ø±Ø© Ù‡ÙŠ Ø®Ø±ÙŠØ·Ø© Ø³Ù…Ø§ÙˆÙŠØ© Ù„Ù„Ø°Ø§ØªØŒ ØªØ£Ø³Ø³Øª ÙÙŠ Ù‚Ù„Ø¨ Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©. Ù†Ø­Ù† Ù†Ø±Ù‰ ÙƒÙ„ ÙØ±Ø¯ ÙƒÙƒÙŠØ§Ù† ÙˆØ§Ø³Ø¹ Ù…Ù† Ø§Ù„ØªØµÙ…ÙŠÙ… ÙˆØ§Ù„ÙØ±Ø§ØºØŒ ÙŠÙ†ØªØ¸Ø± Ø§Ù„ØªØ¹Ø¨ÙŠØ± Ø¹Ù†Ù‡ Ù…Ù† Ø®Ù„Ø§Ù„ Ø§Ù„Ù‚Ù…Ø§Ø´. Ù†ØµÙ†Ø¹ Ù…Ù„Ø§Ø¨Ø³ Ø«Ù‚ÙŠÙ„Ø© Ø§Ù„ÙˆØ²Ù† ÙˆØ¹Ø§Ù„ÙŠØ© Ø§Ù„ÙƒØ«Ø§ÙØ© Ù„Ø£ÙˆÙ„Ø¦Ùƒ Ø§Ù„Ø°ÙŠÙ† ÙŠØ®ÙˆØ¶ÙˆÙ† ØµØ®Ø¨ Ø§Ù„Ù…Ø¯ÙŠÙ†Ø© ÙˆÙ‡Ù… ÙŠØ­Ù…Ù„ÙˆÙ† ÙƒÙˆÙ†Ø§Ù‹ Ø®Ø§ØµØ§Ù‹ Ø¨Ø¯Ø§Ø®Ù„Ù‡Ù…. Ù…Ù† Ø´ÙˆØ§Ø±Ø¹ Ù…ØµØ± Ø¥Ù„Ù‰ Ø­Ø§ÙØ© Ø§Ù„Ù…Ø¬Ù‡ÙˆÙ„ØŒ Ù†Ø­Ù† Ù†ØµÙ†Ø¹ Ø§Ù„Ø²ÙŠ Ø§Ù„Ø±Ø³Ù…ÙŠ Ù„Ù„Ø§Ø³ØªÙƒØ´Ø§Ù."
+    manifesto_ar: "مجرة هي خريطة سماوية للذات، تأسست في قلب القاهرة. نحن نرى كل فرد ككيان واسع من التصميم والفراغ، ينتظر التعبير عنه من خلال القماش. نصنع ملابس ثقيلة الوزن وعالية الكثافة لأولئك الذين يخوضون صخب المدينة وهم يحملون كوناً خاصاً بداخلهم. من شوارع مصر إلى حافة المجهول، نحن نصنع الزي الرسمي للاستكشاف."
   }
 };
 
 const GOVERNORATE_MAP = {
-    'Cairo': 'Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©',
-    'Giza': 'Ø§Ù„Ø¬ÙŠØ²Ø©',
-    'Alexandria': 'Ø§Ù„Ø¥Ø³ÙƒÙ†Ø¯Ø±ÙŠØ©',
-    'Qalyubia': 'Ø§Ù„Ù‚Ù„ÙŠÙˆØ¨ÙŠØ©',
-    'Sharqia': 'Ø§Ù„Ø´Ø±Ù‚ÙŠØ©',
-    'Dakahlia': 'Ø§Ù„Ø¯Ù‚Ù‡Ù„ÙŠØ©',
-    'Gharbia': 'Ø§Ù„ØºØ±Ø¨ÙŠØ©',
-    'Monufia': 'Ø§Ù„Ù…Ù†ÙˆÙÙŠØ©',
-    'Beheira': 'Ø§Ù„Ø¨Ø­ÙŠØ±Ø©',
-    'Damietta': 'Ø¯Ù…ÙŠØ§Ø·',
-    'Port Said': 'Ø¨ÙˆØ±Ø³Ø¹ÙŠØ¯',
-    'Ismailia': 'Ø§Ù„Ø¥Ø³Ù…Ø§Ø¹ÙŠÙ„ÙŠØ©',
-    'Suez': 'Ø§Ù„Ø³ÙˆÙŠØ³',
-    'Kafr El Sheikh': 'ÙƒÙØ± Ø§Ù„Ø´ÙŠØ®',
-    'Fayoum': 'Ø§Ù„ÙÙŠÙˆÙ…',
-    'Beni Suef': 'Ø¨Ù†ÙŠ Ø³ÙˆÙŠÙ',
-    'Minya': 'Ø§Ù„Ù…Ù†ÙŠØ§',
-    'Asyut': 'Ø£Ø³ÙŠÙˆØ·',
-    'Sohag': 'Ø³ÙˆÙ‡Ø§Ø¬',
-    'Qena': 'Ù‚Ù†Ø§',
-    'Luxor': 'Ø§Ù„Ø£Ù‚ØµØ±',
-    'Aswan': 'Ø£Ø³ÙˆØ§Ù†',
-    'Red Sea': 'Ø§Ù„Ø¨Ø­Ø± Ø§Ù„Ø£Ø­Ù…Ø±',
-    'Matrouh': 'Ù…Ø·Ø±ÙˆØ­',
-    'New Valley': 'Ø§Ù„ÙˆØ§Ø¯ÙŠ Ø§Ù„Ø¬Ø¯ÙŠØ¯',
-    'North Sinai': 'Ø´Ù…Ø§Ù„ Ø³ÙŠÙ†Ø§Ø¡',
-    'South Sinai': 'Ø¬Ù†ÙˆØ¨ Ø³ÙŠÙ†Ø§Ø¡'
+    'Cairo': 'القاهرة',
+    'Giza': 'الجيزة',
+    'Alexandria': 'الإسكندرية',
+    'Qalyubia': 'القليوبية',
+    'Sharqia': 'الشرقية',
+    'Dakahlia': 'الدقهلية',
+    'Gharbia': 'الغربية',
+    'Monufia': 'المنوفية',
+    'Beheira': 'البحيرة',
+    'Damietta': 'دمياط',
+    'Port Said': 'بورسعيد',
+    'Ismailia': 'الإسماعيلية',
+    'Suez': 'السويس',
+    'Kafr El Sheikh': 'كفر الشيخ',
+    'Fayoum': 'الفيوم',
+    'Beni Suef': 'بني سويف',
+    'Minya': 'المنيا',
+    'Asyut': 'أسيوط',
+    'Sohag': 'سوهاج',
+    'Qena': 'قنا',
+    'Luxor': 'الأقصر',
+    'Aswan': 'أسوان',
+    'Red Sea': 'البحر الأحمر',
+    'Matrouh': 'مطروح',
+    'New Valley': 'الوادي الجديد',
+    'North Sinai': 'شمال سيناء',
+    'South Sinai': 'جنوب سيناء'
 };
 
 function toggleLanguage() {
@@ -722,7 +722,7 @@ function applyLanguage(lang) {
     
     const langLink = document.getElementById('langToggleLink');
     if (langLink) {
-        langLink.innerText = isAr ? 'English (En)' : 'Ø§Ù„Ø¹Ø±Ø¨ÙŠØ© (Arabic)';
+        langLink.innerText = isAr ? 'English (En)' : 'العربية (Arabic)';
     }
     
     const elements = document.querySelectorAll('[data-t]');
@@ -743,12 +743,12 @@ function applyLanguage(lang) {
 
     if (document.getElementById('checkoutPage').classList.contains('open')) {
         const shippingFeeEl = document.getElementById('chkShipping');
-        if (shippingFeeEl && (shippingFeeEl.innerText === 'Select city' || shippingFeeEl.innerText === 'Ø§Ø®ØªØ§Ø± Ø§Ù„Ù…Ø­Ø§ÙØ¸Ø©')) {
-            shippingFeeEl.innerText = isAr ? "Ø§Ø®ØªØ§Ø± Ø§Ù„Ù…Ø­Ø§ÙØ¸Ø©" : "Select city";
+        if (shippingFeeEl && (shippingFeeEl.innerText === 'Select city' || shippingFeeEl.innerText === 'اختار المحافظة')) {
+            shippingFeeEl.innerText = isAr ? "اختار المحافظة" : "Select city";
         }
         const variantEl = document.getElementById('chkItemVariant');
         if (variantEl && activeSelectedSize) {
-            variantEl.innerText = (isAr ? "Ø§Ù„Ù…Ù‚Ø§Ø³: " : "Size: ") + activeSelectedSize;
+            variantEl.innerText = (isAr ? "المقاس: " : "Size: ") + activeSelectedSize;
         }
     }
     
@@ -772,7 +772,11 @@ function populateCityOptions() {
     const isAr = (currentLang === 'ar');
     const selectedVal = citySelect.value;
     
-    citySelect.innerHTML = `<option value="" disabled selected>${isAr ? 'Ø§Ø®ØªØ§Ø± Ø§Ù„Ù…Ø­Ø§ÙØ¸Ø©' : 'Select Governorate / City'}</option>` + 
+    if (!currentLoadedShippingRates || currentLoadedShippingRates.length === 0) {
+        currentLoadedShippingRates = JSON.parse(localStorage.getItem('storeZones')) || window.bostaDefaultTiers;
+    }
+    
+    citySelect.innerHTML = `<option value="" disabled selected>${isAr ? 'اختار المحافظة' : 'Select Governorate / City'}</option>` + 
         currentLoadedShippingRates.map(z => {
             const displayName = isAr ? (GOVERNORATE_MAP[z.name] || z.name) : z.name;
             return `<option value="${z.name}">${displayName}</option>`;
@@ -802,7 +806,7 @@ async function initApp() {
 
     // Load announcement, speed, and repeats
     window.updateMarqueeDisplay = () => {
-        let text = cfg('promoText', 'ðŸ”¥ MAJARAH 01DROP ðŸ”¥');
+        let text = cfg('promoText', '🔥 MAJARAH 01DROP 🔥');
         const speed = parseFloat(cfg('promoSpeed', '80'));
         const dbRepeats = parseInt(cfg('promoRepeats', '1'));
 
@@ -878,7 +882,7 @@ async function initApp() {
                 }
                 msgEl.style.display = 'block';
                 msgEl.style.color = '#25d366';
-                msgEl.innerText = currentLang === 'ar' ? `ØªÙ… ØªØ·Ø¨ÙŠÙ‚ Ø§Ù„ÙƒÙˆØ¯! Ø®ØµÙ… ${valStr}` : `Applied! ${valStr} discount.`;
+                msgEl.innerText = currentLang === 'ar' ? `تم تطبيق الكود! خصم ${valStr}` : `Applied! ${valStr} discount.`;
                 inputEl.style.borderColor = '#25d366';
             } else {
                 activeDiscountValue = 0;
@@ -886,7 +890,7 @@ async function initApp() {
                 if (input.length >= 3) {
                     msgEl.style.display = 'block';
                     msgEl.style.color = '#ff4444';
-                    msgEl.innerText = currentLang === 'ar' ? 'ÙƒÙˆØ¯ ØºÙŠØ± ØµØ­ÙŠØ­' : 'Invalid code.';
+                    msgEl.innerText = currentLang === 'ar' ? 'كود غير صحيح' : 'Invalid code.';
                     inputEl.style.borderColor = '#ff4444';
                 }
             }
@@ -922,7 +926,7 @@ async function fetchDynamicContent(key) {
 function renderBrandModal(data, lang) {
     const container = document.getElementById('brandModalContent');
     if (!container) return;
-    const slogan = lang === 'ar' ? 'Ø¨ÙŠÙ† Ø§Ù„Ù†Ø¬ÙˆÙ…ØŒ Ù„Ø§ Ø´ÙŠØ¡ ÙŠØ¶ÙŠØ¹.' : 'Between <em>stars,</em><br>nothing is wasted.';
+    const slogan = lang === 'ar' ? 'بين النجوم، لا شيء يضيع.' : 'Between <em>stars,</em><br>nothing is wasted.';
     container.innerHTML = `
         <h2 class="modal-title-alt" style="font-family: 'Cinzel', serif !important;">${slogan}</h2>
         <p class="modal-body-text">${data[lang]}</p>
@@ -1014,17 +1018,17 @@ function renderGarmentModal(data, lang) {
 const STATIC_POLICIES = {
     en: [
         "<strong>Confirmation Call:</strong> After your order is placed, our team will call you within 48 hours to confirm. If we can't reach you, the order is automatically cancelled.",
-        "<strong>Shipping Time:</strong> Your tee ships 1â€“4 business days after your order is confirmed over the phone.",
-        "<strong>Package Integrity:</strong> Packages cannot be opened at the door â€” this protects your piece during transit.",
+        "<strong>Shipping Time:</strong> Your tee ships 1–4 business days after your order is confirmed over the phone.",
+        "<strong>Package Integrity:</strong> Packages cannot be opened at the door — this protects your piece during transit.",
         "<strong>Rejected Deliveries:</strong> If you refuse delivery at the door, return shipping costs will be charged to you.",
         "<strong>Exchange & Return:</strong> We accept exchanges and returns within 14 calendar days from your confirmed delivery date."
     ],
     ar: [
-        "<strong>Ù…ÙƒØ§Ù„Ù…Ø© Ø§Ù„ØªØ£ÙƒÙŠØ¯:</strong> Ø¨Ø¹Ø¯ Ù…Ø§ ØªØªÙ… Ø¹Ù…Ù„ÙŠØ© Ø§Ù„Ø·Ù„Ø¨ØŒ ÙØ±ÙŠÙ‚Ù†Ø§ Ø¨ÙŠØªØµÙ„ Ø¨ÙŠÙƒ Ø®Ù„Ø§Ù„ 48 Ø³Ø§Ø¹Ø© ÙÙŠ Ø£ÙˆÙ‚Ø§Øª Ù…Ø®ØªÙ„ÙØ©. Ù„Ùˆ Ù…Ø¹Ø¯ØªÙŠØ´ Ø±Ø¯ØŒ Ø§Ù„Ø£ÙˆØ±Ø¯Ø± Ø¨ÙŠØªÙ„ØºÙ‰ ØªÙ„Ù‚Ø§Ø¦ÙŠØ§Ù‹.",
-        "<strong>Ù…Ø¯Ø© Ø§Ù„ØªÙˆØµÙŠÙ„:</strong> Ø´Ø­Ù†ØªÙƒ Ø¨ØªÙˆØµÙ„ Ø®Ù„Ø§Ù„ 1 Ù„Ù€ 4 Ø£ÙŠØ§Ù… Ø¹Ù…Ù„ Ø¨Ø¹Ø¯ ØªØ£ÙƒÙŠØ¯ Ø§Ù„Ø£ÙˆØ±Ø¯Ø± ØªÙ„ÙŠÙÙˆÙ†ÙŠØ§Ù‹.",
-        "<strong>Ø³Ù„Ø§Ù…Ø© Ø§Ù„Ù…Ù†ØªØ¬:</strong> Ø­Ø³Ø¨ Ø³ÙŠØ§Ø³Ø© Ø´Ø±ÙƒØ© Ø§Ù„Ø´Ø­Ù†ØŒ Ù…Ø´ Ù…Ø³Ù…ÙˆØ­ Ø¨ÙØªØ­ Ø§Ù„Ø·Ø±Ø¯ Ø¹Ù†Ø¯ Ø§Ù„Ø§Ø³ØªÙ„Ø§Ù…ØŒ ÙˆØ¯Ù‡ Ù„Ø¶Ù…Ø§Ù† ÙˆØµÙˆÙ„ Ù‚Ø·Ø¹ØªÙƒ Ø³Ù„ÙŠÙ…Ø©.",
-        "<strong>Ø±ÙØ¶ Ø§Ù„Ø§Ø³ØªÙ„Ø§Ù…:</strong> Ù„Ùˆ Ø±ÙØ¶Øª Ø§Ø³ØªÙ„Ø§Ù… Ø§Ù„Ø´Ø­Ù†Ø© Ù…Ù† Ø§Ù„Ù…Ù†Ø¯ÙˆØ¨ØŒ Ù…ØµØ§Ø±ÙŠÙ Ø§Ù„Ø´Ø­Ù† Ø§Ù„Ø±Ø¬Ø¹Ø© Ø¨ØªØ±Ø¬Ø¹ Ø¹Ù„ÙŠÙƒ.",
-        "<strong>Ø§Ù„Ø§Ø³ØªØ¨Ø¯Ø§Ù„ ÙˆØ§Ù„Ø§Ø³ØªØ±Ø¬Ø§Ø¹:</strong> Ø¨Ù†Ù‚Ø¨Ù„ Ø§Ù„Ø§Ø³ØªØ¨Ø¯Ø§Ù„ Ø£Ùˆ Ø§Ù„Ø§Ø³ØªØ±Ø¬Ø§Ø¹ Ø®Ù„Ø§Ù„ 14 ÙŠÙˆÙ… Ù…Ù† ØªØ§Ø±ÙŠØ® Ø§Ø³ØªÙ„Ø§Ù… Ø§Ù„Ø´Ø­Ù†Ø©."
+        "<strong>مكالمة التأكيد:</strong> بعد ما تتم عملية الطلب، فريقنا بيتصل بيك خلال 48 ساعة في أوقات مختلفة. لو معدتيش رد، الأوردر بيتلغى تلقائياً.",
+        "<strong>مدة التوصيل:</strong> شحنتك بتوصل خلال 1 لـ 4 أيام عمل بعد تأكيد الأوردر تليفونياً.",
+        "<strong>سلامة المنتج:</strong> حسب سياسة شركة الشحن، مش مسموح بفتح الطرد عند الاستلام، وده لضمان وصول قطعتك سليمة.",
+        "<strong>رفض الاستلام:</strong> لو رفضت استلام الشحنة من المندوب، مصاريف الشحن الرجعة بترجع عليك.",
+        "<strong>الاستبدال والاسترجاع:</strong> بنقبل الاستبدال أو الاسترجاع خلال 14 يوم من تاريخ استلام الشحنة."
     ]
 };
 
@@ -1033,7 +1037,7 @@ function renderRefundPolicyModal(data, lang) {
     if (!container) return;
     // Use API data if available, otherwise fall back to static content
     const rules = (data && data[lang] && data[lang].length > 0) ? data[lang] : STATIC_POLICIES[lang] || STATIC_POLICIES.en;
-    const title = lang === 'ar' ? 'Ø³ÙŠØ§Ø³Ø© Ø§Ù„Ø§Ø³ØªØ¨Ø¯Ø§Ù„ ÙˆØ§Ù„Ø§Ø³ØªØ±Ø¬Ø§Ø¹' : 'Exchange & Return Policy';
+    const title = lang === 'ar' ? 'سياسة الاستبدال والاسترجاع' : 'Exchange & Return Policy';
     let html = `
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
             <div style="flex: 1; height: 1px; background: #161616;"></div>
@@ -1096,9 +1100,9 @@ async function openHow() {
             { n: '02', title: 'Select size & add to cart', desc: 'Choose your size and hit Add to Cart.' },
             { n: '03', title: 'Checkout', desc: 'Enter your name, phone number, address, and confirm your order.' }
         ], ar: [
-            { n: '01', title: 'Ø§Ø®ØªØ§Ø± Ù‚Ø·Ø¹ØªÙƒ', desc: 'ØªØµÙØ­ Ø§Ù„Ù…Ø¬Ù…ÙˆØ¹Ø© ÙˆØ§Ø¶ØºØ· Ø¹Ù„Ù‰ Ø§Ù„Ù…Ù†ØªØ¬ Ø§Ù„Ø°ÙŠ ØªØ±ÙŠØ¯Ù‡.' },
-            { n: '02', title: 'Ø§Ø®ØªØ§Ø± Ø§Ù„Ù…Ù‚Ø§Ø³ ÙˆØ¶Ù Ù„Ù„Ø¹Ø±Ø¨Ø©', desc: 'Ø§Ø®ØªØ± Ù…Ù‚Ø§Ø³Ùƒ ÙˆØ§Ø¶ØºØ· Ø¹Ù„Ù‰ Ø¥Ø¶Ø§ÙØ© Ø¥Ù„Ù‰ Ø§Ù„Ø¹Ø±Ø¨Ø©.' },
-            { n: '03', title: 'Ø§Ù„Ø¯ÙØ¹ ÙˆØ§Ù„Ø´Ø­Ù†', desc: 'Ø£Ø¯Ø®Ù„ Ø§Ø³Ù…ÙƒØŒ ÙˆØ±Ù‚Ù… Ù‡Ø§ØªÙÙƒØŒ ÙˆØ¹Ù†ÙˆØ§Ù†Ùƒ Ù„ØªØ£ÙƒÙŠØ¯ Ø·Ù„Ø¨Ùƒ.' }
+            { n: '01', title: 'اختار قطعتك', desc: 'تصفح المجموعة واضغط على المنتج الذي تريده.' },
+            { n: '02', title: 'اختار المقاس وضف للعربة', desc: 'اختر مقاسك واضغط على إضافة إلى العربة.' },
+            { n: '03', title: 'الدفع والشحن', desc: 'أدخل اسمك، ورقم هاتفك، وعنوانك لتأكيد طلبك.' }
         ] }, currentLang);
     }
 }
@@ -1118,7 +1122,7 @@ async function openSize() {
         renderSizeModal({
             headers: {
                 en: ['Size', 'Chest', 'Shoulder', 'Length'],
-                ar: ['Ø§Ù„Ù…Ù‚Ø§Ø³', 'Ø§Ù„ØµØ¯Ø±', 'Ø§Ù„ÙƒØªÙ', 'Ø§Ù„Ø·ÙˆÙ„']
+                ar: ['المقاس', 'الصدر', 'الكتف', 'الطول']
             },
             rows: [
                 ['XS', '52 cm', '46 cm', '66 cm'],
@@ -1129,7 +1133,7 @@ async function openSize() {
             ],
             note: {
                 en: 'Measurements in centimeters. Fit is oversized. Garment patterns are cut loose. Size down if you prefer a standard, closer-to-body look.',
-                ar: 'Ø§Ù„Ù…Ù‚Ø§Ø³Ø§Øª Ø¨Ø§Ù„Ø³Ù†ØªÙŠÙ…ØªØ±. Ø§Ù„Ù‚ØµØ§Øª ÙˆØ§Ø³Ø¹Ø© ÙˆÙ…Ø±ÙŠØ­Ø© (Oversized). Ø§Ø®ØªØ± Ù…Ù‚Ø§Ø³Ø§Ù‹ Ø£ØµØºØ± Ø¥Ø°Ø§ ÙƒÙ†Øª ØªÙØ¶Ù„ Ø§Ù„Ù…Ø¸Ù‡Ø± Ø§Ù„Ù…Ø¹ØªØ§Ø¯.'
+                ar: 'المقاسات بالسنتيمتر. القصات واسعة ومريحة (Oversized). اختر مقاساً أصغر إذا كنت تفضل المظهر المعتاد.'
             }
         }, currentLang);
     }
@@ -1148,8 +1152,8 @@ async function openBrand() {
     if (data) renderBrandModal(data, currentLang);
     else {
         renderBrandModal({
-            en: "MAJARAH (Ù…ÙŽØ¬ÙŽØ±ÙŽÙ‘Ø©) means 'galaxy' in Arabic. Born in Cairo, 2026. We make heavyweight cotton essentials for the modern explorer â€” screen-printed in Egypt, built to last. No rules. Just us.",
-            ar: "Ù…ÙŽØ¬ÙŽØ±ÙŽÙ‘Ø© ØªØ¹Ù†ÙŠ 'Galaxy' Ø¨Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©. ØªØ£Ø³Ø³Øª ÙÙŠ Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©ØŒ 2026. Ù†ØµÙ†Ø¹ Ø£Ø³Ø§Ø³ÙŠØ§Øª Ù‚Ø·Ù†ÙŠØ© Ø«Ù‚ÙŠÙ„Ø© Ù„Ù„Ù…Ø³ØªÙƒØ´Ù Ø§Ù„Ù…Ø¹Ø§ØµØ± - Ù…Ø·Ø¨ÙˆØ¹Ø© ÙÙŠ Ù…ØµØ±ØŒ ÙˆÙ…ØµÙ†ÙˆØ¹Ø© Ù„ØªØ¯ÙˆÙ…. Ù„Ø§ Ù‚ÙˆØ§Ø¹Ø¯. Ù†Ø­Ù† ÙÙ‚Ø·."
+            en: "MAJARAH (مَجَرَّة) means 'galaxy' in Arabic. Born in Cairo, 2026. We make heavyweight cotton essentials for the modern explorer — screen-printed in Egypt, built to last. No rules. Just us.",
+            ar: "مَجَرَّة تعني 'Galaxy' بالعربية. تأسست في القاهرة، 2026. نصنع أساسيات قطنية ثقيلة للمستكشف المعاصر - مطبوعة في مصر، ومصنوعة لتدوم. لا قواعد. نحن فقط."
         }, currentLang);
     }
 }
@@ -1199,7 +1203,7 @@ async function openProduct(id, push = true) {
     document.getElementById('ppPrice').innerText = "EGP " + p.price;
     document.getElementById('ppDesc').innerHTML = descTranslated;
     
-    // 1. Dynamic Thumbs â€” Fix logic to handle JSON strings or Arrays
+    // 1. Dynamic Thumbs — Fix logic to handle JSON strings or Arrays
     const thumbsContainer = document.getElementById('pp-thumbs');
     if (thumbsContainer) {
         thumbsContainer.innerHTML = '';
@@ -1251,11 +1255,11 @@ async function openProduct(id, push = true) {
     if (buyBtn) {
         if (totalStock <= 0) {
             buyBtn.disabled = true;
-            buyBtn.innerText = isAr ? "Ù†ÙØ°Øª Ø§Ù„ÙƒÙ…ÙŠØ©" : "SOLD OUT";
+            buyBtn.innerText = isAr ? "نفذت الكمية" : "SOLD OUT";
             buyBtn.style.opacity = "0.5";
         } else {
             buyBtn.disabled = false;
-            buyBtn.innerText = isAr ? 'Ø§Ø´ØªØ±ÙŠÙ‡ Ø¯Ù„ÙˆÙ‚ØªÙŠ' : 'Buy It Now';
+            buyBtn.innerText = isAr ? 'اشتريه دلوقتي' : 'Buy It Now';
             buyBtn.style.opacity = '1';
         }
     }
@@ -1281,14 +1285,14 @@ async function openProduct(id, push = true) {
             else if (totalStock <= 7) tier = 'low';
             
             if (tier === 'urgent') {
-                stockText.innerHTML = isAr ? `Ø¨Ø§Ù‚ÙŠ <strong style="color:#ff4444">${totalStock}</strong> Ù‚Ø·Ø¹Ø© Ø¨Ø³` : `Only <strong style="color:#ff4444">${totalStock}</strong> left`;
+                stockText.innerHTML = isAr ? `باقي <strong style="color:#ff4444">${totalStock}</strong> قطعة بس` : `Only <strong style="color:#ff4444">${totalStock}</strong> left`;
             } else if (tier === 'low') {
-                stockText.innerHTML = isAr ? `Ø¨Ø§Ù‚ÙŠ <strong style="color:#ff9500">${totalStock}</strong> Ù‚Ø·Ø¹Ø©` : `<strong style="color:#ff9500">${totalStock}</strong> remaining`;
+                stockText.innerHTML = isAr ? `باقي <strong style="color:#ff9500">${totalStock}</strong> قطعة` : `<strong style="color:#ff9500">${totalStock}</strong> remaining`;
             } else {
-                stockText.innerHTML = isAr ? `Ù…ØªØ§Ø­ Â· ${totalStock} Ù‚Ø·Ø¹Ø©` : `In Stock Â· ${totalStock} units`;
+                stockText.innerHTML = isAr ? `متاح · ${totalStock} قطعة` : `In Stock · ${totalStock} units`;
             }
             
-            stockTag.innerText = isAr ? (tier === 'urgent' ? 'Ø·Ù„Ø¨ Ø¹Ø§Ù„ÙŠ' : tier === 'low' ? 'Ù…Ø­Ø¯ÙˆØ¯' : 'Ù…ØªÙˆÙØ±') : (tier === 'urgent' ? 'URGENT' : tier === 'low' ? 'LOW' : 'STABLE');
+            stockTag.innerText = isAr ? (tier === 'urgent' ? 'طلب عالي' : tier === 'low' ? 'محدود' : 'متوفر') : (tier === 'urgent' ? 'URGENT' : tier === 'low' ? 'LOW' : 'STABLE');
             stockTag.className = 'mjr-stock-tag ' + tier;
             
             stockPulse.className = 'mjr-stock-pulse ' + tier;
@@ -1357,7 +1361,7 @@ function openCheckout(push = true) {
     }
 
     if(!activeSelectedSize) {
-        showToast(currentLang === 'ar' ? 'ÙŠØ±Ø¬Ù‰ Ø§Ø®ØªÙŠØ§Ø± Ø§Ù„Ù…Ù‚Ø§Ø³ Ø£ÙˆÙ„Ø§Ù‹.' : 'Please select a size to checkout.', 'info');
+        showToast(currentLang === 'ar' ? 'يرجى اختيار المقاس أولاً.' : 'Please select a size to checkout.', 'info');
         return;
     }
     
@@ -1381,7 +1385,7 @@ function openCheckout(push = true) {
     // Sync review sidebar layouts
     document.getElementById('chkItemThumb').src = resolveImgSrc(p.front_image_url, defaultFront);
     document.getElementById('chkItemTitle').innerText = nameTranslated;
-    document.getElementById('chkItemVariant').innerText = (currentLang === 'ar' ? "Ø§Ù„Ù…Ù‚Ø§Ø³: " : "Size: ") + activeSelectedSize;
+    document.getElementById('chkItemVariant').innerText = (currentLang === 'ar' ? "المقاس: " : "Size: ") + activeSelectedSize;
     document.getElementById('chkItemPrice').innerText = "EGP " + Number(p.price).toFixed(2);
     
     // Reset shipping fields
@@ -1469,7 +1473,7 @@ function applyCheckoutCoupon() {
     if (!input) {
         msgEl.style.display = 'block';
         msgEl.style.color = '#ff4444';
-        msgEl.innerText = currentLang === 'ar' ? 'ÙŠØ±Ø¬Ù‰ Ø¥Ø¯Ø®Ø§Ù„ ÙƒÙˆØ¯ Ø§Ù„Ø®ØµÙ….' : 'Please enter a coupon code.';
+        msgEl.innerText = currentLang === 'ar' ? 'يرجى إدخال كود الخصم.' : 'Please enter a coupon code.';
         inputEl.style.borderColor = '#ff4444';
         return;
     }
@@ -1481,12 +1485,12 @@ function applyCheckoutCoupon() {
     if (!matched) {
         msgEl.style.display = 'block';
         msgEl.style.color = '#ff4444';
-        msgEl.innerText = currentLang === 'ar' ? 'ÙƒÙˆØ¯ Ø§Ù„Ø®ØµÙ… ØºÙŠØ± ØµØ­ÙŠØ­.' : 'Invalid coupon code.';
+        msgEl.innerText = currentLang === 'ar' ? 'كود الخصم غير صحيح.' : 'Invalid coupon code.';
         inputEl.style.borderColor = '#ff4444';
         activeDiscountValue = 0;
         activeDiscountCode = '';
         calculateTotals();
-        showToast(currentLang === 'ar' ? 'ÙƒÙˆØ¯ Ø§Ù„Ø®ØµÙ… ØºÙŠØ± ØµØ­ÙŠØ­.' : 'Invalid coupon code.', 'error');
+        showToast(currentLang === 'ar' ? 'كود الخصم غير صحيح.' : 'Invalid coupon code.', 'error');
         return;
     }
     
@@ -1504,12 +1508,12 @@ function applyCheckoutCoupon() {
     msgEl.style.display = 'block';
     msgEl.style.color = '#25d366';
     msgEl.innerText = currentLang === 'ar' 
-        ? `ØªÙ… ØªØ·Ø¨ÙŠÙ‚ Ø§Ù„ÙƒÙˆØ¯ Ø¨Ù†Ø¬Ø§Ø­! Ø®ØµÙ… ${valueStr}` 
+        ? `تم تطبيق الكود بنجاح! خصم ${valueStr}` 
         : `Coupon applied successfully! ${valueStr} discount.`;
     inputEl.style.borderColor = '#25d366';
         
     calculateTotals();
-    showToast(currentLang === 'ar' ? 'ØªÙ… ØªØ·Ø¨ÙŠÙ‚ ÙƒÙˆØ¯ Ø§Ù„Ø®ØµÙ… Ø¨Ù†Ø¬Ø§Ø­!' : 'Coupon applied successfully!', 'success');
+    showToast(currentLang === 'ar' ? 'تم تطبيق كود الخصم بنجاح!' : 'Coupon applied successfully!', 'success');
 }
 
 // Custom functions for Washing Instructions and Garment Care modals
@@ -1521,18 +1525,18 @@ async function openWashingModal() {
     else {
         renderWashingModal({
             en: [
-                { title: 'Machine Wash Cold', desc: 'Machine wash cold (30Â°C max).' },
+                { title: 'Machine Wash Cold', desc: 'Machine wash cold (30°C max).' },
                 { title: 'Wash Inside Out', desc: 'Wash inside out to preserve print.' },
                 { title: 'Do Not Bleach', desc: 'Do not use bleach on the fabric.' },
                 { title: 'Do Not Tumble Dry', desc: 'Air dry. Do not tumble dry.' },
                 { title: 'Iron Inside Out', desc: 'Iron inside out on low heat.' }
             ],
             ar: [
-                { title: 'ØºØ³ÙŠÙ„ ØºØ³Ø§Ù„Ø© Ø¨Ø§Ø±Ø¯', desc: 'ÙŠØºØ³Ù„ ÙÙŠ Ø§Ù„ØºØ³Ø§Ù„Ø© Ø¨Ù…Ø§Ø¡ Ø¨Ø§Ø±Ø¯ (30 Ø¯Ø±Ø¬Ø© Ù…Ø¦ÙˆÙŠØ© Ø¨Ø­Ø¯ Ø£Ù‚ØµÙ‰).' },
-                { title: 'ØºØ³ÙŠÙ„ Ø¨Ø§Ù„Ù…Ù‚Ù„ÙˆØ¨', desc: 'ÙŠØºØ³Ù„ Ù…Ù‚Ù„ÙˆØ¨Ø§Ù‹ Ù„Ù„Ø­ÙØ§Ø¸ Ø¹Ù„Ù‰ Ø§Ù„Ø·Ø¨Ø§Ø¹Ø©.' },
-                { title: 'ØªØ¬Ù†Ø¨ Ø§Ù„Ù…Ø¨ÙŠØ¶Ø§Øª', desc: 'Ù„Ø§ ØªØ³ØªØ®Ø¯Ù… Ø§Ù„ÙƒÙ„ÙˆØ± Ø£Ùˆ Ø§Ù„Ù…Ø¨ÙŠØ¶Ø§Øª.' },
-                { title: 'ØªØ¬Ù†Ø¨ Ø§Ù„Ù…Ø¬ÙÙ Ø§Ù„Ø­Ø±Ø§Ø±ÙŠ', desc: 'ÙŠØ¬ÙÙ Ø¨Ø§Ù„ØªØ¹Ù„ÙŠÙ‚ ÙÙŠ Ø§Ù„Ù‡ÙˆØ§Ø¡ØŒ Ù„Ø§ ØªØ³ØªØ®Ø¯Ù… Ø§Ù„Ù…Ø¬ÙÙ.' },
-                { title: 'Ø§Ù„ÙƒÙŠ Ø¨Ø§Ù„Ù…Ù‚Ù„ÙˆØ¨', desc: 'ÙŠÙƒÙˆÙ‰ Ù…Ù‚Ù„ÙˆØ¨Ø§Ù‹ Ø¹Ù„Ù‰ Ø¯Ø±Ø¬Ø© Ø­Ø±Ø§Ø±Ø© Ù…Ù†Ø®ÙØ¶Ø©.' }
+                { title: 'غسيل غسالة بارد', desc: 'يغسل في الغسالة بماء بارد (30 درجة مئوية بحد أقصى).' },
+                { title: 'غسيل بالمقلوب', desc: 'يغسل مقلوباً للحفاظ على الطباعة.' },
+                { title: 'تجنب المبيضات', desc: 'لا تستخدم الكلور أو المبيضات.' },
+                { title: 'تجنب المجفف الحراري', desc: 'يجفف بالتعليق في الهواء، لا تستخدم المجفف.' },
+                { title: 'الكي بالمقلوب', desc: 'يكوى مقلوباً على درجة حرارة منخفضة.' }
             ]
         }, currentLang);
     }
@@ -1557,9 +1561,9 @@ async function openGarmentModal() {
                 { title: 'Keep Away From Rough Surfaces', desc: 'Keep away from rough surfaces that may pill the fabric.' }
             ],
             ar: [
-                { title: 'Ø§Ù„ØªØ®Ø²ÙŠÙ† Ù…Ø·ÙˆÙŠØ§Ù‹', desc: 'ÙŠØ®Ø²Ù† Ù…Ø·ÙˆÙŠØ§Ù‹ ÙˆÙ„ÙŠØ³ Ø¹Ù„Ù‰ Ø¹Ù„Ø§Ù‚Ø© Ù„Ù„Ø­ÙØ§Ø¸ Ø¹Ù„Ù‰ Ø§Ù„Ø´ÙƒÙ„.' },
-                { title: 'ØªØ¬Ù†Ø¨ Ø£Ø´Ø¹Ø© Ø§Ù„Ø´Ù…Ø³', desc: 'ØªØ¬Ù†Ø¨ Ø§Ù„ØªØ¹Ø±Ø¶ Ø§Ù„Ø·ÙˆÙŠÙ„ Ù„Ø£Ø´Ø¹Ø© Ø§Ù„Ø´Ù…Ø³ Ø§Ù„Ù…Ø¨Ø§Ø´Ø±Ø© Ù„Ù…Ù†Ø¹ Ø¨Ù‡ØªØ§Ù† Ø§Ù„Ù„ÙˆÙ†.' },
-                { title: 'Ø§Ù„Ø§Ø¨ØªØ¹Ø§Ø¯ Ø¹Ù† Ø§Ù„Ø£Ø³Ø·Ø­ Ø§Ù„Ø®Ø´Ù†Ø©', desc: 'ÙŠØ­ÙØ¸ Ø¨Ø¹ÙŠØ¯Ø§Ù‹ Ø¹Ù† Ø§Ù„Ø£Ø³Ø·Ø­ Ø§Ù„Ø®Ø´Ù†Ø© Ø§Ù„ØªÙŠ Ù‚Ø¯ ØªØ³Ø¨Ø¨ ØªØ´Ù‚Ù‚ Ø§Ù„Ù‚Ù…Ø§Ø´.' }
+                { title: 'التخزين مطوياً', desc: 'يخزن مطوياً وليس على علاقة للحفاظ على الشكل.' },
+                { title: 'تجنب أشعة الشمس', desc: 'تجنب التعرض الطويل لأشعة الشمس المباشرة لمنع بهتان اللون.' },
+                { title: 'الابتعاد عن الأسطح الخشنة', desc: 'يحفظ بعيداً عن الأسطح الخشنة التي قد تسبب تشقق القماش.' }
             ]
         }, currentLang);
     }
@@ -1597,7 +1601,7 @@ async function trackOrdersByPhone() {
     errEl.style.display = 'none';
     
     if (!phoneInput) {
-        errEl.innerText = currentLang === 'ar' ? 'ÙŠØ±Ø¬Ù‰ Ø¥Ø¯Ø®Ø§Ù„ Ø±Ù‚Ù… Ù‡Ø§ØªÙÙƒ.' : 'Please enter your phone number.';
+        errEl.innerText = currentLang === 'ar' ? 'يرجى إدخال رقم هاتفك.' : 'Please enter your phone number.';
         errEl.style.display = 'block';
         return;
     }
@@ -1605,7 +1609,7 @@ async function trackOrdersByPhone() {
     const searchBtn = document.getElementById('trackerSearchBtn');
     if (searchBtn) {
         searchBtn.disabled = true;
-        searchBtn.innerHTML = `<span class="chk-spinner"></span>${currentLang === 'ar' ? 'Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø¨Ø­Ø«...' : 'Searching...'}`;
+        searchBtn.innerHTML = `<span class="chk-spinner"></span>${currentLang === 'ar' ? 'جاري البحث...' : 'Searching...'}`;
     }
     
     let ordersList = [];
@@ -1638,11 +1642,11 @@ async function trackOrdersByPhone() {
     
     if (searchBtn) {
         searchBtn.disabled = false;
-        searchBtn.innerText = currentLang === 'ar' ? 'ØªØªØ¨Ø¹ Ø§Ù„Ø·Ù„Ø¨' : 'Track Order';
+        searchBtn.innerText = currentLang === 'ar' ? 'تتبع الطلب' : 'Track Order';
     }
     
     if (ordersList.length === 0) {
-        errEl.innerText = currentLang === 'ar' ? 'Ù„Ù… ÙŠØªÙ… Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ Ø£ÙŠ Ø·Ù„Ø¨Ø§Øª Ù„Ù‡Ø°Ø§ Ø§Ù„Ø±Ù‚Ù….' : 'No orders found for this phone number.';
+        errEl.innerText = currentLang === 'ar' ? 'لم يتم العثور على أي طلبات لهذا الرقم.' : 'No orders found for this phone number.';
         errEl.style.display = 'block';
         return;
     }
@@ -1659,7 +1663,7 @@ async function trackOrdersByPhone() {
         if (order.status === 'refunded') badgeClass = 'status-refunded';
         if (order.status === 'refund_denied') badgeClass = 'status-refund_denied';
         
-        let dateStr = 'â€”';
+        let dateStr = '—';
         if (order.created_at) {
             dateStr = new Date(order.created_at).toLocaleDateString(isAr ? 'ar-EG' : 'en-US');
         } else if (order.date) {
@@ -1673,28 +1677,28 @@ async function trackOrdersByPhone() {
         <div class="order-tracker-card" style="border: 1px solid #1a1a1a; background: #070707; border-radius: 6px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 24px rgba(0,0,0,0.4); text-align: left;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
                 <div>
-                    <h3 style="font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0 0 4px 0; color: #fff;">${isAr ? 'Ø·Ù„Ø¨' : 'Order'} #${order.id}</h3>
-                    <p style="font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px;">${isAr ? 'ØªØ§Ø±ÙŠØ® Ø§Ù„Ø·Ù„Ø¨' : 'Date'}: ${dateStr}</p>
+                    <h3 style="font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0 0 4px 0; color: #fff;">${isAr ? 'طلب' : 'Order'} #${order.id}</h3>
+                    <p style="font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px;">${isAr ? 'تاريخ الطلب' : 'Date'}: ${dateStr}</p>
                 </div>
                 <span class="status-badge ${badgeClass}" style="font-size: 10px; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; font-weight: 600;">${order.status}</span>
             </div>
             
             ${stepperHTML ? stepperHTML : `
                 <div style="background: rgba(255,255,255,0.02); padding: 10px; border-radius: 4px; text-align: center; margin: 15px 0; font-size: 11px; color: #888;">
-                    ${isAr ? 'Ø­Ø§Ù„Ø© Ø§Ù„Ø·Ù„Ø¨' : 'Status'}: <strong style="color: #fff; text-transform: uppercase;">${order.status}</strong>
+                    ${isAr ? 'حالة الطلب' : 'Status'}: <strong style="color: #fff; text-transform: uppercase;">${order.status}</strong>
                 </div>
             `}
             
             <div style="font-size: 12px; color: #888; line-height: 1.6; display: flex; flex-direction: column; gap: 4px; margin-top: 15px; border-top: 1px solid #111; padding-top: 12px;">
-                <div><strong>${isAr ? 'Ø§Ù„Ù…Ù†ØªØ¬' : 'Product'}:</strong> <span style="color: #eee;">${order.product_name} (${order.size || 'â€”'})</span></div>
-                <div><strong>${isAr ? 'Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„Ù…Ø¯ÙÙˆØ¹' : 'Total Paid'}:</strong> <span style="color: #eee;">EGP ${totalPaid}.00</span></div>
-                <div><strong>${isAr ? 'Ø¹Ù†ÙˆØ§Ù† Ø§Ù„Ø´Ø­Ù†' : 'Address'}:</strong> <span style="color: #eee;">${order.address ? order.address.split(' | ')[0] : 'â€”'}</span></div>
+                <div><strong>${isAr ? 'المنتج' : 'Product'}:</strong> <span style="color: #eee;">${order.product_name} (${order.size || '—'})</span></div>
+                <div><strong>${isAr ? 'إجمالي المدفوع' : 'Total Paid'}:</strong> <span style="color: #eee;">EGP ${totalPaid}.00</span></div>
+                <div><strong>${isAr ? 'عنوان الشحن' : 'Address'}:</strong> <span style="color: #eee;">${order.address ? order.address.split(' | ')[0] : '—'}</span></div>
             </div>
         </div>
         `;
     });
     
-    html += `<button class="desc-trigger-btn" onclick="backToTrackerSearch()" style="margin-top: 15px; width: 100%; border-color: #111;">${isAr ? 'â† Ø±Ø¬ÙˆØ¹ Ù„Ù„Ø¨Ø­Ø«' : 'â† Back to Search'}</button>`;
+    html += `<button class="desc-trigger-btn" onclick="backToTrackerSearch()" style="margin-top: 15px; width: 100%; border-color: #111;">${isAr ? '← رجوع للبحث' : '← Back to Search'}</button>`;
     
     document.getElementById('trackerResults').innerHTML = html;
     document.getElementById('trackerSearchForm').style.display = 'none';
@@ -1752,7 +1756,7 @@ function calculateTotals() {
         document.getElementById('chkShipping').innerText = "EGP " + Number(shippingFeeValue).toFixed(2);
         document.getElementById('chkTotal').innerHTML = `<span class="chk-currency-code">EGP </span>${computedTotalSum.toFixed(2)}`;
     } else {
-        const placeholder = currentLang === 'ar' ? "Ø§Ø®ØªØ§Ø± Ø§Ù„Ù…Ø­Ø§ÙØ¸Ø©" : "Select city";
+        const placeholder = currentLang === 'ar' ? "اختار المحافظة" : "Select city";
         document.getElementById('chkShipping').innerText = placeholder;
         document.getElementById('chkTotal').innerHTML = `<span class="chk-currency-code">EGP </span>${finalSubtotal.toFixed(2)}`;
     }
@@ -1819,7 +1823,7 @@ async function submitShopifyCheckout() {
     const submitBtn = document.querySelector('.chk-submit-button');
     if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = `<span class="chk-spinner"></span>${currentLang === 'ar' ? 'Ø¬Ø§Ø±Ù Ø§Ù„Ù…Ø¹Ø§Ù„Ø¬Ø©...' : 'Processing...'}`;
+        submitBtn.innerHTML = `<span class="chk-spinner"></span>${currentLang === 'ar' ? 'جارٍ المعالجة...' : 'Processing...'}`;
     }
 
     // 1. Verify stock availability via Proxy
@@ -1939,6 +1943,7 @@ async function submitShopifyCheckout() {
     // Dispatch Email receipt via EmailJS
     sendEmailReceipt(orderId, emailInput, firstInput, lastInput, p.name, activeSelectedSize, activeSelectedPayment, finalSubtotal, shippingFeeValue, computedTotalSum, contactInput, combinedAddress, cityInput);
 
+    // Send Discord Notification
     const discordOrderInfo = {
         name: firstInput + ' ' + lastInput,
         phone: contactInput,
@@ -1954,7 +1959,7 @@ async function submitShopifyCheckout() {
 
     if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = currentLang === 'ar' ? 'Ø£ÙƒØ¯ Ø§Ù„Ø·Ù„Ø¨ Ø¯Ù„ÙˆÙ‚ØªÙŠ' : 'Complete Order';
+        submitBtn.innerHTML = currentLang === 'ar' ? 'أكد الطلب دلوقتي' : 'Complete Order';
     }
     
     // Clear checkout views and forms
@@ -1975,38 +1980,39 @@ function showOrderConfirmationModal(orderId, firstName, productName, size, subto
     const isAr = currentLang === 'ar';
     const waMsg = encodeURIComponent(
         isAr
-            ? `ØªØ£ÙƒÙŠØ¯ Ø·Ù„Ø¨ Ù…Ø¬Ø±Ø©\nØ±Ù‚Ù… Ø§Ù„Ø·Ù„Ø¨: ${orderId}\nØ§Ù„Ø§Ø³Ù…: ${firstName}\nØ§Ù„Ù‚Ø·Ø¹Ø©: ${productName} (Ù…Ù‚Ø§Ø³ ${size})\nØ§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ: ${total.toFixed(2)} Ø¬Ù†ÙŠÙ‡ Ù…ØµØ±ÙŠ\nØ·Ø±ÙŠÙ‚Ø© Ø§Ù„Ø¯ÙØ¹: Ù†Ù‚Ø¯Ø§Ù‹ Ø¹Ù†Ø¯ Ø§Ù„Ø§Ø³ØªÙ„Ø§Ù…\n\nØ·Ù„Ø¨Ùƒ Ù‚ÙŠØ¯ Ø§Ù„ØªÙ†ÙÙŠØ° ÙˆØ³ÙŠØªÙ… Ø§Ù„ØªÙˆØµÙŠÙ„ Ø®Ù„Ø§Ù„ Ù¢ Ø¥Ù„Ù‰ Ù¤ Ø£ÙŠØ§Ù… Ø¹Ù…Ù„. Ø³ÙŠÙ‚ÙˆÙ… Ø§Ù„Ù…Ù†Ø¯ÙˆØ¨ Ø¨Ø§Ù„Ø§ØªØµØ§Ù„ Ø¨Ùƒ ÙÙˆØ± ÙˆØµÙˆÙ„Ù‡ Ø¥Ù„Ù‰ Ù…Ù†Ø·Ù‚ØªÙƒ.`
+            ? `تأكيد طلب مجرة\nرقم الطلب: ${orderId}\nالاسم: ${firstName}\nالقطعة: ${productName} (مقاس ${size})\nالإجمالي: ${total.toFixed(2)} جنيه مصري\nطريقة الدفع: نقداً عند الاستلام\n\nطلبك قيد التنفيذ وسيتم التوصيل خلال ٢ إلى ٤ أيام عمل. سيقوم المندوب بالاتصال بك فور وصوله إلى منطقتك.`
             : `MAJARAH | Order Confirmation\nOrder Number: ${orderId}\nCustomer Name: ${firstName}\nItem: ${productName} (Size ${size})\nTotal Amount: ${total.toFixed(2)} EGP\nPayment Method: Cash on Delivery\n\nYour order is being processed and will be delivered within 2 to 4 business days. You will receive a call from our courier once they arrive in your area.`
     );
-    const waLink = `https://wa.me/201229067066?text=${waMsg}`;
+    const configuredWa = window.SITE_CONFIG?.waNumber || '201229067066';
+    const waLink = `https://wa.me/${configuredWa}?text=${waMsg}`;
 
     const modal = document.createElement('div');
     modal.id = 'orderConfirmModal';
     modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);';
     modal.innerHTML = `
         <div style="background:#080808;border:1px solid #1a1a1a;border-radius:8px;max-width:460px;width:100%;padding:40px 35px;text-align:center;position:relative;animation:confirmSlideUp 0.4s cubic-bezier(0.16,1,0.3,1);">
-            <div style="font-size:48px;margin-bottom:16px;">âœ…</div>
-            <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:#555;margin-bottom:8px;">${isAr ? 'ØªÙ… ØªØ£ÙƒÙŠØ¯ Ø§Ù„Ø·Ù„Ø¨' : 'Order Confirmed'}</div>
-            <h2 style="font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:#fff;margin:0 0 6px 0;">${isAr ? 'Ø´ÙƒØ±Ø§Ù‹ØŒ ' + firstName + '!' : 'Thank you, ' + firstName + '!'}</h2>
+            <div style="font-size:48px;margin-bottom:16px;">✅</div>
+            <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:#555;margin-bottom:8px;">${isAr ? 'تم تأكيد الطلب' : 'Order Confirmed'}</div>
+            <h2 style="font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:#fff;margin:0 0 6px 0;">${isAr ? 'شكراً، ' + firstName + '!' : 'Thank you, ' + firstName + '!'}</h2>
             <p style="font-size:12px;color:#666;line-height:1.7;margin:0 0 24px 0;">
                 ${isAr
-                    ? `Ø·Ù„Ø¨Ùƒ <strong style="color:#fff">${orderId}</strong> ÙˆØµÙ„Ù†Ø§ ÙˆÙ‡ÙŠØªÙ… Ø§Ù„ØªÙˆØ§ØµÙ„ Ù…Ø¹Ø§Ùƒ Ø®Ù„Ø§Ù„ 48 Ø³Ø§Ø¹Ø© Ù„ØªØ£ÙƒÙŠØ¯Ù‡. Ø¨Ø¹Ø¯ Ø§Ù„ØªØ£ÙƒÙŠØ¯ØŒ Ø¨ÙŠÙˆØµÙ„Ùƒ Ø®Ù„Ø§Ù„ 1â€“4 Ø£ÙŠØ§Ù… Ø¹Ù…Ù„.`
-                    : `Order <strong style="color:#fff">${orderId}</strong> received. We'll call you within 48 hours to confirm. After confirmation, delivery takes 1â€“4 business days.`
+                    ? `طلبك <strong style="color:#fff">${orderId}</strong> وصلنا وهيتم التواصل معاك خلال 48 ساعة لتأكيده. بعد التأكيد، بيوصلك خلال 1–4 أيام عمل.`
+                    : `Order <strong style="color:#fff">${orderId}</strong> received. We'll call you within 48 hours to confirm. After confirmation, delivery takes 1–4 business days.`
                 }
             </p>
             <div style="background:#0d0d0d;border:1px solid #151515;border-radius:6px;padding:16px;margin-bottom:24px;text-align:left;">
-                <div style="display:flex;justify-content:space-between;font-size:11px;style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:8px;"><span>${isAr ? 'Ø§Ù„Ù…Ù†ØªØ¬' : 'Product'}</span    <div style="lor:#ccc;">${productName} (${size})</span></div>
-                <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:8px;"><span>${isAr ? 'Ø§Ù„Ù…Ø­Ø§ÙØ¸Ø©' : 'City'}</span><span style="color:#ccc;">${city}</span></div>
-                <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:8px;"><span>${isAr ? 'Ø§Ù„Ù…Ù†ØªØ¬' : 'Subtotal'}</span><span style="color:#ccc;">EGP ${subtotal.toFixed(2)}</span></div>
-                <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:10px;"><span>${isAr ? 'Ø§Ù„Ø´Ø­Ù†' : 'Shipping'}</span><span style="color:#ccc;">EGP ${shipping.toFixed(2)}</span></div>
-                <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#fff;border-top:1px solid #1a1a1a;padding-top:10px;"><span>${isAr ? 'Ø§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ' : 'Total'}</span><span>EGP ${total.toFixed(2)}</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:8px;"><span>${isAr ? 'المنتج' : 'Product'}</span    <div style="lor:#ccc;">${productName} (${size})</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:8px;"><span>${isAr ? 'المحافظة' : 'City'}</span><span style="color:#ccc;">${city}</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:8px;"><span>${isAr ? 'المنتج' : 'Subtotal'}</span><span style="color:#ccc;">EGP ${subtotal.toFixed(2)}</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:10px;"><span>${isAr ? 'الشحن' : 'Shipping'}</span><span style="color:#ccc;">EGP ${shipping.toFixed(2)}</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#fff;border-top:1px solid #1a1a1a;padding-top:10px;"><span>${isAr ? 'الإجمالي' : 'Total'}</span><span>EGP ${total.toFixed(2)}</span></div>
             </div>
             <a href="${waLink}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;background:#25d366;color:#fff;text-decoration:none;border-radius:6px;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                ${isAr ? 'ØªØ£ÙƒÙŠØ¯ Ø§Ù„Ø·Ù„Ø¨ Ø¹Ø¨Ø± ÙˆØ§ØªØ³Ø§Ø¨' : 'Confirm via WhatsApp'}
+                ${isAr ? 'تأكيد الطلب عبر واتساب' : 'Confirm via WhatsApp'}
             </a>
             <button onclick="closeOrderConfirmModal()" style="width:100%;padding:12px;background:transparent;border:1px solid #222;color:#666;border-radius:6px;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='#444';this.style.color='#fff'" onmouseout="this.style.borderColor='#222';this.style.color='#666'">
-                ${isAr ? 'Ø¥ØºÙ„Ø§Ù‚' : 'Close'}
+                ${isAr ? 'إغلاق' : 'Close'}
             </button>
         </div>
     `;
@@ -2166,15 +2172,15 @@ function calculateRecommendedSize() {
     const isAr = (currentLang === 'ar');
     if (fit === 'oversized') {
         desc = isAr 
-            ? `Ø§Ù„Ù…Ù‚Ø§Ø³ Ø§Ù„Ù…Ù‚ØªØ±Ø­ <strong>${finalSize}</strong> Ù‡ÙŠØ¯ÙŠÙƒ Ø§Ù„Ø§Ø³ØªØ§ÙŠÙ„ Ø§Ù„Ø£ÙˆÙØ±Ø³Ø§ÙŠØ² Ø§Ù„ÙˆØ§Ø³Ø¹ Ø§Ù„Ù…Ø±ÙŠØ­ ÙˆØ§Ù„ÙƒØªÙ Ø§Ù„Ø³Ø§Ù‚Ø· Ø§Ù„Ù…Ø¸Ø¨ÙˆØ·.`
+            ? `المقاس المقترح <strong>${finalSize}</strong> هيديك الاستايل الأوفرسايز الواسع المريح والكتف الساقط المظبوط.`
             : `Suggested size <strong>${finalSize}</strong> gives you the perfect boxy, dropped-shoulder streetwear fit.`;
     } else if (fit === 'regular') {
         desc = isAr
-            ? `Ø§Ù„Ù…Ù‚Ø§Ø³ Ø§Ù„Ù…Ù‚ØªØ±Ø­ <strong>${finalSize}</strong> Ù‡ÙŠÙƒÙˆÙ† Ù…Ø±ÙŠØ­ Ø¨Ø³ Ø£Ù‚Ø±Ø¨ Ù„Ù„Ù…Ù‚Ø§Ø³Ø§Øª Ø§Ù„Ø¹Ø§Ø¯ÙŠØ© ÙˆÙ…Ø´ ÙˆØ§Ø³Ø¹ Ø£ÙˆÙŠ.`
+            ? `المقاس المقترح <strong>${finalSize}</strong> هيكون مريح بس أقرب للمقاسات العادية ومش واسع أوي.`
             : `Suggested size <strong>${finalSize}</strong> fits loose but sits closer to standard sizing dimensions.`;
     } else {
         desc = isAr
-            ? `Ø§Ù„Ù…Ù‚Ø§Ø³ Ø§Ù„Ù…Ù‚ØªØ±Ø­ <strong>${finalSize}</strong> Ù‡ÙŠÙƒÙˆÙ† Ù…Ø¸Ø¨ÙˆØ· ÙˆØ¯Ø§ÙŠÙ‚ Ø´ÙˆÙŠØ© Ø¹Ù„Ù‰ Ø§Ù„Ø¬Ø³Ù… (ØµØºØ±Ù†Ø§ Ù…Ù‚Ø§Ø³ Ø¹Ù† Ø§Ù„ÙˆØ§Ø³Ø¹ Ø§Ù„Ù…Ø¹ØªØ§Ø¯).`
+            ? `المقاس المقترح <strong>${finalSize}</strong> هيكون مظبوط ودايق شوية على الجسم (صغرنا مقاس عن الواسع المعتاد).`
             : `Suggested size <strong>${finalSize}</strong> fits snuggier to the body (sizing down from default).`;
     }
     document.getElementById('recommenderFitDesc').innerHTML = desc;
@@ -2208,7 +2214,7 @@ async function openRefundModal() {
     lockBodyScroll();
     backToRefundLookup();
     const data = await fetchDynamicContent('policies');
-    // Always render policy â€” uses static fallback if API fails
+    // Always render policy — uses static fallback if API fails
     renderRefundPolicyModal(data, currentLang);
 }
 
@@ -2287,10 +2293,10 @@ async function lookupOrderForRefund() {
 function getStepperHTML(status) {
     const isAr = (currentLang === 'ar');
     const steps = [
-        { key: 'pending', en: 'Pending', ar: 'Ù‚ÙŠØ¯ Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø±' },
-        { key: 'confirmed', en: 'Confirmed', ar: 'Ù…Ø¤ÙƒØ¯' },
-        { key: 'shipped', en: 'Shipped', ar: 'ØªÙ… Ø§Ù„Ø´Ø­Ù†' },
-        { key: 'delivered', en: 'Delivered', ar: 'ØªÙ… Ø§Ù„ØªÙˆØµÙŠÙ„' }
+        { key: 'pending', en: 'Pending', ar: 'قيد الانتظار' },
+        { key: 'confirmed', en: 'Confirmed', ar: 'مؤكد' },
+        { key: 'shipped', en: 'Shipped', ar: 'تم الشحن' },
+        { key: 'delivered', en: 'Delivered', ar: 'تم التوصيل' }
     ];
     
     let activeIdx = 0;
@@ -2333,7 +2339,7 @@ function displayRefundOrderDetails(order) {
     if (order.status === 'refunded') badgeClass = 'status-refunded';
     if (order.status === 'refund_denied') badgeClass = 'status-refund_denied';
 
-    let dateStr = 'â€”';
+    let dateStr = '—';
     if (order.created_at) {
         dateStr = new Date(order.created_at).toLocaleDateString();
     } else if (order.date) {
@@ -2348,7 +2354,7 @@ function displayRefundOrderDetails(order) {
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
             <div>
                 <h3 style="font-size: 16px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Order #${order.id}</h3>
-                <p style="font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 1px;">${isAr ? 'Ø§Ù„Ø¹Ù…ÙŠÙ„' : 'Customer'}: ${order.first_name || ''} ${order.last_name || ''}</p>
+                <p style="font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 1px;">${isAr ? 'العميل' : 'Customer'}: ${order.first_name || ''} ${order.last_name || ''}</p>
             </div>
             <span class="status-b|| ''}</p>
             </div>
@@ -2356,9 +2362,9 @@ function displayRefundOrderDetails(order) {
         </div>
         ${stepperHTML}
         <div style="font-size: 13px; color: #888; line-height: 1.6; display: flex; flex-direction: column; gap: 6px; margin-top: 15px;">
-            <div><strong>${isAr ? 'Ø§Ù„Ù…Ù†ØªØ¬' : 'Product'}:</strong> ${order.product_name} (${order.size || 'â€”'})</div>
-            <div><strong>${isAr ? 'ØªØ§Ø±ÙŠØ® Ø§Ù„Ø·Ù„Ø¨' : 'Date Ordered'}:</strong> ${dateStr}</div>
-            <div><strong>${isAr ? 'Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„Ù…Ø¯ÙÙˆØ¹' : 'Total Paid'}:</strong> EGP ${totalPaid}.00</div>
+            <div><strong>${isAr ? 'المنتج' : 'Product'}:</strong> ${order.product_name} (${order.size || '—'})</div>
+            <div><strong>${isAr ? 'تاريخ الطلب' : 'Date Ordered'}:</strong> ${dateStr}</div>
+            <div><strong>${isAr ? 'إجمالي المدفوع' : 'Total Paid'}:</strong> EGP ${totalPaid}.00</div>
         </div>
     `;
 
@@ -2721,7 +2727,7 @@ function checkPrelaunch() {
             badge.style.cssText = 'position:fixed;bottom:20px;right:20px;width:40px;height:40px;border-radius:50%;background:rgba(8,8,8,0.92);border:1px solid rgba(255,255,255,0.12);color:#fff;font-size:18px;cursor:pointer;z-index:99999;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,0.5);backdrop-filter:blur(8px);transition:transform 0.2s,background 0.2s;';
             badge.onmouseover = () => { badge.style.background='rgba(255,68,68,0.15)'; badge.style.transform='scale(1.1)'; };
             badge.onmouseout  = () => { badge.style.background='rgba(8,8,8,0.92)';    badge.style.transform='scale(1)'; };
-            badge.innerHTML = 'ðŸ”’';
+            badge.innerHTML = '🔒';
             document.body.appendChild(badge);
         }
     } else {
@@ -3400,7 +3406,7 @@ async function loadCustomerProfile() {
     }
     
     ordersContainer.innerHTML = ordersList.map(o => {
-        const orderDate = o.created_at ? new Date(o.created_at).toLocaleDateString() : 'â€”';
+        const orderDate = o.created_at ? new Date(o.created_at).toLocaleDateString() : '—';
         const total = (Number(o.subtotal) || 0) + (Number(o.shipping_cost) || 0);
         let badgeClass = 'status-pending';
         if (o.status === 'confirmed' || o.status === 'delivered' || o.status === 'shipped') badgeClass = 'status-confirmed';
@@ -3413,7 +3419,7 @@ async function loadCustomerProfile() {
             <div style="background: #0d0d0d; border: 1px solid #141414; padding: 12px 15px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <div>
                     <div style="font-size: 12px; font-weight: 700; color: #fff;">Order #${o.id}</div>
-                    <div style="font-size: 11px; color: #555; margin-top: 4px;">${o.product_name} (${o.size}) Â· ${orderDate}</div>
+                    <div style="font-size: 11px; color: #555; margin-top: 4px;">${o.product_name} (${o.size}) · ${orderDate}</div>
                     <div style="font-size: 11px; color: #aaa; margin-top: 2px;">Total: EGP ${total}.00</div>
                 </div>
                 <span class="status-badge ${badgeClass}" style="font-size: 9px; padding: 2px 8px;">${o.status}</span>
@@ -3461,7 +3467,8 @@ function toggleChatWidget(event) {
 }
 
 function triggerFooterContact() {
-    window.open('https://wa.me/201229067066', '_blank');
+    const configuredWa = window.SITE_CONFIG?.waNumber || '201229067066';
+    window.open(`https://wa.me/${configuredWa}`, '_blank');
 }
 
 // Close chat window on click outside
@@ -3482,7 +3489,7 @@ let mobileFlippedCard = null;
 document.addEventListener('touchstart', (e) => {
     const card = e.target.closest('.product-card');
     if (!card) {
-        // Tap outside a card â€” unflip
+        // Tap outside a card — unflip
         if (mobileFlippedCard) {
             mobileFlippedCard.classList.remove('mobile-flipped');
             mobileFlippedCard = null;
@@ -3511,14 +3518,14 @@ document.addEventListener('touchstart', (e) => {
     const hintEl = document.querySelector('[data-t="tap_explore"]');
     if (hintEl && isTouchDevice) {
         const isAr = currentLang === 'ar';
-        hintEl.textContent = isAr ? 'Ø§Ø¶ØºØ· Ø¹Ù„Ù‰ Ø£ÙŠ Ù‚Ø·Ø¹Ø© Ù„Ù„Ø§Ø³ØªÙƒØ´Ø§Ù Â· Ø§Ø¶ØºØ· Ù…Ø±ØªÙŠÙ† Ù„Ø±Ø¤ÙŠØ© Ø§Ù„Ø¸Ù‡Ø±' : 'Tap to explore Â· Tap again to see the back';
+        hintEl.textContent = isAr ? 'اضغط على أي قطعة للاستكشاف · اضغط مرتين لرؤية الظهر' : 'Tap to explore · Tap again to see the back';
     }
 })();
 
 // Run Application Bootstrap Setup Loop
 initApp();
 
-// â”€â”€ GLOBAL EXPORTS (for obfuscated environment) â”€â”€
+// ── GLOBAL EXPORTS (for obfuscated environment) ──
 window.resolveImgSrc = resolveImgSrc;
 window.startTeaserCountdown = startTeaserCountdown;
 window.openProduct = openProduct;
@@ -3582,6 +3589,7 @@ window.handlePrelaunchNotify = handlePrelaunchNotify;
 window.handlePrelaunchBypass = handlePrelaunchBypass;
 window.showToast = showToast;
 
+
 async function sendOrderToDiscord(order) {
   const WEBHOOK_URL = 'https://discord.com/api/webhooks/1514721625206165578/9z2Lh7Ufp6d_AU3TDJbFfLsbXtPw-cRb9FKKhKurfz9z31_eKGbFRDorRtQGBkoZYmKW';
   
@@ -3589,21 +3597,21 @@ async function sendOrderToDiscord(order) {
     username: 'Majarah Orders',
     avatar_url: 'https://majarah.vercel.app/logo.png',
     embeds: [{
-      title: 'ðŸ›ï¸ NEW ORDER â€” MAJARAH',
+      title: '🛍️ NEW ORDER — MAJARAH',
       color: 0xffffff,
       fields: [
-        { name: 'ðŸ‘¤ Name', value: order.name || 'N/A', inline: true },
-        { name: 'ðŸ“ž Phone', value: order.phone || 'N/A', inline: true },
-        { name: 'ðŸ™ï¸ Governorate', value: order.governorate || 'N/A', inline: true },
-        { name: 'ðŸ  Address', value: order.address || 'N/A', inline: true },
-        { name: 'ðŸ¢ Apartment', value: order.apartment || 'N/A', inline: true },
-        { name: 'ðŸ‘• Product', value: order.productName || 'N/A', inline: true },
-        { name: 'ðŸ“ Size', value: order.size || 'N/A', inline: true },
-        { name: 'ðŸ’° Total', value: `EGP ${order.total || 'N/A'}`, inline: true },
-        { name: 'ðŸ“¦ Status', value: 'ðŸŸ¡ Pending', inline: true },
-        { name: 'ðŸ• Time', value: new Date().toLocaleString('en-EG', { timeZone: 'Africa/Cairo' }), inline: false },
+        { name: '👤 Name', value: order.name || 'N/A', inline: true },
+        { name: '📞 Phone', value: order.phone || 'N/A', inline: true },
+        { name: '🏙️ Governorate', value: order.governorate || 'N/A', inline: true },
+        { name: '🏠 Address', value: order.address || 'N/A', inline: true },
+        { name: '🏢 Apartment', value: order.apartment || 'N/A', inline: true },
+        { name: '👕 Product', value: order.productName || 'N/A', inline: true },
+        { name: '📐 Size', value: order.size || 'N/A', inline: true },
+        { name: '💰 Total', value: `EGP ${order.total || 'N/A'}`, inline: true },
+        { name: '📦 Status', value: '🟡 Pending', inline: true },
+        { name: '🕐 Time', value: new Date().toLocaleString('en-EG', { timeZone: 'Africa/Cairo' }), inline: false },
       ],
-      footer: { text: 'Majarah Storefront â€¢ Cairo, Egypt' },
+      footer: { text: 'Majarah Storefront • Cairo, Egypt' },
       thumbnail: { url: order.productImage || '' }
     }]
   };
