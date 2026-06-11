@@ -1,4 +1,4 @@
-﻿// --- GLOBAL DATABASE FETCH INTERCEPTOR (Trigger Rebuild) ---
+// --- GLOBAL DATABASE FETCH INTERCEPTOR (Trigger Rebuild) ---
 window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
 // Normalize SB_URL: remove trailing slashes and /rest/v1 if present to avoid "Double REST" URL errors
 if (window.SB_URL) {
@@ -1208,6 +1208,10 @@ async function openProduct(id, push = true) {
     document.getElementById('ppPrice').innerText = "EGP " + p.price;
     document.getElementById('ppDesc').innerHTML = descTranslated;
     
+    const stickyPrice = document.getElementById('stickyPrice');
+    if (stickyPrice) stickyPrice.innerText = "EGP " + p.price;
+    setTimeout(initStickyCartObserver, 100);
+    
     // 1. Dynamic Thumbs — Fix logic to handle JSON strings or Arrays
     const thumbsContainer = document.getElementById('pp-thumbs');
     if (thumbsContainer) {
@@ -1267,6 +1271,35 @@ async function openProduct(id, push = true) {
             buyBtn.innerText = isAr ? 'اشتريه دلوقتي' : 'Buy It Now';
             buyBtn.style.opacity = '1';
         }
+    }
+
+    // Cross Sell Upsell Logic
+    const crossSellBlock = document.getElementById('crossSellBlock');
+    const crossSellContent = document.getElementById('crossSellContent');
+    if (crossSellBlock && crossSellContent && window.fetchedProducts && window.fetchedProducts.length > 1) {
+        // Find a different product to recommend
+        const otherProduct = window.fetchedProducts.find(prod => String(prod.id) !== String(id));
+        if (otherProduct) {
+            let csName = isAr ? (window.PRODUCT_TRANSLATIONS.ar[otherProduct.name] || otherProduct.name) : otherProduct.name;
+            let csColor = isAr ? (window.PRODUCT_TRANSLATIONS.ar[otherProduct.color] || otherProduct.color) : otherProduct.color;
+            let csImg = otherProduct.front_image_url || 'blackinfront.jpg';
+            
+            crossSellContent.innerHTML = `
+                <div class="cross-sell-item" onclick="openProduct('${otherProduct.id}')">
+                    <img src="${csImg}" class="cross-sell-img" alt="${csName}">
+                    <div class="cross-sell-info">
+                        <div class="cross-sell-name">${csName} - ${csColor}</div>
+                        <div class="cross-sell-price">EGP ${otherProduct.price}</div>
+                    </div>
+                    <div class="cross-sell-add">+</div>
+                </div>
+            `;
+            crossSellBlock.style.display = 'block';
+        } else {
+            crossSellBlock.style.display = 'none';
+        }
+    } else if (crossSellBlock) {
+        crossSellBlock.style.display = 'none';
     }
 
     // 3. Stock indicator
@@ -2593,6 +2626,33 @@ function initScrollReveal() {
     
     elements.forEach(el => revealObserver.observe(el));
 }
+
+// 3. Sticky Mobile Cart Observer
+let stickyCartObserver = null;
+function initStickyCartObserver() {
+    if (stickyCartObserver) stickyCartObserver.disconnect();
+    
+    const buyBtn = document.querySelector('#productPage .checkout-trigger-btn');
+    const stickyBar = document.getElementById('mobileStickyCheckout');
+    
+    if (buyBtn && stickyBar) {
+        stickyCartObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) {
+                    // Buy button is off screen, show sticky bar
+                    stickyBar.classList.add('visible');
+                } else {
+                    // Buy button is on screen, hide sticky bar
+                    stickyBar.classList.remove('visible');
+                }
+            });
+        }, { threshold: 0 });
+        
+        stickyCartObserver.observe(buyBtn);
+    }
+}
+// Call initially and when opening product
+setTimeout(initStickyCartObserver, 1000);
 
 // 3. Cosmic Background Starfield Particle Animation Canvas
 function initCosmicCanvas() {

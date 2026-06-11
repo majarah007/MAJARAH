@@ -637,6 +637,12 @@
                 </div>
             </div>
             <button class="checkout-trigger-btn" onclick="window.openCheckout()" data-t="buy_now">Buy It Now</button>
+            
+            <!-- Cross Sell Block -->
+            <div id="crossSellBlock" class="cross-sell-container" style="display: none;">
+                <div class="cross-sell-title" data-t="complete_the_look">Complete the Look</div>
+                <div id="crossSellContent" class="cross-sell-content"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -767,7 +773,14 @@
             </div>
         </div>
     </div>
+<!-- Mobile Sticky Checkout -->
+<div class="mobile-sticky-checkout" id="mobileStickyCheckout">
+    <div class="sticky-inner">
+        <div class="sticky-price" id="stickyPrice">EGP 0.00</div>
+        <button class="checkout-trigger-btn" style="margin-top: 0; padding: 12px 20px;" onclick="window.openCheckout()" data-t="buy_now">Buy It Now</button>
+    </div>
 </div>
-<script src="storefront.js"></script>
+
+<script src="storefront.js?v=4" defer></script>
 </body>
 </html>
