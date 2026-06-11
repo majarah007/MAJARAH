@@ -778,7 +778,7 @@ function populateCityOptions() {
     const selectedVal = citySelect.value;
     
     if (!currentLoadedShippingRates || currentLoadedShippingRates.length === 0) {
-        currentLoadedShippingRates = window.bostaDefaultTiers;
+        currentLoadedShippingRates = bostaDefaultTiers;
     }
     
     citySelect.innerHTML = `<option value="" disabled selected>${isAr ? 'اختار المحافظة' : 'Select Governorate / City'}</option>` + 
@@ -1722,8 +1722,8 @@ function getShippingRate(cityName) {
         return Number(rates[cityName]);
     }
     // Fallback to bostaDefaultTiers if available
-    if (window.bostaDefaultTiers) {
-        const match = window.bostaDefaultTiers.find(r => r.name === cityName);
+    if (bostaDefaultTiers) {
+        const match = bostaDefaultTiers.find(r => r.name === cityName);
         return match ? Number(match.price) : 0;
     }
     return 0;
@@ -1788,7 +1788,7 @@ async function submitShopifyCheckout() {
 
     const combinedAddress = `${addressInputMain} | ${buildingInput} | ${floorInput || '-'} | ${apartmentInput || '-'} | ${landmarkInput || '-'}`;
 
-    currentLoadedShippingRates = window.bostaDefaultTiers;
+    currentLoadedShippingRates = bostaDefaultTiers;
     
     let p = fetchedProducts.find(prod => String(prod.id) === String(activeProductId));
     if (!p) {
