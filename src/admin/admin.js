@@ -1671,7 +1671,7 @@ async function deleteOrder(id) {
   if (!confirmed) return;
   
   let success = false;
-  if (window.SB_URL && window.SB_KEY && String(id).indexOf('ORD-') === -1) {
+  if (String(id).indexOf('ORD-') === -1) {
     const res = await sbFetch('orders', 'DELETE', null, `?id=eq.${id}`);
     if (res) success = true;
   }
@@ -1982,7 +1982,7 @@ async function saveOrder() {
     showToast("Order added successfully!");
     
     // --- SEND DISCORD WEBHOOK ---
-    const WEBHOOK_URL = 'https://discord.com/api/webhooks/1514721625206165578/9z2Lh7Ufp6d_AU3TDJbFfLsbXtPw-cRb9FKKhKurfz9z31_eKGbFRDorRtQGBkoZYmKW';
+    const WEBHOOK_URL = '/api/discord';
     const embed = {
       username: 'Majarah Orders',
       avatar_url: 'https://majarah.vercel.app/logo.png',
