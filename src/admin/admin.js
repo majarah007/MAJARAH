@@ -1,4 +1,4 @@
-﻿window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
+window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
 // Normalize SB_URL: remove trailing slashes and /rest/v1 if present to avoid "Double REST" URL errors
 if (window.SB_URL) {
     window.SB_URL = window.SB_URL.replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
@@ -101,7 +101,15 @@ async function loadAdminConfig() {
                 }
             }
         }
-    } catch (e) { console.error("Config fetch failed:", e); }
+    } catch (e) { 
+        console.error("Config fetch failed:", e); 
+    } finally {
+        const loader = document.getElementById('globalLoader');
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => loader.remove(), 600);
+        }
+    }
 }
 
 function populateTweaksFromConfig() {
@@ -139,7 +147,7 @@ function populateTweaksFromConfig() {
     
     // Prelaunch
     setVal('tweakShowPrelaunch', String(cfg('showPrelaunch', false)));
-    setVal('waNumber', cfg('waNumber', '201229067066'));
+    setVal('waNumber', cfg('waNumber', '201099460237'));
     setVal('tweakPrelaunchDate', cfg('prelaunchDate', '2026-07-01T20:00:00'));
     setVal('tweakPrelaunchPassword', cfg('bypassPassword', 'majarah2026'));
     
@@ -156,7 +164,7 @@ function populateTweaksFromConfig() {
 }
 
 async function saveConfigToSupabase(partialConfig, secondArg) {
-  if (!SB_URL || !SB_KEY) {
+  if (false) {
     showToast('Supabase not connected. Check credentials.', 'error');
     return;
   }
@@ -534,7 +542,7 @@ function renderDashboard() {
         </div>
         <div class="settings-card">
           <h3>📱 WhatsApp Number</h3>
-          <div class="field-group"><label>Fulfillment Phone (with country code)</label><input type="text" id="waNumber" placeholder="201229067066"></div>
+          <div class="field-group"><label>Fulfillment Phone (with country code)</label><input type="text" id="waNumber" placeholder="201099460237"></div>
           <button class="btn btn-accent btn-sm" onclick="saveWaNumber()">Save Number</button>
           <p style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.8;">This number receives WhatsApp order notifications from the checkout page.</p>
         </div>
@@ -1929,7 +1937,7 @@ function changePassword() {
 }
 function saveWaNumber() {
   const num = document.getElementById('waNumber').value.trim();
-  setConfig({ waNumber: num });
+  saveConfigToSupabase({ waNumber: num });
   showToast("WhatsApp configuration saved!");
 }
 // savePromoText merged into saveTweaks for combined marquee config save operations.

@@ -187,6 +187,11 @@ async function loadSiteConfig() {
         console.warn("Using local cache for config:", e);
     } finally {
         applyConfigToDOM();
+        const loader = document.getElementById('globalLoader');
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => loader.remove(), 600);
+        }
     }
 }
 
@@ -261,20 +266,20 @@ function applyConfigToDOM() {
 
 // Official 27 Bosta Governorate Default Matrix Setup (Subsidized Shipping Strategy)
 const bostaDefaultTiers = [
-    { name: 'Cairo', price: 43 }, { name: 'Giza', price: 43 },
-    { name: 'Alexandria', price: 50 }, { name: 'Qalyubia', price: 53 },
-    { name: 'Sharqia', price: 53 }, { name: 'Dakahlia', price: 53 },
-    { name: 'Gharbia', price: 53 }, { name: 'Monufia', price: 53 },
-    { name: 'Beheira', price: 53 }, { name: 'Damietta', price: 53 },
-    { name: 'Port Said', price: 53 }, { name: 'Ismailia', price: 53 },
-    { name: 'Suez', price: 53 }, { name: 'Kafr El Sheikh', price: 53 },
-    { name: 'Fayoum', price: 118 }, { name: 'Beni Suef', price: 118 },
-    { name: 'Minya', price: 118 }, { name: 'Asyut', price: 118 },
-    { name: 'Sohag', price: 118 }, { name: 'Qena', price: 118 },
-    { name: 'Luxor', price: 118 }, { name: 'Aswan', price: 118 },
-    { name: 'Red Sea', price: 131 }, { name: 'Matrouh', price: 131 },
-    { name: 'New Valley', price: 131 }, { name: 'North Sinai', price: 131 },
-    { name: 'South Sinai', price: 131 }
+    { name: 'Cairo', price: 93 }, { name: 'Giza', price: 93 },
+    { name: 'Alexandria', price: 101 }, { name: 'Qalyubia', price: 104 },
+    { name: 'Sharqia', price: 104 }, { name: 'Dakahlia', price: 104 },
+    { name: 'Gharbia', price: 104 }, { name: 'Monufia', price: 104 },
+    { name: 'Beheira', price: 104 }, { name: 'Damietta', price: 104 },
+    { name: 'Port Said', price: 104 }, { name: 'Ismailia', price: 104 },
+    { name: 'Suez', price: 104 }, { name: 'Kafr El Sheikh', price: 104 },
+    { name: 'Fayoum', price: 112 }, { name: 'Beni Suef', price: 112 },
+    { name: 'Minya', price: 112 }, { name: 'Asyut', price: 112 },
+    { name: 'Sohag', price: 122 }, { name: 'Qena', price: 122 },
+    { name: 'Luxor', price: 122 }, { name: 'Aswan', price: 122 },
+    { name: 'Red Sea', price: 136 }, { name: 'Matrouh', price: 136 },
+    { name: 'New Valley', price: 136 }, { name: 'North Sinai', price: 136 },
+    { name: 'South Sinai', price: 136 }
 ];
 
 let activeProductId = null;
@@ -1983,7 +1988,7 @@ function showOrderConfirmationModal(orderId, firstName, productName, size, subto
             ? `تأكيد طلب مجرة\nرقم الطلب: ${orderId}\nالاسم: ${firstName}\nالقطعة: ${productName} (مقاس ${size})\nالإجمالي: ${total.toFixed(2)} جنيه مصري\nطريقة الدفع: نقداً عند الاستلام\n\nطلبك قيد التنفيذ وسيتم التوصيل خلال ٢ إلى ٤ أيام عمل. سيقوم المندوب بالاتصال بك فور وصوله إلى منطقتك.`
             : `MAJARAH | Order Confirmation\nOrder Number: ${orderId}\nCustomer Name: ${firstName}\nItem: ${productName} (Size ${size})\nTotal Amount: ${total.toFixed(2)} EGP\nPayment Method: Cash on Delivery\n\nYour order is being processed and will be delivered within 2 to 4 business days. You will receive a call from our courier once they arrive in your area.`
     );
-    const configuredWa = window.SITE_CONFIG?.waNumber || '201229067066';
+    const configuredWa = window.SITE_CONFIG?.waNumber || '201099460237';
     const waLink = `https://wa.me/${configuredWa}?text=${waMsg}`;
 
     const modal = document.createElement('div');
@@ -3467,7 +3472,7 @@ function toggleChatWidget(event) {
 }
 
 function triggerFooterContact() {
-    const configuredWa = window.SITE_CONFIG?.waNumber || '201229067066';
+    const configuredWa = window.SITE_CONFIG?.waNumber || '201099460237';
     window.open(`https://wa.me/${configuredWa}`, '_blank');
 }
 
