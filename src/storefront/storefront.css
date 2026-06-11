@@ -2199,4 +2199,4 @@
 }
 
 /* Hide widgets on specific pages */
-body.on-product .support-chat-widget, body.on-product #lockIconBtn, body.on-cart .support-chat-widget, body.on-cart #lockIconBtn, body.on-checkout .support-chat-widget, body.on-checkout #lockIconBtn { display: none !important; }
+body.on-product .support-chat-widget, body.on-product #prelaunchBypassBadge, body.on-cart .support-chat-widget, body.on-cart #prelaunchBypassBadge, body.on-checkout .support-chat-widget, body.on-checkout #prelaunchBypassBadge { display: none !important; }

@@ -33,7 +33,7 @@ function handleNavigation(path, push = true) {
     // Toggle floating widgets
     const isHome = path === '/' || path === '' || path === '/#collection' || path === '/index.html';
     const chatWidget = document.querySelector('.support-chat-widget');
-    const lockIcon = document.querySelector('#lockIconBtn');
+    const lockIcon = document.querySelector('#prelaunchBypassBadge');
     if (chatWidget) chatWidget.style.display = isHome ? 'block' : 'none';
     if (lockIcon) lockIcon.style.display = isHome ? 'flex' : 'none';
     
@@ -2698,11 +2698,11 @@ function checkPrelaunch() {
     const blockingStyle = document.getElementById('prelaunch-blocking-style');
     
     // Manage dynamic floating bypass badge
-    let existingBadge = document.getElementById('lockIconBtn');
+    let existingBadge = document.getElementById('prelaunchBypassBadge');
     if (showPrelaunch && bypass && targetDate > now) {
         if (!existingBadge) {
             const badge = document.createElement('button');
-            badge.id = 'lockIconBtn';
+            badge.id = 'prelaunchBypassBadge';
             badge.onclick = lockPrelaunchStore;
             badge.title = 'Lock Store';
             badge.style.cssText = 'position:fixed;bottom:20px;right:20px;width:40px;height:40px;border-radius:50%;background:rgba(8,8,8,0.92);border:1px solid rgba(255,255,255,0.12);color:#fff;font-size:18px;cursor:pointer;z-index:99999;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,0.5);backdrop-filter:blur(8px);transition:transform 0.2s,background 0.2s;';
