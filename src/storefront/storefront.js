@@ -1,4 +1,4 @@
-﻿// --- GLOBAL DATABASE FETCH INTERCEPTOR (Trigger Rebuild) ---
+// --- GLOBAL DATABASE FETCH INTERCEPTOR (Trigger Rebuild) ---
 window.SB_URL = "https://nojnqefgbpyibuhduxdx.supabase.co";
 // Normalize SB_URL: remove trailing slashes and /rest/v1 if present to avoid "Double REST" URL errors
 if (window.SB_URL) {
@@ -266,20 +266,20 @@ function applyConfigToDOM() {
 
 // Official 27 Bosta Governorate Default Matrix Setup (Subsidized Shipping Strategy)
 const bostaDefaultTiers = [
-    { name: 'Cairo', price: 93 }, { name: 'Giza', price: 93 },
-    { name: 'Alexandria', price: 101 }, { name: 'Qalyubia', price: 104 },
-    { name: 'Sharqia', price: 104 }, { name: 'Dakahlia', price: 104 },
-    { name: 'Gharbia', price: 104 }, { name: 'Monufia', price: 104 },
-    { name: 'Beheira', price: 104 }, { name: 'Damietta', price: 104 },
-    { name: 'Port Said', price: 104 }, { name: 'Ismailia', price: 104 },
-    { name: 'Suez', price: 104 }, { name: 'Kafr El Sheikh', price: 104 },
-    { name: 'Fayoum', price: 112 }, { name: 'Beni Suef', price: 112 },
-    { name: 'Minya', price: 112 }, { name: 'Asyut', price: 112 },
-    { name: 'Sohag', price: 122 }, { name: 'Qena', price: 122 },
-    { name: 'Luxor', price: 122 }, { name: 'Aswan', price: 122 },
-    { name: 'Red Sea', price: 136 }, { name: 'Matrouh', price: 136 },
-    { name: 'New Valley', price: 136 }, { name: 'North Sinai', price: 136 },
-    { name: 'South Sinai', price: 136 }
+    { name: 'Cairo', price: 43 }, { name: 'Giza', price: 43 },
+    { name: 'Alexandria', price: 51 }, { name: 'Qalyubia', price: 54 },
+    { name: 'Sharqia', price: 54 }, { name: 'Dakahlia', price: 54 },
+    { name: 'Gharbia', price: 54 }, { name: 'Monufia', price: 54 },
+    { name: 'Beheira', price: 54 }, { name: 'Damietta', price: 54 },
+    { name: 'Port Said', price: 54 }, { name: 'Ismailia', price: 54 },
+    { name: 'Suez', price: 54 }, { name: 'Kafr El Sheikh', price: 54 },
+    { name: 'Fayoum', price: 62 }, { name: 'Beni Suef', price: 62 },
+    { name: 'Minya', price: 62 }, { name: 'Asyut', price: 62 },
+    { name: 'Sohag', price: 72 }, { name: 'Qena', price: 72 },
+    { name: 'Luxor', price: 72 }, { name: 'Aswan', price: 72 },
+    { name: 'Red Sea', price: 86 }, { name: 'Matrouh', price: 86 },
+    { name: 'New Valley', price: 86 }, { name: 'North Sinai', price: 86 },
+    { name: 'South Sinai', price: 86 }
 ];
 
 let activeProductId = null;
@@ -1797,6 +1797,8 @@ async function submitShopifyCheckout() {
     }
     const targetZoneObj = currentLoadedShippingRates.find(z => z.name === cityInput);
     const shippingFeeValue = targetZoneObj ? targetZoneObj.price : 0;
+    
+    let basePrice = Number(p.price) || 0;
     let discountAmount = 0;
     if (activeDiscountCode && activeDiscountValue > 0) {
         if (activeDiscountType === 'percent') {
