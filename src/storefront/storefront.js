@@ -3693,4 +3693,13 @@ window.handlePrelaunchNotify = handlePrelaunchNotify;
 window.handlePrelaunchBypass = handlePrelaunchBypass;
 window.showToast = showToast;
 
+// Dynamic scroll handler to hide floating chat and lock widgets when user scrolls down
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 80) {
+        document.body.classList.add('scrolled-down');
+    } else {
+        document.body.classList.remove('scrolled-down');
+    }
+}, { passive: true });
+
 

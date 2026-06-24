@@ -546,7 +546,7 @@
     .charts-row { grid-template-columns: 1fr !important; }
     .settings-grid { grid-template-columns: 1fr !important; gap: 14px; }
     .settings-card { grid-column: auto !important; }
-    .main { padding: 20px 14px; }
+    .main { padding: 20px 14px 110px 14px !important; }
     .page-header {
       margin-bottom: 20px;
       padding-bottom: 16px;

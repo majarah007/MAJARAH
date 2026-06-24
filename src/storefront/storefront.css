@@ -89,9 +89,9 @@
         }
 
         .badge {
-            position: absolute; top: 16px; left: 16px; z-index: 2;
-            font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase;
-            color: #050505; background: #fff; padding: 5px 10px;
+            position: absolute; top: 12px; left: 12px; z-index: 2;
+            font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase;
+            color: #050505; background: #fff; padding: 3px 8px;
             font-weight: 700;
         }
 
@@ -501,9 +501,9 @@
                 font-size: 11px;
             }
             .badge {
-                font-size: 7px;
-                letter-spacing: 1px;
-                padding: 3px 6px;
+                font-size: 6.5px;
+                letter-spacing: 0.8px;
+                padding: 2px 5px;
                 top: 8px;
                 left: 8px;
             }
@@ -2336,5 +2336,15 @@ body.light-mode .cross-sell-price {
 }
 body.light-mode .cross-sell-add {
     color: #111;
+}
+
+/* ── SCROLL-CONTROLLED WIDGETS HIDING ── */
+.support-chat-widget, #prelaunchBypassBadge {
+    transition: opacity 0.3s ease, transform 0.3s ease, background 0.2s, visibility 0.3s !important;
+}
+body.scrolled-down .support-chat-widget,
+body.scrolled-down #prelaunchBypassBadge {
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 

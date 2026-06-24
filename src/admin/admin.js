@@ -1520,8 +1520,9 @@ function handleFileSelect(input, targetId, previewId) {
         sourceX = (img.width - sourceWidth) / 2;
       } else if (img.width / img.height < targetRatio) {
         // Image is taller than 3:4 - crop vertical sides (top and bottom)
+        // Bias crop towards the top (12% from top, 88% from bottom) to preserve the model's head and face
         sourceHeight = img.width / targetRatio;
-        sourceY = (img.height - sourceHeight) / 2;
+        sourceY = (img.height - sourceHeight) * 0.12;
       }
 
       // Target high quality output dimensions: 1200 x 1600 (3:4)
