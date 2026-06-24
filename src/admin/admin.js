@@ -2499,27 +2499,40 @@ window.addEventListener('DOMContentLoaded', async () => {
   const loginScreen = document.getElementById('loginScreen');
   const appEl = document.getElementById('app');
 
+  const hideLoader = () => {
+    const loader = document.getElementById('globalLoader');
+    if (loader) {
+      loader.style.opacity = '0';
+      setTimeout(() => loader.remove(), 600);
+    }
+  };
+
   if (token) {
     if (loginScreen) loginScreen.style.display = 'none';
     if (appEl) appEl.style.display = 'block';
     
-    await showDashboard();
-    
-    // Initialise shipping zones panel
-    setTimeout(renderShippingZones, 500);
-    // Load shipping rules
-    const rules = JSON.parse(localStorage.getItem('storeShippingRules')) || {};
-    if (rules.freeShipThreshold !== undefined && document.getElementById('freeShipThreshold')) {
-      const el = document.getElementById('freeShipThreshold');
-      if (el) el.value = rules.freeShipThreshold;
+    try {
+      await showDashboard();
+      
+      // Initialise shipping zones panel
+      setTimeout(renderShippingZones, 500);
+      // Load shipping rules
+      const rules = JSON.parse(localStorage.getItem('storeShippingRules')) || {};
+      if (rules.freeShipThreshold !== undefined && document.getElementById('freeShipThreshold')) {
+        const el = document.getElementById('freeShipThreshold');
+        if (el) el.value = rules.freeShipThreshold;
+      }
+      if (rules.deliveryDays) {
+        const el = document.getElementById('deliveryDays');
+        if (el) el.value = rules.deliveryDays;
+      }
+      
+      // Initialize tweaks
+      setTimeout(initializeTweaks, 800);
+    } catch (err) {
+      console.error("Dashboard initialization failed:", err);
+      hideLoader();
     }
-    if (rules.deliveryDays) {
-      const el = document.getElementById('deliveryDays');
-      if (el) el.value = rules.deliveryDays;
-    }
-    
-    // Initialize tweaks
-    setTimeout(initializeTweaks, 800);
   } else {
     // No active session — show login screen defined in index.html
     if (loginScreen) loginScreen.style.display = 'flex';
@@ -2527,6 +2540,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         appEl.style.display = 'none';
         appEl.innerHTML = '';
     }
+    hideLoader();
   }
 });
 
@@ -2706,6 +2720,4 @@ window.requestNotificationPermission = requestNotificationPermission;
 window.showSystemNotification = showSystemNotification;
 window.playNotificationSound = playNotificationSound;
 window.unlockMobileAudio = unlockMobileAudio;
-window.flashTitle = flashTitle;
-ileAudio = unlockMobileAudio;
 window.flashTitle = flashTitle;
