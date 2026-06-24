@@ -105,9 +105,7 @@ if (fs.existsSync(srcAdminDir)) {
       deadCodeInjection: false,
       numbersToExpressions: false,
       simplify: true,
-      stringArray: true,
-      stringArrayCallsTransform: false,
-      stringArrayThreshold: 0.75,
+      stringArray: false,
       splitStrings: false,
       unicodeEscapeSequence: false
     }).getObfuscatedCode();
