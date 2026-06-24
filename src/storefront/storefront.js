@@ -1081,6 +1081,7 @@ function lockBodyScroll() {
     document.body.style.width = '100%';
     document.body.style.top = `-${scrollY}px`;
     document.body.dataset.scrollY = scrollY;
+    document.body.classList.add('modal-open');
 }
 function unlockBodyScroll() {
     const scrollY = document.body.dataset.scrollY || 0;
@@ -1089,6 +1090,7 @@ function unlockBodyScroll() {
     document.body.style.width = '';
     document.body.style.top = '';
     window.scrollTo(0, parseInt(scrollY));
+    document.body.classList.remove('modal-open');
 }
 
 // --- STANDARD MODAL INTERACTIONS ---
@@ -1344,6 +1346,7 @@ async function openProduct(id, push = true) {
     
     activeSelectedSize = null;
     document.getElementById('productPage').classList.add('open');
+    document.body.classList.add('modal-open');
     if (push && p) {
         const slug = p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
         if (window.location.pathname !== `/products/${slug}`) {
@@ -1354,6 +1357,7 @@ async function openProduct(id, push = true) {
 
 function closeProduct(push = true) {
     document.getElementById('productPage').classList.remove('open');
+    document.body.classList.remove('modal-open');
     if (push && window.location.pathname !== '/') {
         history.pushState({ page: 'home' }, '', '/');
     }
