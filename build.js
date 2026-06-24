@@ -48,7 +48,11 @@ if (fs.existsSync(srcStorefrontDir)) {
   const jsSrc   = fs.readFileSync(path.join(srcStorefrontDir, 'storefront.js'), 'utf8');
   const cssSrc  = fs.readFileSync(path.join(srcStorefrontDir, 'storefront.css'), 'utf8');
 
-  const minHtml = minifyHtml(htmlSrc);
+  const buildVersion = Date.now();
+  const minHtml = minifyHtml(htmlSrc).replace(
+    /(href|src)=["'](storefront\.(css|js))(\?v=[^"']*)?["']/g,
+    (match, p1, p2) => `${p1}="${p2}?v=${buildVersion}"`
+  );
   const minCss  = minifyCss(cssSrc);
 
   console.log('🔒 Obfuscating storefront.js...');
@@ -84,7 +88,11 @@ if (fs.existsSync(srcAdminDir)) {
   const jsSrc   = fs.readFileSync(path.join(srcAdminDir, 'admin.js'), 'utf8');
   const cssSrc  = fs.readFileSync(path.join(srcAdminDir, 'admin.css'), 'utf8');
 
-  const minHtml = minifyHtml(htmlSrc);
+  const buildVersion = Date.now();
+  const minHtml = minifyHtml(htmlSrc).replace(
+    /(href|src)=["'](admin\.(css|js))(\?v=[^"']*)?["']/g,
+    (match, p1, p2) => `${p1}="${p2}?v=${buildVersion}"`
+  );
   const minCss  = minifyCss(cssSrc);
 
   console.log('🔒 Obfuscating admin.js...');
