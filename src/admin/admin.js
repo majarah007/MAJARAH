@@ -1499,34 +1499,45 @@ function handleFileSelect(input, targetId, previewId) {
   const originalPlaceholder = targetInput.placeholder;
   
   targetInput.value = '';
-  targetInput.placeholder = 'Optimizing for 4K Quality...';
+  targetInput.placeholder = 'Optimizing image ratio & quality...';
   
   const reader = new FileReader();
   reader.onload = function(e) {
     const img = new Image();
     img.onload = function() {
       const canvas = document.createElement('canvas');
-      let width = img.width;
-      let height = img.height;
       
-      const maxDim = 2000; // Increased to 2000px for better quality
-      if (width > maxDim || height > maxDim) {
-        if (width > height) {
-          height = Math.round((height * maxDim) / width);
-          width = maxDim;
-        } else {
-          width = Math.round((width * maxDim) / height);
-          height = maxDim;
-        }
+      // Target aspect ratio: 3:4 (0.75)
+      const targetRatio = 3 / 4;
+      let sourceX = 0;
+      let sourceY = 0;
+      let sourceWidth = img.width;
+      let sourceHeight = img.height;
+
+      if (img.width / img.height > targetRatio) {
+        // Image is wider than 3:4 - crop horizontal sides (left and right)
+        sourceWidth = img.height * targetRatio;
+        sourceX = (img.width - sourceWidth) / 2;
+      } else if (img.width / img.height < targetRatio) {
+        // Image is taller than 3:4 - crop vertical sides (top and bottom)
+        sourceHeight = img.width / targetRatio;
+        sourceY = (img.height - sourceHeight) / 2;
       }
+
+      // Target high quality output dimensions: 1200 x 1600 (3:4)
+      const targetWidth = 1200;
+      const targetHeight = 1600;
       
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
       const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, targetWidth, targetHeight);
       
-      // Safety: Clear canvas and ensure entire image is drawn
-      ctx.clearRect(0, 0, width, height);
-      ctx.drawImage(img, 0, 0, width, height);
+      // Use high quality image smoothing
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      
+      ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, targetWidth, targetHeight);
       
       // Higher quality JPEG compression (0.92)
       const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
@@ -1535,7 +1546,7 @@ function handleFileSelect(input, targetId, previewId) {
       targetInput.placeholder = originalPlaceholder;
       updateImagePreview(targetId, previewId);
       
-      showToast('High-quality image ready!');
+      showToast('Image auto-cropped to 3:4 and optimized successfully!');
       input.value = ''; 
     };
     img.src = e.target.result;

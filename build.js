@@ -91,7 +91,7 @@ if (fs.existsSync(srcAdminDir)) {
   const buildVersion = Date.now();
   const minHtml = minifyHtml(htmlSrc).replace(
     /(href|src)=["'](admin\.(css|js))(\?v=[^"']*)?["']/g,
-    (match, p1, p2) => `${p1}="${p2}?v=${buildVersion}"`
+    (match, p1, p2) => `${p1}="/fien/${p2}?v=${buildVersion}"`
   );
   const minCss  = minifyCss(cssSrc);
 
