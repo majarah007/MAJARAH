@@ -112,7 +112,7 @@ function loadFontStylesheet(linkId, font) {
     if (font.type === 'google') {
         href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font.family)}:wght@400;600;700;800&display=swap`;
     } else {
-        href = `/fonts/${font.id}/font.css`;
+        href = `../fonts/${font.id}/font.css`;
     }
     
     if (link.getAttribute('href') !== href) {

@@ -1079,15 +1079,18 @@
             flex-direction: column;
             gap: 12px;
         }
-        .footer-col ul li a {
+        .footer-col ul li a, .footer-col ul li button {
             font-size: 12px;
             color: #555;
             transition: color 0.3s;
             cursor: pointer;
             text-transform: none;
             letter-spacing: 0.5px;
+            text-align: inherit;
+            width: 100%;
+            display: block;
         }
-        .footer-col ul li a:hover {
+        .footer-col ul li a:hover, .footer-col ul li button:hover {
             color: #fff;
         }
         .benefits-col {
