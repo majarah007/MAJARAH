@@ -3,10 +3,10 @@ async function sendOrderToDiscord(order) {
   const WEBHOOK_URL = 'https://discord.com/api/webhooks/1514721625206165578/9z2Lh7Ufp6d_AU3TDJbFfLsbXtPw-cRb9FKKhKurfz9z31_eKGbFRDorRtQGBkoZYmKW';
   
   const embed = {
-    username: 'Majarah Orders',
-    avatar_url: 'https://majarah.vercel.app/logo.png',
+    username: 'Majarrah Orders',
+    avatar_url: 'https://majarrah.vercel.app/logo.png',
     embeds: [{
-      title: '🛍️ NEW ORDER — MAJARAH',
+      title: '🛍️ NEW ORDER — MAJARRAH',
       color: 0xffffff,
       fields: [
         { name: '👤 Name', value: order.name || 'N/A', inline: true },
@@ -20,7 +20,7 @@ async function sendOrderToDiscord(order) {
         { name: '📦 Status', value: '🟡 Pending', inline: true },
         { name: '🕐 Time', value: new Date().toLocaleString('en-EG', { timeZone: 'Africa/Cairo' }), inline: false },
       ],
-      footer: { text: 'Majarah Storefront • Cairo, Egypt' },
+      footer: { text: 'Majarrah Storefront • Cairo, Egypt' },
       thumbnail: { url: order.productImage || '' }
     }]
   };

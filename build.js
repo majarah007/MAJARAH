@@ -30,7 +30,7 @@ function minifyHtml(html) {
     .trim();
 }
 
-console.log('🚀 Starting MAJARAH build process...');
+console.log('🚀 Starting MAJARRAH build process...');
 
 const distDir = path.join(__dirname, 'dist');
 const fienDistDir = path.join(distDir, 'fien');
@@ -58,18 +58,17 @@ if (fs.existsSync(srcStorefrontDir)) {
   console.log('🔒 Obfuscating storefront.js...');
   const obfuscatedJs = JavaScriptObfuscator.obfuscate(jsSrc, {
     compact: true,
-    controlFlowFlattening: true,
-    controlFlowFlatteningThreshold: 0.6,
-    deadCodeInjection: true,
-    deadCodeInjectionThreshold: 0.4,
-    numbersToExpressions: true,
+    controlFlowFlattening: false,
+    controlFlowFlatteningThreshold: 0,
+    deadCodeInjection: false,
+    deadCodeInjectionThreshold: 0,
+    numbersToExpressions: false,
     simplify: true,
     stringArray: true,
     stringArrayCallsTransform: true,
-    stringArrayCallsTransformThreshold: 0.75,
-    stringArrayThreshold: 0.8,
-    splitStrings: true,
-    splitStringsChunkLength: 8,
+    stringArrayCallsTransformThreshold: 0.5,
+    stringArrayThreshold: 0.5,
+    splitStrings: false,
     unicodeEscapeSequence: false
   }).getObfuscatedCode();
 
@@ -134,6 +133,22 @@ if (fs.existsSync(srcAdminDir)) {
   console.warn('⚠ Admin Panel source directory not found.');
 }
 
+function copyRecursiveSync(src, dest) {
+  const exists = fs.existsSync(src);
+  const stats = exists && fs.statSync(src);
+  const isDirectory = exists && stats.isDirectory();
+  if (isDirectory) {
+    if (!fs.existsSync(dest)) {
+      fs.mkdirSync(dest, { recursive: true });
+    }
+    fs.readdirSync(src).forEach(childItemName => {
+      copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName));
+    });
+  } else {
+    fs.copyFileSync(src, dest);
+  }
+}
+
 // ── STATIC ASSETS ────────────────────────────────────────
 console.log('📋 Copying static assets...');
 const srcAssetsDir = path.join(__dirname, 'src', 'assets');
@@ -142,13 +157,11 @@ if (fs.existsSync(srcAssetsDir)) {
   assets.forEach(asset => {
     const srcPath  = path.join(srcAssetsDir, asset);
     const destPath = path.join(distDir, asset);
-    if (fs.lstatSync(srcPath).isFile()) {
-      fs.copyFileSync(srcPath, destPath);
-      console.log(`  -> Copied ${asset}`);
-    }
+    copyRecursiveSync(srcPath, destPath);
+    console.log(`  -> Copied ${asset}`);
   });
 } else {
   console.warn('⚠ src/assets directory not found.');
 }
 
-console.log('🎉 MAJARAH build completed successfully!');
+console.log('🎉 MAJARRAH build completed successfully!');

@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
 
   const content = {
     brand: {
-      en: '<strong>Majarah — مَجَرَّة</strong> is an Egyptian streetwear collective founded to construct high-concept garments that act as blank canvases for cosmic identity architecture. Crafted in Cairo, scaled for the infinite.',
+      en: '<strong>Majarrah — مَجَرَّة</strong> is an Egyptian streetwear collective founded to construct high-concept garments that act as blank canvases for cosmic identity architecture. Crafted in Cairo, scaled for the infinite.',
       ar: '<strong>مَجَرَّة — مَجَرَّة</strong> هي علامة تجارية مصرية لملابس الشارع تأسست لتصميم ملابس ذات طابع خاص تعبر عن الهوية الكونية. صُنعت في القاهرة، وصُممت لتلائم اللانهائية.'
     },
     how: {

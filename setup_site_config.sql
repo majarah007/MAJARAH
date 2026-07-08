@@ -28,13 +28,13 @@ USING (true)
 WITH CHECK (true);
 
 INSERT INTO public.site_config (id, config) VALUES (1, '{
-  "promoText": "🔥 MAJARAH DROP 01 OUT NOW · FAST HOME DELIVERY ALL OVER EGYPT 🔥",
+  "promoText": "🔥 MAJARRAH DROP 01 OUT NOW · FAST HOME DELIVERY ALL OVER EGYPT 🔥",
   "promoVisible": true,
   "promoSpeed": 30,
   "promoRepeats": 12,
   "showPrelaunch": false,
   "prelaunchDate": "2026-07-01T20:00:00",
-  "bypassPassword": "majarah2026",
+  "bypassPassword": "majarrah2026",
   "prelaunchEmailText": "ENTER YOUR EMAIL TO SECURE EARLY ACCESS AND LAUNCH NOTIFICATIONS.",
   "drop2TeaserVisible": false,
   "drop2TeaserDate": "2026-07-15T20:00:00",
@@ -120,7 +120,7 @@ INSERT INTO public.site_config (id, config) VALUES (1, '{
       "how_title": "How to Order",
       "how_sub": "3 steps · less than a minute",
       "brand_title": "The Brand",
-      "brand_sub": "Majarah Universe",
+      "brand_sub": "Majarrah Universe",
       "size_recommend_title": "Size Recommender",
       "size_recommend_sub": "Calculate your perfect fit in seconds",
       "height": "Height",

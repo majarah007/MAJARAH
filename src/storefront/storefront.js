@@ -143,6 +143,7 @@ window.initDOMCache = function() {
 window.SITE_CONFIG = {};
 
 // CONFIG KEYS for sync
+// CONFIG KEYS for sync
 const CONFIG_KEYS = [
     'promoText', 'promoVisible', 'promoSpeed', 'promoRepeats',
     'showPrelaunch', 'prelaunchDate', 'bypassPassword',
@@ -151,7 +152,7 @@ const CONFIG_KEYS = [
     'drop2Product1Image', 'drop2Product2Name', 'drop2Product2Image',
     'showSignIn', 'instagramVisible', 'tiktokVisible', 'showSizeCalc',
     'showStars', 'showCoupons', 'coupons', 'paymentCOD', 'paymentApplePay', 'paymentCard',
-    'shippingRates', 'translations'
+    'shippingRates', 'translations', 'fontGlobal', 'fontLogo', 'fonts'
 ];
 
 // Initial load from local cache for instant UI response
@@ -201,7 +202,56 @@ function cfg(key, fallback = '') {
     return val;
 }
 
+function applyFonts() {
+    const fontGlobalId = cfg('fontGlobal', 'cinzel');
+    const fontLogoId = cfg('fontLogo', 'cinzel');
+    
+    const defaultFonts = [
+        { id: "cinzel", name: "Cinzel", family: "Cinzel", type: "google" },
+        { id: "rostex", name: "Rostex", family: "Rostex", type: "custom" },
+        { id: "retro-floral", name: "Retro Floral", family: "Retro Floral", type: "custom" },
+        { id: "nevera", name: "Nevera", family: "Nevera", type: "custom" },
+        { id: "brigold-demo", name: "Brigold DEMO", family: "Brigold DEMO", type: "custom" },
+        { id: "eclipsed-blazzing", name: "Eclipsed Blazzing", family: "Eclipsed Blazzing", type: "custom" },
+        { id: "alenia", name: "Alenia", family: "Alenia", type: "custom" }
+    ];
+    
+    const fonts = cfg('fonts', defaultFonts);
+    const globalFont = fonts.find(f => f.id === fontGlobalId) || fonts[0];
+    const logoFont = fonts.find(f => f.id === fontLogoId) || fonts[0];
+    
+    document.documentElement.style.setProperty('--font-global', `'${globalFont.family}', sans-serif`);
+    document.documentElement.style.setProperty('--font-logo', `'${logoFont.family}', serif`);
+    
+    loadFontStylesheet('global-font-stylesheet', globalFont);
+    loadFontStylesheet('logo-font-stylesheet', logoFont);
+}
+
+function loadFontStylesheet(linkId, font) {
+    let link = document.getElementById(linkId);
+    if (!link) {
+        link = document.createElement('link');
+        link.id = linkId;
+        link.rel = 'stylesheet';
+        document.head.appendChild(link);
+    }
+    
+    let href = '';
+    if (font.type === 'google') {
+        href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font.family)}:wght@400;600;700;800&display=swap`;
+    } else {
+        href = `/fonts/${font.id}/font.css`;
+    }
+    
+    if (link.getAttribute('href') !== href) {
+        link.setAttribute('href', href);
+    }
+}
+
 function applyConfigToDOM() {
+    // 0. Typography System
+    applyFonts();
+
     // 1. Marquee visibility
     const marquee = document.getElementById('storefrontPromoMarquee');
     if (marquee) marquee.style.display = cfg('promoVisible', true) ? 'flex' : 'none';
@@ -480,9 +530,9 @@ const TRANSLATIONS = {
     tbl_height: "Height",
     size_note_body: "<strong>Fit is oversized.</strong> Garment patterns are cut loose. Size down if you prefer a standard, closer-to-body look.",
     brand_title: "The Brand",
-    brand_sub: "Majarah Universe",
+    brand_sub: "Majarrah Universe",
     brand_slogan: "Between <em>stars,</em><br>nothing is wasted.",
-    brand_body: "MAJARAH is a celestial map of the self, founded in the heart of Cairo. We view every individual as a vast system of architecture and void, waiting to be expressed through fabric. We produce heavyweight, high-density garments for those who navigate the urban landscape while carrying a private universe within. From the streets of Egypt to the edge of the unknown, we provide the uniform for exploration.",
+    brand_body: "MAJARRAH is a celestial map of the self, founded in the heart of Cairo. We view every individual as a vast system of architecture and void, waiting to be expressed through fabric. We produce heavyweight, high-density garments for those who navigate the urban landscape while carrying a private universe within. From the streets of Egypt to the edge of the unknown, we provide the uniform for exploration.",
     track_refund_title: "Track & Refund",
     track_refund_sub: "Look up your order to track its status or request a refund",
     track_refund_instructions: "Enter your order number or phone number to track your order or request a refund.",
@@ -547,7 +597,7 @@ const TRANSLATIONS = {
     mins_label: "MINS",
     secs_label: "SECS",
     manifesto_title: "THE UNIVERSE WITHIN",
-    manifesto_en: "MAJARAH is a celestial map of the self, founded in the heart of Cairo. We view every individual as a vast system of architecture and void, waiting to be expressed through fabric. We produce heavyweight, high-density garments for those who navigate the urban landscape while carrying a private universe within. From the streets of Egypt to the edge of the unknown, we provide the uniform for exploration.",
+    manifesto_en: "MAJARRAH is a celestial map of the self, founded in the heart of Cairo. We view every individual as a vast system of architecture and void, waiting to be expressed through fabric. We produce heavyweight, high-density garments for those who navigate the urban landscape while carrying a private universe within. From the streets of Egypt to the edge of the unknown, we provide the uniform for exploration.",
     manifesto_ar: "مجرة هي خريطة سماوية للذات، تأسست في قلب القاهرة. نحن نرى كل فرد ككيان واسع من التصميم والفراغ، ينتظر التعبير عنه من خلال القماش. نصنع ملابس ثقيلة الوزن وعالية الكثافة لأولئك الذين يخوضون صخب المدينة وهم يحملون كوناً خاصاً بداخلهم. من شوارع مصر إلى حافة المجهول، نحن نصنع الزي الرسمي للاستكشاف."
   },
   ar: {
@@ -604,7 +654,7 @@ const TRANSLATIONS = {
     tbl_height: "الطول (الشخص)",
     size_note_body: "<strong>الاستايل أوفرسايز واسع.</strong> التقصيصة واسعة ومريحة. لو حابب اللبس يكون مظبوط أو أقرب للمقاس العادي، صغر مقاس.",
     brand_title: "عن البراند",
-    brand_sub: "كون MAJARAH",
+    brand_sub: "كون MAJARRAH",
     brand_slogan: "بين النجوم،<br>مفيش حاجة بتضيع.",
     brand_body: "مجرة هي خريطة سماوية للذات، تأسست في قلب القاهرة. نحن نرى كل فرد ككيان واسع من التصميم والفراغ، ينتظر التعبير عنه من خلال القماش. نصنع ملابس ثقيلة الوزن وعالية الكثافة لأولئك الذين يخوضون صخب المدينة وهم يحملون كوناً خاصاً بداخلهم. من شوارع مصر إلى حافة المجهول، نحن نصنع الزي الرسمي للاستكشاف.",
     track_refund_title: "تتبع وارجاع الطلبات",
@@ -811,7 +861,7 @@ async function initApp() {
 
     // Load announcement, speed, and repeats
     window.updateMarqueeDisplay = () => {
-        let text = cfg('promoText', '🔥 MAJARAH 01DROP 🔥');
+        let text = cfg('promoText', '🔥 MAJARRAH 01DROP 🔥');
         const speed = parseFloat(cfg('promoSpeed', '80'));
         const dbRepeats = parseInt(cfg('promoRepeats', '1'));
 
@@ -1159,7 +1209,7 @@ async function openBrand() {
     if (data) renderBrandModal(data, currentLang);
     else {
         renderBrandModal({
-            en: "MAJARAH (مَجَرَّة) means 'galaxy' in Arabic. Born in Cairo, 2026. We make heavyweight cotton essentials for the modern explorer — screen-printed in Egypt, built to last. No rules. Just us.",
+            en: "MAJARRAH (مَجَرَّة) means 'galaxy' in Arabic. Born in Cairo, 2026. We make heavyweight cotton essentials for the modern explorer — screen-printed in Egypt, built to last. No rules. Just us.",
             ar: "مَجَرَّة تعني 'Galaxy' بالعربية. تأسست في القاهرة، 2026. نصنع أساسيات قطنية ثقيلة للمستكشف المعاصر - مطبوعة في مصر، ومصنوعة لتدوم. لا قواعد. نحن فقط."
         }, currentLang);
     }
@@ -1230,7 +1280,7 @@ async function openProduct(id, push = true) {
             const div = document.createElement('div');
             div.className = 'pp-thumb' + (i === 0 ? ' active' : '');
             div.onclick = () => switchImg(i);
-            div.innerHTML = `<img src="${src}" alt="View ${i}">`;
+            div.innerHTML = `<img src="${src}" alt="View ${i}" loading="lazy">`;
             thumbsContainer.appendChild(div);
         });
         
@@ -1288,7 +1338,7 @@ async function openProduct(id, push = true) {
             
             crossSellContent.innerHTML = `
                 <div class="cross-sell-item" onclick="openProduct('${otherProduct.id}')">
-                    <img src="${csImg}" class="cross-sell-img" alt="${csName}">
+                    <img src="${csImg}" class="cross-sell-img" alt="${csName}" loading="lazy">
                     <div class="cross-sell-info">
                         <div class="cross-sell-name">${csName} - ${csColor}</div>
                         <div class="cross-sell-price">EGP ${otherProduct.price}</div>
@@ -2025,7 +2075,7 @@ function showOrderConfirmationModal(orderId, firstName, productName, size, subto
     const waMsg = encodeURIComponent(
         isAr
             ? `تأكيد طلب مجرة\nرقم الطلب: ${orderId}\nالاسم: ${firstName}\nالقطعة: ${productName} (مقاس ${size})\nالإجمالي: ${total.toFixed(2)} جنيه مصري\nطريقة الدفع: نقداً عند الاستلام\n\nطلبك قيد التنفيذ وسيتم التوصيل خلال ٢ إلى ٤ أيام عمل. سيقوم المندوب بالاتصال بك فور وصوله إلى منطقتك.`
-            : `MAJARAH | Order Confirmation\nOrder Number: ${orderId}\nCustomer Name: ${firstName}\nItem: ${productName} (Size ${size})\nTotal Amount: ${total.toFixed(2)} EGP\nPayment Method: Cash on Delivery\n\nYour order is being processed and will be delivered within 2 to 4 business days. You will receive a call from our courier once they arrive in your area.`
+            : `MAJARRAH | Order Confirmation\nOrder Number: ${orderId}\nCustomer Name: ${firstName}\nItem: ${productName} (Size ${size})\nTotal Amount: ${total.toFixed(2)} EGP\nPayment Method: Cash on Delivery\n\nYour order is being processed and will be delivered within 2 to 4 business days. You will receive a call from our courier once they arrive in your area.`
     );
     const configuredWa = window.SITE_CONFIG?.waNumber || '201099460237';
     const waLink = `https://wa.me/${configuredWa}?text=${waMsg}`;
@@ -2931,7 +2981,7 @@ function handlePrelaunchBypass(e) {
     const passInput = document.getElementById('prelaunchBypassPass');
     if (!passInput) return;
     const enteredPass = passInput.value.trim();
-    const correctPass = cfg('bypassPassword', 'majarah2026');
+    const correctPass = cfg('bypassPassword', 'majarrah2026');
     
     if (enteredPass === correctPass) {
         localStorage.setItem('mjr_bypass_prelaunch', 'true');
@@ -3524,10 +3574,10 @@ async function sendOrderToDiscord(order) {
   const WEBHOOK_URL = 'https://discord.com/api/webhooks/1514721625206165578/9z2Lh7Ufp6d_AU3TDJbFfLsbXtPw-cRb9FKKhKurfz9z31_eKGbFRDorRtQGBkoZYmKW';
   
   const embed = {
-    username: 'Majarah Orders',
-    avatar_url: 'https://majarah.vercel.app/logo.png',
+    username: 'Majarrah Orders',
+    avatar_url: 'https://majarrah.vercel.app/logo.png',
     embeds: [{
-      title: 'NEW ORDER - MAJARAH',
+      title: 'NEW ORDER - MAJARRAH',
       color: 0xffffff,
       fields: [
         { name: 'Name', value: order.name || 'N/A', inline: true },
@@ -3541,7 +3591,7 @@ async function sendOrderToDiscord(order) {
         { name: 'Status', value: 'Pending', inline: true },
         { name: 'Time', value: new Date().toLocaleString('en-EG', { timeZone: 'Africa/Cairo' }), inline: false },
       ],
-      footer: { text: 'Majarah Storefront - Cairo, Egypt' },
+      footer: { text: 'Majarrah Storefront - Cairo, Egypt' },
       thumbnail: { url: order.productImage || '' }
     }]
   };

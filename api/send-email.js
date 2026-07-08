@@ -23,8 +23,8 @@ module.exports = async (req, res) => {
   }
 
   const brevoApiKey = process.env.BREVO_API_KEY || '';
-  const senderEmail = process.env.BREVO_SENDER_EMAIL || 'majarah007@gmail.com';
-  const senderName = process.env.BREVO_SENDER_NAME || 'Majarah';
+  const senderEmail = process.env.BREVO_SENDER_EMAIL || 'majarrah007@gmail.com';
+  const senderName = process.env.BREVO_SENDER_NAME || 'Majarrah';
 
   if (!brevoApiKey) {
     res.status(500).json({ error: 'Brevo API key is not configured on the Vercel server.' });
@@ -62,7 +62,7 @@ module.exports = async (req, res) => {
     <body>
       <div class="wrapper">
         <div class="container">
-          <div class="logo">MAJARAH</div>
+          <div class="logo">MAJARRAH</div>
           <div class="sublogo">مَجَرَّة</div>
           <div class="divider"></div>
           
@@ -97,7 +97,7 @@ module.exports = async (req, res) => {
           <div class="divider"></div>
           
           <div class="footer-text">HOME DELIVERY · ALL EGYPT GOVERNORATES 🚚</div>
-          <div class="footer-text" style="color: #333333;">&copy; 2026 MAJARAH · مَجَرَّة</div>
+          <div class="footer-text" style="color: #333333;">&copy; 2026 MAJARRAH · مَجَرَّة</div>
         </div>
       </div>
     </body>
@@ -115,7 +115,7 @@ module.exports = async (req, res) => {
       body: JSON.stringify({
         sender: { name: senderName, email: senderEmail },
         to: [{ email, name: name || 'Customer' }],
-        subject: `Order Confirmation #${orderId} - MAJARAH`,
+        subject: `Order Confirmation #${orderId} - MAJARRAH`,
         htmlContent
       })
     });

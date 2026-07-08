@@ -59,8 +59,60 @@ const CONFIG_KEYS = [
     'drop2Product1Image', 'drop2Product2Name', 'drop2Product2Image',
     'showSignIn', 'instagramVisible', 'tiktokVisible', 'showSizeCalc',
     'showStars', 'showCoupons', 'coupons', 'paymentCOD', 'paymentApplePay', 'paymentCard',
-    'shippingRates', 'translations', 'waNumber'
+    'shippingRates', 'translations', 'waNumber', 'fontGlobal', 'fontLogo', 'fonts'
 ];
+
+function cfg(key, fallback = '') {
+    const val = window.ADMIN_CONFIG[key];
+    if (val === undefined || val === null || val === '') return fallback;
+    return val;
+}
+
+function applyFonts() {
+    const fontGlobalId = cfg('fontGlobal', 'cinzel');
+    const fontLogoId = cfg('fontLogo', 'cinzel');
+    
+    const defaultFonts = [
+        { id: "cinzel", name: "Cinzel", family: "Cinzel", type: "google" },
+        { id: "rostex", name: "Rostex", family: "Rostex", type: "custom" },
+        { id: "retro-floral", name: "Retro Floral", family: "Retro Floral", type: "custom" },
+        { id: "nevera", name: "Nevera", family: "Nevera", type: "custom" },
+        { id: "brigold-demo", name: "Brigold DEMO", family: "Brigold DEMO", type: "custom" },
+        { id: "eclipsed-blazzing", name: "Eclipsed Blazzing", family: "Eclipsed Blazzing", type: "custom" },
+        { id: "alenia", name: "Alenia", family: "Alenia", type: "custom" }
+    ];
+    
+    const fonts = cfg('fonts', defaultFonts);
+    const globalFont = fonts.find(f => f.id === fontGlobalId) || fonts[0];
+    const logoFont = fonts.find(f => f.id === fontLogoId) || fonts[0];
+    
+    document.documentElement.style.setProperty('--font-global', `'${globalFont.family}', sans-serif`);
+    document.documentElement.style.setProperty('--font-logo', `'${logoFont.family}', serif`);
+    
+    loadFontStylesheet('global-font-stylesheet', globalFont);
+    loadFontStylesheet('logo-font-stylesheet', logoFont);
+}
+
+function loadFontStylesheet(linkId, font) {
+    let link = document.getElementById(linkId);
+    if (!link) {
+        link = document.createElement('link');
+        link.id = linkId;
+        link.rel = 'stylesheet';
+        document.head.appendChild(link);
+    }
+    
+    let href = '';
+    if (font.type === 'google') {
+        href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font.family)}:wght@400;600;700;800&display=swap`;
+    } else {
+        href = `/fonts/${font.id}/font.css`;
+    }
+    
+    if (link.getAttribute('href') !== href) {
+        link.setAttribute('href', href);
+    }
+}
 
 function loadLocalAdminConfig() {
     CONFIG_KEYS.forEach(k => {
@@ -73,6 +125,7 @@ function loadLocalAdminConfig() {
             }
         }
     });
+    applyFonts();
 }
 loadLocalAdminConfig();
 
@@ -86,6 +139,7 @@ async function loadAdminConfig() {
             if (data && data[0] && data[0].config) {
                 // Database is the absolute truth — replace local config
                 window.ADMIN_CONFIG = data[0].config;
+                applyFonts();
                 
                 // Sync to localStorage for next time
                 Object.keys(window.ADMIN_CONFIG).forEach(k => {
@@ -104,6 +158,7 @@ async function loadAdminConfig() {
     } catch (e) { 
         console.error("Config fetch failed:", e); 
     } finally {
+        applyFonts();
         const loader = document.getElementById('globalLoader');
         if (loader) {
             loader.style.opacity = '0';
@@ -121,7 +176,7 @@ function populateTweaksFromConfig() {
     };
 
     // Marquee
-    setVal('promoTextSetting', cfg('promoText', '🔥 MAJARAH 01DROP 🔥'));
+    setVal('promoTextSetting', cfg('promoText', '🔥 MAJARRAH 01DROP 🔥'));
     setVal('tweakPromoSpeed', cfg('promoSpeed', '80'));
     setVal('tweakPromoRepeats', cfg('promoRepeats', '12'));
     setVal('tweakShowMarquee', String(cfg('promoVisible', true)));
@@ -232,7 +287,7 @@ function renderDashboard() {
 <div class="shell">
   <aside class="sidebar">
     <div class="sb-logo">
-      <div class="sb-logo-text">MAJARAH</div>
+      <div class="sb-logo-text">MAJARRAH</div>
       <div class="sb-logo-sub">Admin · Drop 01</div>
     </div>
     <div class="sb-section">Store</div>
@@ -244,6 +299,7 @@ function renderDashboard() {
     <div class="sb-section">Settings</div>
     <div class="sb-item" onclick="showPage('shipping', this)"><span class="icon">🚚</span> Shipping</div>
     <div class="sb-item" onclick="showPage('tweaks', this)"><span class="icon">🛠</span> Tweaks</div>
+    <div class="sb-item" onclick="showPage('typography', this)"><span class="icon">🔤</span> Typography</div>
     <div class="sb-item" onclick="showPage('settings', this)"><span class="icon">⚙</span> Settings</div>
     <div class="sync-status"><span class="sync-dot"></span><span id="sidebarSyncTime">Syncing...</span></div>
     <div class="sb-bottom">
@@ -445,7 +501,7 @@ function renderDashboard() {
       <div class="settings-grid">
         <div class="settings-card">
           <h3>📢 Promotion Marquee &amp; Announcement</h3>
-          <div class="field-group"><label>Marquee Promotion Text</label><input type="text" id="promoTextSetting" placeholder="e.g. 🔥 MAJARAH DROP 01 OUT NOW..." style="width:100%"></div>
+          <div class="field-group"><label>Marquee Promotion Text</label><input type="text" id="promoTextSetting" placeholder="e.g. 🔥 MAJARRAH DROP 01 OUT NOW..." style="width:100%"></div>
           <div class="field-row">
             <div class="field-group"><label>Scrolling Speed (seconds)</label><input type="number" id="tweakPromoSpeed" min="5" max="100" placeholder="e.g. 25"></div>
             <div class="field-group"><label>Text Repetition Count</label><input type="number" id="tweakPromoRepeats" min="1" max="10" placeholder="e.g. 1"></div>
@@ -571,6 +627,52 @@ function renderDashboard() {
       </div>
     </div>
 
+    <!-- Typography Management System Page -->
+    <div class="page" id="page-typography">
+      <div class="page-header">
+        <div><h1>Typography</h1><p>Dynamic font selectors and live preview</p></div>
+      </div>
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h3>🔤 Font System Settings</h3>
+          <div class="field-group">
+            <label for="typoGlobalFontSelect">Global Website Font</label>
+            <select id="typoGlobalFontSelect" onchange="updateTypoPreview()">
+              <!-- Options populated dynamically -->
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="typoLogoFontSelect">Logo Font</label>
+            <select id="typoLogoFontSelect" onchange="updateTypoPreview()">
+              <!-- Options populated dynamically -->
+            </select>
+          </div>
+          <div style="margin-top:24px;">
+            <button class="btn btn-accent" onclick="saveTypographyConfig()">Save Settings</button>
+          </div>
+        </div>
+        <div class="settings-card">
+          <h3>👁 Live Preview</h3>
+          <div style="margin-bottom: 20px; padding: 18px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); position: relative;">
+            <label style="display:block; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px;">Global Font Preview</label>
+            <div id="typoGlobalPreviewText" style="font-size: 16px; line-height: 1.6; word-break: break-all;">
+              ABCDEFGHIKLMNOPQRSTVXYZ<br>
+              abcdefghijklmnopqrstuvwxyz<br>
+              0123456789
+            </div>
+          </div>
+          <div style="padding: 18px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); position: relative;">
+            <label style="display:block; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px;">Logo Font Preview</label>
+            <div id="typoLogoPreviewText" style="font-size: 26px; font-weight: 700; word-break: break-all;">
+              MAJARRAH<br>
+              majarrah<br>
+              0123456789
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -581,6 +683,7 @@ function renderDashboard() {
   <div class="m-nav-item" onclick="showMobilePage('products', this)">👕<span>Products</span></div>
   <div class="m-nav-item" onclick="showMobilePage('inventory', this)">📊<span>Inventory</span></div>
   <div class="m-nav-item" onclick="showMobilePage('tweaks', this)">🛠<span>Tweaks</span></div>
+  <div class="m-nav-item" onclick="showMobilePage('typography', this)">🔤<span>Fonts</span></div>
   <div class="m-nav-item" onclick="showMobilePage('settings', this)">⚙<span>Settings</span></div>
 </nav>
 
@@ -1053,7 +1156,7 @@ async function syncDashboardData(isBackground = false) {
     if (hasNewNotifications) {
       playNotificationSound();
       flashTitle(notificationMessage);
-      showSystemNotification("MAJARAH Admin Notification", notificationMessage);
+      showSystemNotification("MAJARRAH Admin Notification", notificationMessage);
       showToast(notificationMessage);
     }
   }
@@ -1439,13 +1542,16 @@ async function showPage(pageId, element) {
   if(targetPage) targetPage.classList.add('active');
   
   // Refresh UI from latest config when switching to relevant pages
-  if (['tweaks', 'shipping', 'settings', 'translations'].includes(pageId)) {
+  if (['tweaks', 'shipping', 'settings', 'translations', 'typography'].includes(pageId)) {
     showToast(`Syncing ${pageId}...`);
     await initSupabase(); 
   }
   
   if (pageId === 'translations') {
     loadTranslationsPanel();
+  }
+  if (pageId === 'typography') {
+    populateTypographyOptions();
   }
   
   if(element) {
@@ -1996,10 +2102,10 @@ async function saveOrder() {
     // --- SEND DISCORD WEBHOOK ---
     const WEBHOOK_URL = '/api/discord';
     const embed = {
-      username: 'Majarah Orders',
-      avatar_url: 'https://majarah.vercel.app/logo.png',
+      username: 'Majarrah Orders',
+      avatar_url: 'https://majarrah.vercel.app/logo.png',
       embeds: [{
-        title: 'NEW ORDER (MANUAL) - MAJARAH',
+        title: 'NEW ORDER (MANUAL) - MAJARRAH',
         color: 0xffffff,
         fields: [
           { name: 'Name', value: first_name + ' ' + last_name, inline: true },
@@ -2012,7 +2118,7 @@ async function saveOrder() {
           { name: 'Status', value: status || 'Pending', inline: true },
           { name: 'Time', value: new Date().toLocaleString('en-EG', { timeZone: 'Africa/Cairo' }), inline: false },
         ],
-        footer: { text: 'Majarah Admin Panel - Cairo, Egypt' }
+        footer: { text: 'Majarrah Admin Panel - Cairo, Egypt' }
       }]
     };
     try {
@@ -2228,7 +2334,7 @@ function adminConfirm(message) {
 
 // --- PROMOTION STATISTICS & TWEAKS HANDLERS ---
 function updatePromoPreviewStats() {
-  const text = localStorage.getItem('mjr_promo_text') || '🔥 MAJARAH DROP 01 OUT NOW · FAST HOME DELIVERY ALL OVER EGYPT 🔥';
+  const text = localStorage.getItem('mjr_promo_text') || '🔥 MAJARRAH DROP 01 OUT NOW · FAST HOME DELIVERY ALL OVER EGYPT 🔥';
   const previewEl = document.getElementById('tweakPromoPreview');
   const wordCountEl = document.getElementById('tweakPromoWordCount');
   const charCountEl = document.getElementById('tweakPromoCharCount');
@@ -2661,6 +2767,98 @@ function updateSimulatorControlsUI() {
 // Initialise clock updater
 setInterval(updateSimulatorClock, 30000);
 
+function populateTypographyOptions() {
+  const globalSel = document.getElementById('typoGlobalFontSelect');
+  const logoSel = document.getElementById('typoLogoFontSelect');
+  if (!globalSel || !logoSel) return;
+  
+  const defaultFonts = [
+    { id: "cinzel", name: "Cinzel", family: "Cinzel", type: "google" },
+    { id: "rostex", name: "Rostex", family: "Rostex", type: "custom" },
+    { id: "retro-floral", name: "Retro Floral", family: "Retro Floral", type: "custom" },
+    { id: "nevera", name: "Nevera", family: "Nevera", type: "custom" },
+    { id: "brigold-demo", name: "Brigold DEMO", family: "Brigold DEMO", type: "custom" },
+    { id: "eclipsed-blazzing", name: "Eclipsed Blazzing", family: "Eclipsed Blazzing", type: "custom" },
+    { id: "alenia", name: "Alenia", family: "Alenia", type: "custom" }
+  ];
+  
+  const fonts = cfg('fonts', defaultFonts);
+  
+  // Clear options
+  globalSel.innerHTML = '';
+  logoSel.innerHTML = '';
+  
+  // Populate options
+  fonts.forEach(font => {
+    const optGlobal = document.createElement('option');
+    optGlobal.value = font.id;
+    optGlobal.textContent = font.name;
+    globalSel.appendChild(optGlobal);
+    
+    const optLogo = document.createElement('option');
+    optLogo.value = font.id;
+    optLogo.textContent = font.name;
+    logoSel.appendChild(optLogo);
+  });
+  
+  // Set current selected values
+  const activeGlobal = cfg('fontGlobal', 'cinzel');
+  const activeLogo = cfg('fontLogo', 'cinzel');
+  
+  globalSel.value = activeGlobal;
+  logoSel.value = activeLogo;
+  
+  updateTypoPreview();
+}
+
+function updateTypoPreview() {
+  const globalSel = document.getElementById('typoGlobalFontSelect');
+  const logoSel = document.getElementById('typoLogoFontSelect');
+  const globalPreview = document.getElementById('typoGlobalPreviewText');
+  const logoPreview = document.getElementById('typoLogoPreviewText');
+  if (!globalSel || !logoSel || !globalPreview || !logoPreview) return;
+  
+  const defaultFonts = [
+    { id: "cinzel", name: "Cinzel", family: "Cinzel", type: "google" },
+    { id: "rostex", name: "Rostex", family: "Rostex", type: "custom" },
+    { id: "retro-floral", name: "Retro Floral", family: "Retro Floral", type: "custom" },
+    { id: "nevera", name: "Nevera", family: "Nevera", type: "custom" },
+    { id: "brigold-demo", name: "Brigold DEMO", family: "Brigold DEMO", type: "custom" },
+    { id: "eclipsed-blazzing", name: "Eclipsed Blazzing", family: "Eclipsed Blazzing", type: "custom" },
+    { id: "alenia", name: "Alenia", family: "Alenia", type: "custom" }
+  ];
+  
+  const fonts = cfg('fonts', defaultFonts);
+  const globalFont = fonts.find(f => f.id === globalSel.value) || fonts[0];
+  const logoFont = fonts.find(f => f.id === logoSel.value) || fonts[0];
+  
+  loadFontStylesheet('preview-global-font-link', globalFont);
+  loadFontStylesheet('preview-logo-font-link', logoFont);
+  
+  globalPreview.style.fontFamily = `'${globalFont.family}'`;
+  logoPreview.style.fontFamily = `'${logoFont.family}'`;
+}
+
+async function saveTypographyConfig() {
+  const globalSel = document.getElementById('typoGlobalFontSelect');
+  const logoSel = document.getElementById('typoLogoFontSelect');
+  if (!globalSel || !logoSel) return;
+  
+  const fontGlobal = globalSel.value;
+  const fontLogo = logoSel.value;
+  
+  showToast('Saving typography configurations...', 'info');
+  
+  try {
+    await saveConfigToSupabase({ fontGlobal, fontLogo });
+    // Apply changes locally to the admin panel instantly
+    applyFonts();
+    showToast('Typography settings saved successfully!', 'success');
+  } catch (err) {
+    showToast('Failed to save typography settings: ' + err.message, 'error');
+  }
+}
+
 // ── GLOBAL EXPORTS (for obfuscated environment) ──
 window.doLogin = doLogin;
 window.logout = logout;
@@ -2686,6 +2884,9 @@ window.exportPrelaunchEmailsCSV = exportPrelaunchEmailsCSV;
 window.clearPrelaunchEmails = clearPrelaunchEmails;
 window.openMobileSimulator = openMobileSimulator;
 window.saveTranslations = saveTranslations;
+window.populateTypographyOptions = populateTypographyOptions;
+window.updateTypoPreview = updateTypoPreview;
+window.saveTypographyConfig = saveTypographyConfig;
 window.changePassword = changePassword;
 window.saveWaNumber = saveWaNumber;
 window.saveEmailJSConfig = saveEmailJSConfig;
