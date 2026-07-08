@@ -275,7 +275,7 @@
         .pp-size-btn:hover { border-color: #555; color: #ccc; }
         .pp-size-btn.active { border-color: #fff; background: #fff; color: #050505; }
 
-        /* ── MAJARAH STOCK INDICATOR ── */
+        /* ── MAJARRAH STOCK INDICATOR ── */
         .mjr-stock-indicator { margin-top: 22px; }
         .mjr-stock-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
         .mjr-stock-label { display: flex; align-items: center; gap: 8px; font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; font-weight: 700; color: #fff; }

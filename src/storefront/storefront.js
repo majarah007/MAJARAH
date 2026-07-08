@@ -721,7 +721,7 @@ const TRANSLATIONS = {
     mins_label: "دقائق",
     secs_label: "ثواني",
     manifesto_title: "THE UNIVERSE WITHIN",
-    manifesto_en: "MAJARAH is a celestial map of the self, founded in the heart of Cairo. We view every individual as a vast system of architecture and void, waiting to be expressed through fabric. We produce heavyweight, high-density garments for those who navigate the urban landscape while carrying a private universe within. From the streets of Egypt to the edge of the unknown, we provide the uniform for exploration.",
+    manifesto_en: "MAJARRAH is a celestial map of the self, founded in the heart of Cairo. We view every individual as a vast system of architecture and void, waiting to be expressed through fabric. We produce heavyweight, high-density garments for those who navigate the urban landscape while carrying a private universe within. From the streets of Egypt to the edge of the unknown, we provide the uniform for exploration.",
     manifesto_ar: "مجرة هي خريطة سماوية للذات، تأسست في قلب القاهرة. نحن نرى كل فرد ككيان واسع من التصميم والفراغ، ينتظر التعبير عنه من خلال القماش. نصنع ملابس ثقيلة الوزن وعالية الكثافة لأولئك الذين يخوضون صخب المدينة وهم يحملون كوناً خاصاً بداخلهم. من شوارع مصر إلى حافة المجهول، نحن نصنع الزي الرسمي للاستكشاف."
   }
 };
