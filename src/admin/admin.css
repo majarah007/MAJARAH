@@ -27,6 +27,17 @@
   body { background:var(--bg); color:var(--text); font-family:var(--font-display); min-height:100vh; }
   ::-webkit-scrollbar { width:4px; } ::-webkit-scrollbar-track { background:var(--bg); } ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
 
+  /* Focus outlines for keyboard accessibility */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+      box-shadow: 0 0 0 6px rgba(200, 255, 0, 0.15);
+  }
+
   /* ── LOGIN ── */
   #loginScreen {
     position:fixed; inset:0; background:var(--bg); z-index:9999;

@@ -18,6 +18,17 @@
         ::-webkit-scrollbar-track { background: #050505; }
         ::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }
 
+        /* Focus rings for keyboard navigation accessibility */
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible {
+            outline: 2px solid #c8ff00;
+            outline-offset: 3px;
+            box-shadow: 0 0 0 6px rgba(200, 255, 0, 0.15);
+        }
+
         /* ── NAV ── */
         header {
             display: flex; justify-content: space-between; align-items: center;
@@ -271,9 +282,20 @@
         .pp-size-guide-btn { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #333; cursor: pointer; background: none; border: none; font-family: inherit; border-bottom: 1px solid #222; transition: color 0.2s, border-color 0.2s; }
         .pp-size-guide-btn:hover { color: #fff; border-color: #fff; }
         .pp-sizes { display: flex; gap: 8px; margin-top: 12px; }
-        .pp-size-btn { width: 46px; height: 46px; border: 1px solid #1e1e1e; background: transparent; color: #555; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; font-family: inherit; }
-        .pp-size-btn:hover { border-color: #555; color: #ccc; }
-        .pp-size-btn.active { border-color: #fff; background: #fff; color: #050505; }
+        .pp-size-btn { 
+            width: 48px; height: 48px; 
+            border: 1px solid rgba(255,255,255,0.08); 
+            background: rgba(255,255,255,0.01); 
+            color: #666; font-size: 11px; 
+            letter-spacing: 1.5px; text-transform: uppercase; 
+            cursor: pointer; 
+            transition: all 0.25s cubic-bezier(0.16,1,0.3,1); 
+            font-family: inherit;
+            border-radius: 4px;
+        }
+        .pp-size-btn:hover { border-color: rgba(255,255,255,0.25); color: #ccc; transform: translateY(-1px); }
+        .pp-size-btn:active { transform: scale(0.95); }
+        .pp-size-btn.active { border-color: #fff; background: #fff; color: #050505; box-shadow: 0 0 16px rgba(255,255,255,0.08); }
 
         /* ── MAJARRAH STOCK INDICATOR ── */
         .mjr-stock-indicator { margin-top: 22px; }
@@ -340,9 +362,27 @@
         .chk-input-row { display: grid; grid-template-columns: 1fr; gap: 12px; }
         .chk-input-split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         
-        .chk-input-field { width: 100%; background: #111; border: 1px solid #222; border-radius: 4px; padding: 13px 15px; color: #fff; font-size: 13px; font-family: inherit; transition: border-color 0.2s, background-color 0.2s; }
-        .chk-input-field:focus { outline: none; border-color: #555; background: #141414; }
-        .chk-input-field::placeholder { color: #444; font-size: 12px; letter-spacing: 0.5px; }
+        .chk-input-field { 
+            width: 100%; 
+            background: rgba(255,255,255,0.02); 
+            border: 1px solid rgba(255,255,255,0.08); 
+            border-radius: 8px; 
+            padding: 14px 18px; 
+            color: #fff; 
+            font-size: 13px; 
+            font-family: inherit; 
+            transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease; 
+        }
+        .chk-input-field:hover {
+            border-color: rgba(255,255,255,0.15);
+        }
+        .chk-input-field:focus { 
+            outline: none; 
+            border-color: rgba(255,255,255,0.3); 
+            background: rgba(255,255,255,0.04); 
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 0 16px rgba(255,255,255,0.04);
+        }
+        .chk-input-field::placeholder { color: #555; font-size: 12px; letter-spacing: 0.5px; }
 
         /* Shopify Checkout Custom Select Styling */
         .chk-select-wrap { position: relative; width: 100%; }
@@ -350,15 +390,15 @@
         .chk-input-field.select-box { -webkit-appearance: none; -moz-appearance: none; appearance: none; cursor: pointer; padding-right: 35px; }
 
         /* Payment Selection Block Matrix */
-        .chk-payment-box { border: 1px solid #222; border-radius: 5px; overflow: hidden; background: #111; }
-        .chk-payment-row { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid #1a1a1a; cursor: pointer; transition: background 0.2s; }
+        .chk-payment-box { border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; overflow: hidden; background: rgba(255,255,255,0.01); }
+        .chk-payment-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); cursor: pointer; transition: all 0.25s cubic-bezier(0.16,1,0.3,1); }
         .chk-payment-row:last-child { border-bottom: none; }
-        .chk-payment-row:hover { background: #141414; }
-        .chk-payment-row.active { background: #161616; border-left: 2px solid #fff; }
+        .chk-payment-row:hover { background: rgba(255,255,255,0.03); }
+        .chk-payment-row.active { background: rgba(255,255,255,0.04); border-left: 3px solid #fff; box-shadow: inset 0 0 10px rgba(255,255,255,0.02); }
         
         .chk-radio-lbl { display: flex; align-items: center; gap: 12px; cursor: pointer; font-weight: 500; color: #fff; font-size: 13px; }
-        .chk-radio-circle { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #444; display: flex; align-items: center; justify-content: center; transition: border-color 0.2s; }
-        .chk-payment-row.active .chk-radio-circle { border-color: #fff; }
+        .chk-radio-circle { width: 16px; height: 16px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; transition: all 0.25s cubic-bezier(0.16,1,0.3,1); }
+        .chk-payment-row.active .chk-radio-circle { border-color: #fff; box-shadow: 0 0 8px rgba(255,255,255,0.25); }
         .chk-radio-inner { width: 8px; height: 8px; border-radius: 50%; background: transparent; }
         .chk-payment-row.active .chk-radio-inner { background: #fff; }
         
