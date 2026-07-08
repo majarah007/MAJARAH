@@ -79,7 +79,13 @@ function applyFonts() {
         { id: "nevera", name: "Nevera", family: "Nevera", type: "custom" },
         { id: "brigold-demo", name: "Brigold DEMO", family: "Brigold DEMO", type: "custom" },
         { id: "eclipsed-blazzing", name: "Eclipsed Blazzing", family: "Eclipsed Blazzing", type: "custom" },
-        { id: "alenia", name: "Alenia", family: "Alenia", type: "custom" }
+        { id: "alenia", name: "Alenia", family: "Alenia", type: "custom" },
+        { id: "plus-jakarta-sans", name: "Plus Jakarta Sans", family: "Plus Jakarta Sans", type: "google" },
+        { id: "geist", name: "Geist", family: "Geist", type: "google" },
+        { id: "instrument-sans", name: "Instrument Sans", family: "Instrument Sans", type: "google" },
+        { id: "manrope", name: "Manrope", family: "Manrope", type: "google" },
+        { id: "outfit", name: "Outfit", family: "Outfit", type: "google" },
+        { id: "inter", name: "Inter", family: "Inter", type: "google" }
     ];
     
     const fonts = cfg('fonts', defaultFonts);
@@ -2779,7 +2785,13 @@ function populateTypographyOptions() {
     { id: "nevera", name: "Nevera", family: "Nevera", type: "custom" },
     { id: "brigold-demo", name: "Brigold DEMO", family: "Brigold DEMO", type: "custom" },
     { id: "eclipsed-blazzing", name: "Eclipsed Blazzing", family: "Eclipsed Blazzing", type: "custom" },
-    { id: "alenia", name: "Alenia", family: "Alenia", type: "custom" }
+    { id: "alenia", name: "Alenia", family: "Alenia", type: "custom" },
+    { id: "plus-jakarta-sans", name: "Plus Jakarta Sans", family: "Plus Jakarta Sans", type: "google" },
+    { id: "geist", name: "Geist", family: "Geist", type: "google" },
+    { id: "instrument-sans", name: "Instrument Sans", family: "Instrument Sans", type: "google" },
+    { id: "manrope", name: "Manrope", family: "Manrope", type: "google" },
+    { id: "outfit", name: "Outfit", family: "Outfit", type: "google" },
+    { id: "inter", name: "Inter", family: "Inter", type: "google" }
   ];
   
   const fonts = cfg('fonts', defaultFonts);
@@ -2825,7 +2837,13 @@ function updateTypoPreview() {
     { id: "nevera", name: "Nevera", family: "Nevera", type: "custom" },
     { id: "brigold-demo", name: "Brigold DEMO", family: "Brigold DEMO", type: "custom" },
     { id: "eclipsed-blazzing", name: "Eclipsed Blazzing", family: "Eclipsed Blazzing", type: "custom" },
-    { id: "alenia", name: "Alenia", family: "Alenia", type: "custom" }
+    { id: "alenia", name: "Alenia", family: "Alenia", type: "custom" },
+    { id: "plus-jakarta-sans", name: "Plus Jakarta Sans", family: "Plus Jakarta Sans", type: "google" },
+    { id: "geist", name: "Geist", family: "Geist", type: "google" },
+    { id: "instrument-sans", name: "Instrument Sans", family: "Instrument Sans", type: "google" },
+    { id: "manrope", name: "Manrope", family: "Manrope", type: "google" },
+    { id: "outfit", name: "Outfit", family: "Outfit", type: "google" },
+    { id: "inter", name: "Inter", family: "Inter", type: "google" }
   ];
   
   const fonts = cfg('fonts', defaultFonts);
